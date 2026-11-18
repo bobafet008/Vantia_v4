@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../helpers/MailerService.php';
 class UsuarioController
 {
     public function registro()
