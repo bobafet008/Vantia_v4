@@ -21,6 +21,7 @@
         <?php if ($_SESSION['tipo'] === 'empresa'): ?>
           <a href="ban.php?pagina=panel_empresa"><strong>Panel Empresa</strong></a>
         <?php elseif ($_SESSION['tipo'] === 'empleado'): ?>
+          <a href="ban.php?pagina=panel_empleado"><strong>Mi Perfil</strong></a>
           <a href="ban.php?pagina=mis_postulaciones"><strong>Mis Postulaciones</strong></a>
           <a href="ban.php?pagina=mis_postulaciones#calificaciones"><strong>Calificaciones</strong></a>
         <?php elseif ($_SESSION['tipo'] === 'admin'): ?>

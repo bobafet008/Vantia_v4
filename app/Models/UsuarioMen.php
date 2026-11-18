@@ -32,7 +32,9 @@ class UsuarioMen
             $usuarioMenId,
             $datosTutor['nombre'] ?? '',
             $datosTutor['telefono'] ?? '',
-            $datosTutor['relacion'] ?? 'Tutor legal'
+            $datosTutor['relacion'] ?? 'Tutor legal',
+            $datosTutor['ci'] ?? null,
+            $datosTutor['correo'] ?? null
         );
 
         return $usuarioMenId;
@@ -43,6 +45,8 @@ class UsuarioMen
         $sql = 'SELECT un.*, 
                        t.id AS tutor_id,
                        t.nombre AS tutor_nombre, 
+                       t.ci AS tutor_ci, 
+                       t.correo AS tutor_correo, 
                        t.telefono AS tutor_telefono, 
                        t.relacion AS tutor_relacion
                 FROM usuarios_men un
@@ -59,6 +63,8 @@ class UsuarioMen
         $sql = 'SELECT un.*, 
                        t.id AS tutor_id,
                        t.nombre AS tutor_nombre, 
+                       t.ci AS tutor_ci, 
+                       t.correo AS tutor_correo, 
                        t.telefono AS tutor_telefono, 
                        t.relacion AS tutor_relacion
                 FROM usuarios_men un
@@ -75,6 +81,8 @@ class UsuarioMen
         $sql = 'SELECT un.*, 
                        t.id AS tutor_id,
                        t.nombre AS tutor_nombre, 
+                       t.ci AS tutor_ci, 
+                       t.correo AS tutor_correo, 
                        t.telefono AS tutor_telefono, 
                        t.relacion AS tutor_relacion,
                        1 AS es_menor, 

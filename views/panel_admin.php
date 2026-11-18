@@ -201,6 +201,13 @@
                 <td>
                   <strong><?= e($umen['nombre']) ?></strong>
                   <span class="badge-menor" style="margin-left:6px; font-size:11px;">Menor de edad</span>
+                  <?php if (!empty($umen['cv_path'])): ?>
+                    <div style="margin-top:4px;">
+                      <a href="<?= e(rutaArchivo($umen['cv_path'])) ?>" target="_blank" class="enlace-contacto" style="font-size:11px; color:#2563eb; display:inline-flex; align-items:center; gap:3px;">
+                        Ver CV (PDF)
+                      </a>
+                    </div>
+                  <?php endif; ?>
                 </td>
                 <td><a href="mailto:<?= e($umen['correo']) ?>" class="enlace-contacto"><?= e($umen['correo']) ?></a></td>
                 <td><?= !empty($umen['telefono']) ? e($umen['telefono']) : '<span class="texto-suave">-</span>' ?></td>
@@ -212,6 +219,12 @@
                 </td>
                 <td>
                   <div><strong><?= e($umen['tutor_nombre'] ?? 'N/D') ?></strong> (<?= e($umen['tutor_relacion'] ?? 'Tutor') ?>)</div>
+                  <?php if (!empty($umen['tutor_ci'])): ?>
+                    <div style="font-size:11px; color:#1e293b;"><strong>C.I.:</strong> <?= e($umen['tutor_ci']) ?></div>
+                  <?php endif; ?>
+                  <?php if (!empty($umen['tutor_correo'])): ?>
+                    <div style="font-size:11px;"><a href="mailto:<?= e($umen['tutor_correo']) ?>" class="enlace-contacto"><?= e($umen['tutor_correo']) ?></a></div>
+                  <?php endif; ?>
                   <div style="font-size:12px; color:var(--gris);">Tel: <?= e($umen['tutor_telefono'] ?? '-') ?></div>
                 </td>
                 <td>
@@ -277,8 +290,9 @@
           <tr>
             <th>ID</th>
             <th>Tutor Legal</th>
+            <th>C.I. Tutor</th>
             <th>Parentesco</th>
-            <th>Teléfono Tutor</th>
+            <th>Contacto Tutor (Tel / Correo)</th>
             <th>Joven a su Cargo</th>
             <th>Contacto del Joven</th>
             <th>Edad del Joven</th>
@@ -288,7 +302,7 @@
         <tbody>
           <?php if (empty($tutores)): ?>
             <tr>
-              <td colspan="8" style="text-align:center; padding:1.5rem; color:var(--gris);">No hay tutores registrados actualmente.</td>
+              <td colspan="9" style="text-align:center; padding:1.5rem; color:var(--gris);">No hay tutores registrados actualmente.</td>
             </tr>
           <?php else: ?>
             <?php foreach ($tutores as $tut): ?>
@@ -299,14 +313,26 @@
                   <div style="font-size:11px; color:#1d4ed8; margin-top:2px;">Tutor legal activo</div>
                 </td>
                 <td>
+                  <?= !empty($tut['ci']) ? '<strong>' . e($tut['ci']) . '</strong>' : '<span class="texto-suave">-</span>' ?>
+                </td>
+                <td>
                   <span class="badge-menor" style="background:#f1f5f9; color:#334155; font-size:11px;">
                     <?= e($tut['relacion'] ?? 'Tutor legal') ?>
                   </span>
                 </td>
                 <td>
-                  <a href="tel:<?= e($tut['telefono']) ?>" class="enlace-contacto">
-                    <?= e($tut['telefono']) ?>
-                  </a>
+                  <div>
+                    <a href="tel:<?= e($tut['telefono']) ?>" class="enlace-contacto">
+                      <?= e($tut['telefono']) ?>
+                    </a>
+                  </div>
+                  <?php if (!empty($tut['correo'])): ?>
+                    <div style="font-size:11px; margin-top:3px;">
+                      <a href="mailto:<?= e($tut['correo']) ?>" class="enlace-contacto">
+                        <?= e($tut['correo']) ?>
+                      </a>
+                    </div>
+                  <?php endif; ?>
                 </td>
                 <td>
                   <div style="font-weight:600; color:#0f172a;">
@@ -376,7 +402,16 @@
             <?php foreach ($usuariosMay as $umay): ?>
               <tr>
                 <td>#<?= (int) $umay['id'] ?></td>
-                <td><strong><?= e($umay['nombre']) ?></strong></td>
+                <td>
+                  <strong><?= e($umay['nombre']) ?></strong>
+                  <?php if (!empty($umay['cv_path'])): ?>
+                    <div style="margin-top:4px;">
+                      <a href="<?= e(rutaArchivo($umay['cv_path'])) ?>" target="_blank" class="enlace-contacto" style="font-size:11px; color:#2563eb; display:inline-flex; align-items:center; gap:3px;">
+                        Ver CV (PDF)
+                      </a>
+                    </div>
+                  <?php endif; ?>
+                </td>
                 <td>
                   <span class="tipo-badge <?= e($umay['tipo']) ?>">
                     <?= ucfirst(e($umay['tipo'])) ?>

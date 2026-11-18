@@ -98,6 +98,7 @@
           <thead>
             <tr>
               <th>Candidato</th>
+              <th>Curriculum vitae</th>
               <th>Contacto Rápido</th>
               <th>Puesto / Vacante</th>
               <th>Protección / Tutor</th>
@@ -114,6 +115,15 @@
                     <p class="nota-postulante"><em>"<?= e($post['mensaje']) ?>"</em></p>
                   <?php endif; ?>
                   <small class="texto-suave">Postulado: <?= date('d/m/Y H:i', strtotime($post['fecha_postulacion'])) ?></small>
+                </td>
+                <td>
+                  <?php if (!empty($post['candidato_cv_path'])): ?>
+                    <a href="<?= e(rutaArchivo($post['candidato_cv_path'])) ?>" target="_blank" class="boton-sm" style="background:#e0e7ff; color:#3730a3; padding:5px 9px; font-size:12px; font-weight:600; text-decoration:none; border-radius:6px; display:inline-flex; align-items:center; gap:4px; border:1px solid #c7d2fe;">
+                      Ver CV (PDF)
+                    </a>
+                  <?php else: ?>
+                    <span class="texto-suave" style="font-size:12px;">Sin CV</span>
+                  <?php endif; ?>
                 </td>
                 <td>
                   <div>
@@ -143,6 +153,12 @@
                     <span class="badge-menor">Menor de edad</span>
                     <div style="font-size:12px; margin-top:4px;">
                       <strong>Tutor:</strong> <?= e($post['tutor_nombre'] ?? 'No registrado') ?><br>
+                      <?php if (!empty($post['tutor_ci'])): ?>
+                        <strong>C.I. Tutor:</strong> <?= e($post['tutor_ci']) ?><br>
+                      <?php endif; ?>
+                      <?php if (!empty($post['tutor_correo'])): ?>
+                        <strong>Correo Tutor:</strong> <?= e($post['tutor_correo']) ?><br>
+                      <?php endif; ?>
                       <strong>Tel:</strong> <?= e($post['tutor_telefono'] ?? '-') ?> (<?= e($post['tutor_relacion'] ?? 'Tutor') ?>)
                     </div>
                   <?php else: ?>

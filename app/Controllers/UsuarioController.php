@@ -124,11 +124,15 @@ class UsuarioController
                             // Menor de 18 años -> tabla usuarios_men
                             $esMenor = true;
                             $tutorNombre = trim($_POST['tutor_nombre'] ?? '');
+                            $tutorCi = trim($_POST['tutor_ci'] ?? '');
+                            $tutorCorreo = trim($_POST['tutor_correo'] ?? '');
                             $tutorTel = trim($_POST['tutor_telefono'] ?? '');
                             $tutorRel = trim($_POST['tutor_relacion'] ?? '');
 
-                            if ($tutorNombre === '' || $tutorTel === '') {
-                                $error = 'Al tener entre 16 y 17 años, es obligatorio ingresar el nombre y teléfono de tu tutor(a) legal.';
+                            if ($tutorNombre === '' || $tutorCi === '' || $tutorCorreo === '' || $tutorTel === '') {
+                                $error = 'Al tener entre 16 y 17 años, es obligatorio ingresar el nombre, cédula de identidad, correo electrónico y teléfono de tu tutor(a) legal.';
+                            } elseif (!filter_var($tutorCorreo, FILTER_VALIDATE_EMAIL)) {
+                                $error = 'Por favor, ingresa una dirección de correo electrónico válida para tu tutor(a) legal.';
                             } else {
                                 $datosMenor = [
                                     'nombre' => $nombre,
@@ -141,6 +145,8 @@ class UsuarioController
                                 ];
                                 $datosTutor = [
                                     'nombre'   => $tutorNombre,
+                                    'ci'       => $tutorCi,
+                                    'correo'   => $tutorCorreo,
                                     'telefono' => $tutorTel,
                                     'relacion' => $tutorRel ?: 'Tutor legal',
                                 ];
@@ -156,6 +162,29 @@ class UsuarioController
                                 'fecha_nacimiento' => $fechaNacimiento,
                                 'cv_path' => null,
                             ];
+                        }
+                    }
+                }
+
+                // Subida y validación obligatoria del Curriculum Vitae en PDF
+                if (!isset($error)) {
+                    if (!isset($_FILES['cv_archivo']) || $_FILES['cv_archivo']['error'] !== UPLOAD_ERR_OK) {
+                        $error = 'Es obligatorio adjuntar tu Curriculum Vitae en formato PDF para completar tu registro.';
+                    } else {
+                        $extCv = strtolower(pathinfo($_FILES['cv_archivo']['name'] ?? '', PATHINFO_EXTENSION));
+                        if ($extCv !== 'pdf') {
+                            $error = 'El archivo de Curriculum Vitae debe ser obligatoriamente un documento en formato PDF (.pdf).';
+                        } else {
+                            $cvPath = subirArchivo('cv_archivo', 'cv', 'cv');
+                            if (!$cvPath) {
+                                $error = 'No se pudo subir el archivo PDF del Curriculum Vitae. Verifica que no exceda el límite de 5MB.';
+                            } else {
+                                if ($esMenor) {
+                                    $datosMenor['cv_path'] = $cvPath;
+                                } else {
+                                    $datosMayor['cv_path'] = $cvPath;
+                                }
+                            }
                         }
                     }
                 }

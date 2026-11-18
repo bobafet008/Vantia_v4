@@ -27,6 +27,11 @@ return [
     'salir' => ['AuthController', 'salir'],
     'soporte'                  => ['SoporteController', 'index'],
     'enviar_soporte'           => ['SoporteController', 'enviarConsulta'],
+    'panel_empleado'             => ['HomeController', 'panelEmpleado'],
+    'cambiar_correo_empleado'    => ['HomeController', 'cambiarCorreoEmpleado'],
+    'cambiar_contrasena_empleado'=> ['HomeController', 'cambiarContrasenaEmpleado'],
+    'actualizar_cv_empleado'     => ['HomeController', 'actualizarCvEmpleado'],
+    'eliminar_cv_empleado'       => ['HomeController', 'eliminarCvEmpleado'],
     'banear_cuenta'            => ['HomeController', 'banearCuenta'],
     'desbanear_cuenta'         => ['HomeController', 'desbanearCuenta'],
 ];

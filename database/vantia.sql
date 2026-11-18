@@ -26,6 +26,8 @@ CREATE TABLE IF NOT EXISTS tutores (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_men_id INT NOT NULL,
     nombre VARCHAR(100) NOT NULL,
+    ci VARCHAR(30) DEFAULT NULL,
+    correo VARCHAR(150) DEFAULT NULL,
     telefono VARCHAR(30) NOT NULL,
     relacion VARCHAR(50) NOT NULL DEFAULT 'Tutor legal',
     creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -54,7 +56,7 @@ CREATE OR REPLACE VIEW usuarios AS
 SELECT 
     um.id, um.nombre, um.correo, um.contrasena, um.tipo, um.telefono, um.fecha_nacimiento, 
     0 AS es_menor, 
-    NULL AS tutor_nombre, NULL AS tutor_telefono, NULL AS tutor_relacion, 
+    NULL AS tutor_nombre, NULL AS tutor_ci, NULL AS tutor_correo, NULL AS tutor_telefono, NULL AS tutor_relacion, 
     um.cv_path, NULL AS permiso_tutor_path, um.fecha_registro, 'mayor' AS tabla_origen,
     um.baneado, um.baneado_hasta, um.motivo_baneo
 FROM usuarios_may um
@@ -62,7 +64,7 @@ UNION ALL
 SELECT 
     un.id, un.nombre, un.correo, un.contrasena, 'empleado' AS tipo, un.telefono, un.fecha_nacimiento, 
     1 AS es_menor, 
-    t.nombre AS tutor_nombre, t.telefono AS tutor_telefono, t.relacion AS tutor_relacion, 
+    t.nombre AS tutor_nombre, t.ci AS tutor_ci, t.correo AS tutor_correo, t.telefono AS tutor_telefono, t.relacion AS tutor_relacion, 
     un.cv_path, un.permiso_tutor_path, un.fecha_registro, 'menor' AS tabla_origen,
     un.baneado, un.baneado_hasta, un.motivo_baneo
 FROM usuarios_men un

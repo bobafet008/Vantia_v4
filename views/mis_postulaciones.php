@@ -23,9 +23,10 @@ if (!empty($postulaciones)) {
     <p>Revisa el estado de tus solicitudes y califica a las empresas donde trabajas.</p>
     
     <div style="display:flex; gap:10px; margin-top:1rem; flex-wrap:wrap;">
+      <a href="ban.php?pagina=panel_empleado" class="boton boton-sm" style="background:#e0e7ff; color:#3730a3;">Mi Perfil y CV</a>
       <a href="#solicitudes" class="boton boton-sm">Mis Postulaciones (<?= count($postulaciones ?? []) ?>)</a>
       <a href="#calificaciones" class="boton boton-sm boton-oscuro">Calificaciones a Empresas (<?= count($empresasContratado) ?>)</a>
-      <a href="ban.php?pagina=trabajos" class="boton boton-sm" style="background:#e2f5e8; color:#1f7a46;">Explorar más oportunidades →</a>
+      <a href="ban.php?pagina=trabajos" class="boton boton-sm" style="background:#e2f5e8; color:#1f7a46;">Explorar más oportunidades</a>
     </div>
   </div>
 </section>

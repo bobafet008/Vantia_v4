@@ -6,23 +6,79 @@ class Tutor
     public function __construct($conexion)
     {
         $this->conexion = $conexion;
+        $this->asegurarColumnas();
     }
 
-    public function crear($usuarioMenId, $nombre, $telefono, $relacion = 'Tutor legal')
+    private function asegurarColumnas()
     {
-        $sql = 'INSERT INTO tutores (usuario_men_id, nombre, telefono, relacion)
-                VALUES (:usuario_men_id, :nombre, :telefono, :relacion)
-                ON DUPLICATE KEY UPDATE 
-                    nombre = VALUES(nombre), 
-                    telefono = VALUES(telefono), 
-                    relacion = VALUES(relacion)';
-        $consulta = $this->conexion->prepare($sql);
-        return $consulta->execute([
-            'usuario_men_id' => (int) $usuarioMenId,
-            'nombre'         => $nombre,
-            'telefono'       => $telefono,
-            'relacion'       => $relacion ?: 'Tutor legal',
-        ]);
+        try {
+            $colCi = $this->conexion->query("SHOW COLUMNS FROM tutores LIKE 'ci'")->fetch();
+            if (!$colCi) {
+                $this->conexion->exec("ALTER TABLE tutores ADD COLUMN ci VARCHAR(30) NULL AFTER nombre");
+            }
+            $colCorreo = $this->conexion->query("SHOW COLUMNS FROM tutores LIKE 'correo'")->fetch();
+            if (!$colCorreo) {
+                $this->conexion->exec("ALTER TABLE tutores ADD COLUMN correo VARCHAR(150) NULL AFTER ci");
+            }
+        } catch (Exception $e) {
+            // Continuar si no se tienen permisos directos de ALTER
+        }
+    }
+
+    public function crear($usuarioMenId, $nombre, $telefono, $relacion = 'Tutor legal', $ci = null, $correo = null)
+    {
+        $this->asegurarColumnas();
+        try {
+            $sql = 'INSERT INTO tutores (usuario_men_id, nombre, ci, correo, telefono, relacion)
+                    VALUES (:usuario_men_id, :nombre, :ci, :correo, :telefono, :relacion)
+                    ON DUPLICATE KEY UPDATE 
+                        nombre = VALUES(nombre), 
+                        ci = VALUES(ci),
+                        correo = VALUES(correo),
+                        telefono = VALUES(telefono), 
+                        relacion = VALUES(relacion)';
+            $consulta = $this->conexion->prepare($sql);
+            return $consulta->execute([
+                'usuario_men_id' => (int) $usuarioMenId,
+                'nombre'         => $nombre,
+                'ci'             => $ci ?: null,
+                'correo'         => $correo ?: null,
+                'telefono'       => $telefono,
+                'relacion'       => $relacion ?: 'Tutor legal',
+            ]);
+        } catch (PDOException $e) {
+            try {
+                $sql = 'INSERT INTO tutores (usuario_men_id, nombre, ci, telefono, relacion)
+                        VALUES (:usuario_men_id, :nombre, :ci, :telefono, :relacion)
+                        ON DUPLICATE KEY UPDATE 
+                            nombre = VALUES(nombre), 
+                            ci = VALUES(ci), 
+                            telefono = VALUES(telefono), 
+                            relacion = VALUES(relacion)';
+                $consulta = $this->conexion->prepare($sql);
+                return $consulta->execute([
+                    'usuario_men_id' => (int) $usuarioMenId,
+                    'nombre'         => $nombre,
+                    'ci'             => $ci ?: null,
+                    'telefono'       => $telefono,
+                    'relacion'       => $relacion ?: 'Tutor legal',
+                ]);
+            } catch (PDOException $e2) {
+                $sql = 'INSERT INTO tutores (usuario_men_id, nombre, telefono, relacion)
+                        VALUES (:usuario_men_id, :nombre, :telefono, :relacion)
+                        ON DUPLICATE KEY UPDATE 
+                            nombre = VALUES(nombre), 
+                            telefono = VALUES(telefono), 
+                            relacion = VALUES(relacion)';
+                $consulta = $this->conexion->prepare($sql);
+                return $consulta->execute([
+                    'usuario_men_id' => (int) $usuarioMenId,
+                    'nombre'         => $nombre,
+                    'telefono'       => $telefono,
+                    'relacion'       => $relacion ?: 'Tutor legal',
+                ]);
+            }
+        }
     }
 
     public function obtenerPorUsuarioMenId($usuarioMenId)

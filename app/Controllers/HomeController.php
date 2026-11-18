@@ -562,4 +562,248 @@ class HomeController
         header('Location: ban.php?pagina=panel_admin');
         exit;
     }
+
+    public function panelEmpleado()
+    {
+        if (empty($_SESSION['usuario_id']) || ($_SESSION['tipo'] ?? '') !== 'empleado') {
+            accesoDenegado('El panel de empleado es de uso exclusivo para jóvenes y postulantes registrados.', 'Panel de Empleado');
+        }
+
+        require __DIR__ . '/../../config/database.php';
+        require_once __DIR__ . '/../Models/Usuario.php';
+
+        $candidatoId = (int) $_SESSION['usuario_id'];
+        $candidatoTipo = !empty($_SESSION['es_menor']) ? 'menor' : 'mayor';
+
+        $modeloUsuario = new Usuario($conexion);
+        $usuario = $modeloUsuario->obtenerPorId($candidatoId, $candidatoTipo);
+
+        if (!$usuario) {
+            $_SESSION['flash_error'] = 'No se encontró la información del usuario.';
+            header('Location: ban.php?pagina=inicio');
+            exit;
+        }
+
+        vista('panel_empleado', [
+            'usuario'       => $usuario,
+            'candidatoTipo' => $candidatoTipo,
+            'mensajeExito'  => $_SESSION['flash_exito'] ?? '',
+            'mensajeError'  => $_SESSION['flash_error'] ?? '',
+        ]);
+        unset($_SESSION['flash_exito'], $_SESSION['flash_error']);
+    }
+
+    public function cambiarCorreoEmpleado()
+    {
+        if (empty($_SESSION['usuario_id']) || ($_SESSION['tipo'] ?? '') !== 'empleado') {
+            accesoDenegado('Acción permitida únicamente para candidatos empleados.', 'Panel de Empleado');
+        }
+
+        require __DIR__ . '/../../config/database.php';
+        require_once __DIR__ . '/../Models/Usuario.php';
+
+        $candidatoId = (int) $_SESSION['usuario_id'];
+        $candidatoTipo = !empty($_SESSION['es_menor']) ? 'menor' : 'mayor';
+        $tabla = ($candidatoTipo === 'menor') ? 'usuarios_men' : 'usuarios_may';
+
+        $modeloUsuario = new Usuario($conexion);
+        $usuario = $modeloUsuario->obtenerPorId($candidatoId, $candidatoTipo);
+
+        $nuevoCorreo = trim($_POST['nuevo_correo'] ?? '');
+        $contrasenaActual = $_POST['contrasena_actual'] ?? '';
+
+        if (empty($nuevoCorreo) || empty($contrasenaActual)) {
+            $_SESSION['flash_error'] = 'Debes ingresar el nuevo correo y tu contraseña actual para confirmar el cambio.';
+            header('Location: ban.php?pagina=panel_empleado#seccionCorreo');
+            exit;
+        }
+
+        if (!filter_var($nuevoCorreo, FILTER_VALIDATE_EMAIL)) {
+            $_SESSION['flash_error'] = 'Por favor, introduce una dirección de correo electrónico válida.';
+            header('Location: ban.php?pagina=panel_empleado#seccionCorreo');
+            exit;
+        }
+
+        if (strtolower($nuevoCorreo) === strtolower($usuario['correo'])) {
+            $_SESSION['flash_error'] = 'El correo electrónico ingresado es idéntico al actual.';
+            header('Location: ban.php?pagina=panel_empleado#seccionCorreo');
+            exit;
+        }
+
+        if (!password_verify($contrasenaActual, $usuario['contrasena'])) {
+            $_SESSION['flash_error'] = 'La contraseña actual ingresada es incorrecta.';
+            header('Location: ban.php?pagina=panel_empleado#seccionCorreo');
+            exit;
+        }
+
+        // Validar que el nuevo correo no esté en uso por otra cuenta
+        $enUso = false;
+        $stmt1 = $conexion->prepare("SELECT id FROM usuarios_may WHERE correo = ? AND NOT (id = ? AND ? = 'mayor') LIMIT 1");
+        $stmt1->execute([$nuevoCorreo, $candidatoId, $candidatoTipo]);
+        if ($stmt1->fetch()) $enUso = true;
+
+        if (!$enUso) {
+            $stmt2 = $conexion->prepare("SELECT id FROM usuarios_men WHERE correo = ? AND NOT (id = ? AND ? = 'menor') LIMIT 1");
+            $stmt2->execute([$nuevoCorreo, $candidatoId, $candidatoTipo]);
+            if ($stmt2->fetch()) $enUso = true;
+        }
+
+        if (!$enUso) {
+            $stmt3 = $conexion->prepare("SELECT id FROM empresas WHERE correo = ? LIMIT 1");
+            $stmt3->execute([$nuevoCorreo]);
+            if ($stmt3->fetch()) $enUso = true;
+        }
+
+        if (!$enUso) {
+            $stmt4 = $conexion->prepare("SELECT id FROM usuarios_admin WHERE correo = ? LIMIT 1");
+            $stmt4->execute([$nuevoCorreo]);
+            if ($stmt4->fetch()) $enUso = true;
+        }
+
+        if ($enUso) {
+            $_SESSION['flash_error'] = 'El correo electrónico ya se encuentra registrado por otra cuenta en el sistema.';
+            header('Location: ban.php?pagina=panel_empleado#seccionCorreo');
+            exit;
+        }
+
+        $stmtUp = $conexion->prepare("UPDATE $tabla SET correo = ? WHERE id = ?");
+        $stmtUp->execute([$nuevoCorreo, $candidatoId]);
+
+        $_SESSION['correo'] = $nuevoCorreo;
+        $_SESSION['flash_exito'] = 'Tu correo electrónico ha sido actualizado exitosamente a: ' . $nuevoCorreo;
+        header('Location: ban.php?pagina=panel_empleado#seccionCorreo');
+        exit;
+    }
+
+    public function cambiarContrasenaEmpleado()
+    {
+        if (empty($_SESSION['usuario_id']) || ($_SESSION['tipo'] ?? '') !== 'empleado') {
+            accesoDenegado('Acción permitida únicamente para candidatos empleados.', 'Panel de Empleado');
+        }
+
+        require __DIR__ . '/../../config/database.php';
+        require_once __DIR__ . '/../Models/Usuario.php';
+
+        $candidatoId = (int) $_SESSION['usuario_id'];
+        $candidatoTipo = !empty($_SESSION['es_menor']) ? 'menor' : 'mayor';
+        $tabla = ($candidatoTipo === 'menor') ? 'usuarios_men' : 'usuarios_may';
+
+        $modeloUsuario = new Usuario($conexion);
+        $usuario = $modeloUsuario->obtenerPorId($candidatoId, $candidatoTipo);
+
+        $contrasenaActual = $_POST['contrasena_actual'] ?? '';
+        $nuevaContrasena = $_POST['nueva_contrasena'] ?? '';
+        $confirmarNuevaContrasena = $_POST['confirmar_nueva_contrasena'] ?? '';
+
+        if (empty($contrasenaActual) || empty($nuevaContrasena) || empty($confirmarNuevaContrasena)) {
+            $_SESSION['flash_error'] = 'Debes completar todos los campos para cambiar tu contraseña.';
+            header('Location: ban.php?pagina=panel_empleado#seccionContrasena');
+            exit;
+        }
+
+        if (!password_verify($contrasenaActual, $usuario['contrasena'])) {
+            $_SESSION['flash_error'] = 'La contraseña actual ingresada es incorrecta.';
+            header('Location: ban.php?pagina=panel_empleado#seccionContrasena');
+            exit;
+        }
+
+        if (strlen($nuevaContrasena) < 6) {
+            $_SESSION['flash_error'] = 'La nueva contraseña debe tener al menos 6 caracteres.';
+            header('Location: ban.php?pagina=panel_empleado#seccionContrasena');
+            exit;
+        }
+
+        if ($nuevaContrasena !== $confirmarNuevaContrasena) {
+            $_SESSION['flash_error'] = 'La nueva contraseña y su confirmación no coinciden.';
+            header('Location: ban.php?pagina=panel_empleado#seccionContrasena');
+            exit;
+        }
+
+        $hashNuevo = password_hash($nuevaContrasena, PASSWORD_DEFAULT);
+        $stmtUp = $conexion->prepare("UPDATE $tabla SET contrasena = ? WHERE id = ?");
+        $stmtUp->execute([$hashNuevo, $candidatoId]);
+
+        $_SESSION['flash_exito'] = 'Tu contraseña ha sido actualizada exitosamente.';
+        header('Location: ban.php?pagina=panel_empleado#seccionContrasena');
+        exit;
+    }
+
+    public function actualizarCvEmpleado()
+    {
+        if (empty($_SESSION['usuario_id']) || ($_SESSION['tipo'] ?? '') !== 'empleado') {
+            accesoDenegado('Acción permitida únicamente para candidatos empleados.', 'Panel de Empleado');
+        }
+
+        require __DIR__ . '/../../config/database.php';
+        require_once __DIR__ . '/../Models/Usuario.php';
+
+        $candidatoId = (int) $_SESSION['usuario_id'];
+        $candidatoTipo = !empty($_SESSION['es_menor']) ? 'menor' : 'mayor';
+        $tabla = ($candidatoTipo === 'menor') ? 'usuarios_men' : 'usuarios_may';
+
+        $modeloUsuario = new Usuario($conexion);
+        $usuario = $modeloUsuario->obtenerPorId($candidatoId, $candidatoTipo);
+
+        if (!isset($_FILES['cv_archivo']) || $_FILES['cv_archivo']['error'] !== UPLOAD_ERR_OK) {
+            $_SESSION['flash_error'] = 'Por favor selecciona un archivo PDF válido de tu Curriculum Vitae.';
+            header('Location: ban.php?pagina=panel_empleado#seccionCv');
+            exit;
+        }
+
+        $extension = strtolower(pathinfo($_FILES['cv_archivo']['name'] ?? '', PATHINFO_EXTENSION));
+        if ($extension !== 'pdf') {
+            $_SESSION['flash_error'] = 'El archivo de Curriculum Vitae debe ser exclusivamente un documento en formato PDF (.pdf).';
+            header('Location: ban.php?pagina=panel_empleado#seccionCv');
+            exit;
+        }
+
+        $nuevoCvPath = subirArchivo('cv_archivo', 'cv', 'cv');
+        if (!$nuevoCvPath) {
+            $_SESSION['flash_error'] = 'No se pudo subir el archivo. Verifica que no sobrepase el tamaño límite de 5MB.';
+            header('Location: ban.php?pagina=panel_empleado#seccionCv');
+            exit;
+        }
+
+        // Eliminar el CV anterior si existía físicamente
+        $cvAnterior = $usuario['cv_path'] ?? null;
+        if (!empty($cvAnterior)) {
+            eliminarArchivo($cvAnterior);
+        }
+
+        $stmtUp = $conexion->prepare("UPDATE $tabla SET cv_path = ? WHERE id = ?");
+        $stmtUp->execute([$nuevoCvPath, $candidatoId]);
+
+        $_SESSION['flash_exito'] = '¡Tu Curriculum Vitae ha sido actualizado con éxito! El archivo anterior fue eliminado del servidor.';
+        header('Location: ban.php?pagina=panel_empleado#seccionCv');
+        exit;
+    }
+
+    public function eliminarCvEmpleado()
+    {
+        if (empty($_SESSION['usuario_id']) || ($_SESSION['tipo'] ?? '') !== 'empleado') {
+            accesoDenegado('Acción permitida únicamente para candidatos empleados.', 'Panel de Empleado');
+        }
+
+        require __DIR__ . '/../../config/database.php';
+        require_once __DIR__ . '/../Models/Usuario.php';
+
+        $candidatoId = (int) $_SESSION['usuario_id'];
+        $candidatoTipo = !empty($_SESSION['es_menor']) ? 'menor' : 'mayor';
+        $tabla = ($candidatoTipo === 'menor') ? 'usuarios_men' : 'usuarios_may';
+
+        $modeloUsuario = new Usuario($conexion);
+        $usuario = $modeloUsuario->obtenerPorId($candidatoId, $candidatoTipo);
+
+        $cvAnterior = $usuario['cv_path'] ?? null;
+        if (!empty($cvAnterior)) {
+            eliminarArchivo($cvAnterior);
+        }
+
+        $stmtUp = $conexion->prepare("UPDATE $tabla SET cv_path = NULL WHERE id = ?");
+        $stmtUp->execute([$candidatoId]);
+
+        $_SESSION['flash_exito'] = 'Tu Curriculum Vitae ha sido eliminado correctamente.';
+        header('Location: ban.php?pagina=panel_empleado#seccionCv');
+        exit;
+    }
 }

@@ -100,6 +100,20 @@ function rutaArchivo($ruta)
     return '../uploads/' . ltrim($ruta, '/');
 }
 
+// Elimina físicamente un archivo de la carpeta uploads si existe
+function eliminarArchivo($ruta)
+{
+    if (empty($ruta)) {
+        return false;
+    }
+    $rutaLimpia = str_replace(['..', '\\'], ['', '/'], $ruta);
+    $rutaCompleta = dirname(__DIR__) . '/uploads/' . ltrim(preg_replace('#^uploads/#', '', $rutaLimpia), '/');
+    if (file_exists($rutaCompleta) && is_file($rutaCompleta)) {
+        return @unlink($rutaCompleta);
+    }
+    return false;
+}
+
 // Muestra la vista de Acceso Denegado (403 Forbidden) cuando un usuario intenta entrar a un panel no permitido
 function accesoDenegado($mensaje = 'No tienes los permisos necesarios para acceder a esta sección.', $panelRequerido = 'Panel restringido')
 {

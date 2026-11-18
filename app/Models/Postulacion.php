@@ -56,8 +56,9 @@ class Postulacion
                        COALESCE(um.correo, un.correo) AS candidato_correo,
                        COALESCE(um.telefono, un.telefono) AS candidato_telefono,
                        COALESCE(um.fecha_nacimiento, un.fecha_nacimiento) AS fecha_nacimiento,
+                       COALESCE(um.cv_path, un.cv_path) AS candidato_cv_path,
                        CASE WHEN p.candidato_tipo = "menor" THEN 1 ELSE 0 END AS es_menor,
-                       t.nombre AS tutor_nombre, t.telefono AS tutor_telefono, t.relacion AS tutor_relacion
+                       t.nombre AS tutor_nombre, t.ci AS tutor_ci, t.correo AS tutor_correo, t.telefono AS tutor_telefono, t.relacion AS tutor_relacion
                 FROM postulaciones p
                 INNER JOIN empleos e ON e.id = p.empleo_id
                 LEFT JOIN usuarios_may um ON (um.id = p.candidato_id AND p.candidato_tipo = "mayor")

@@ -98,6 +98,12 @@ $roeActual = $form['roe_actual'] ?? $form['roe'] ?? 'uploads/roe/roe_default.png
           <label for="tutor_nombre">Nombre del padre, madre o tutor *</label>
           <input id="tutor_nombre" name="tutor_nombre" type="text" maxlength="100" value="<?= e($form['tutor_nombre'] ?? '') ?>" placeholder="Nombre completo del tutor">
 
+          <label for="tutor_ci">Número de Cédula de Identidad (C.I.) del tutor *</label>
+          <input id="tutor_ci" name="tutor_ci" type="text" maxlength="30" value="<?= e($form['tutor_ci'] ?? '') ?>" placeholder="Ej. 12345678 LP o documento de identidad">
+
+          <label for="tutor_correo">Correo electrónico del padre, madre o tutor *</label>
+          <input id="tutor_correo" name="tutor_correo" type="email" maxlength="150" value="<?= e($form['tutor_correo'] ?? '') ?>" placeholder="correo.tutor@ejemplo.com">
+
           <label for="tutor_telefono">Teléfono de contacto del tutor *</label>
           <input id="tutor_telefono" name="tutor_telefono" type="text" maxlength="30" value="<?= e($form['tutor_telefono'] ?? '') ?>" placeholder="Teléfono del tutor">
 
@@ -108,6 +114,14 @@ $roeActual = $form['roe_actual'] ?? $form['roe'] ?? 'uploads/roe/roe_default.png
             <option value="Padre" <?= $relacionActual === 'Padre' ? 'selected' : '' ?>>Padre</option>
             <option value="Tutor legal" <?= $relacionActual === 'Tutor legal' ? 'selected' : '' ?>>Tutor(a) legal</option>
           </select>
+        </div>
+
+        <label for="cv_archivo" style="margin-top:1.15rem;">Curriculum Vitae (CV en formato PDF) *</label>
+        <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px; margin-bottom:1rem;">
+          <input type="file" id="cv_archivo" name="cv_archivo" accept="application/pdf,.pdf" required style="font-size:0.88rem; width:100%;" onchange="validarCvPdf(this)">
+          <div style="font-size:0.78rem; color:#64748b; margin-top:6px;">
+            Documento obligatorio en formato PDF (.pdf, máx. 5MB). Este archivo será tu presentación laboral ante las empresas empleadoras.
+          </div>
         </div>
       <?php endif; ?>
 
@@ -160,6 +174,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const alertaMenor16 = document.getElementById('alertaMenor16');
   const btnCrearCuenta = document.getElementById('btnCrearCuenta');
   const inputTutorNombre = document.getElementById('tutor_nombre');
+  const inputTutorCi = document.getElementById('tutor_ci');
+  const inputTutorCorreo = document.getElementById('tutor_correo');
   const inputTutorTel = document.getElementById('tutor_telefono');
 
   function calcularEdad(fechaString) {
@@ -184,6 +200,8 @@ document.addEventListener('DOMContentLoaded', function() {
       alertaMenor16.style.display = 'none';
       seccionTutor.style.display = 'none';
       inputTutorNombre.required = false;
+      if (inputTutorCi) inputTutorCi.required = false;
+      if (inputTutorCorreo) inputTutorCorreo.required = false;
       inputTutorTel.required = false;
       btnCrearCuenta.disabled = false;
       btnCrearCuenta.style.opacity = '1';
@@ -198,6 +216,8 @@ document.addEventListener('DOMContentLoaded', function() {
       alertaMenor16.style.display = 'block';
       seccionTutor.style.display = 'none';
       inputTutorNombre.required = false;
+      if (inputTutorCi) inputTutorCi.required = false;
+      if (inputTutorCorreo) inputTutorCorreo.required = false;
       inputTutorTel.required = false;
       btnCrearCuenta.disabled = true;
       btnCrearCuenta.style.opacity = '0.5';
@@ -208,6 +228,8 @@ document.addEventListener('DOMContentLoaded', function() {
       alertaMenor16.style.display = 'block';
       seccionTutor.style.display = 'none';
       inputTutorNombre.required = false;
+      if (inputTutorCi) inputTutorCi.required = false;
+      if (inputTutorCorreo) inputTutorCorreo.required = false;
       inputTutorTel.required = false;
       btnCrearCuenta.disabled = true;
       btnCrearCuenta.style.opacity = '0.5';
@@ -217,6 +239,8 @@ document.addEventListener('DOMContentLoaded', function() {
       alertaMenor16.style.display = 'none';
       seccionTutor.style.display = 'block';
       inputTutorNombre.required = true;
+      if (inputTutorCi) inputTutorCi.required = true;
+      if (inputTutorCorreo) inputTutorCorreo.required = true;
       inputTutorTel.required = true;
       btnCrearCuenta.disabled = false;
       btnCrearCuenta.style.opacity = '1';
@@ -226,6 +250,8 @@ document.addEventListener('DOMContentLoaded', function() {
       alertaMenor16.style.display = 'none';
       seccionTutor.style.display = 'none';
       inputTutorNombre.required = false;
+      if (inputTutorCi) inputTutorCi.required = false;
+      if (inputTutorCorreo) inputTutorCorreo.required = false;
       inputTutorTel.required = false;
       btnCrearCuenta.disabled = false;
       btnCrearCuenta.style.opacity = '1';
@@ -249,6 +275,23 @@ function actualizarPreviewRoe(input) {
       }
     };
     lector.readAsDataURL(input.files[0]);
+  }
+}
+
+function validarCvPdf(input) {
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    const extension = file.name.split('.').pop().toLowerCase();
+    if (extension !== 'pdf') {
+      alert('Solo se admiten documentos en formato PDF (.pdf) para tu Curriculum Vitae.');
+      input.value = '';
+      return false;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('El archivo PDF del Curriculum Vitae no debe exceder los 5MB de tamaño.');
+      input.value = '';
+      return false;
+    }
   }
 }
 </script>
