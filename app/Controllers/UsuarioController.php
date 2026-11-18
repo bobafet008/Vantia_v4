@@ -382,6 +382,13 @@ class UsuarioController
                     $_SESSION['tipo'] = 'empleado';
                     $_SESSION['es_menor'] = 0;
                     $_SESSION['tabla_usuario'] = 'usuarios_may';
+                enviarCorreoRegistro([
+                        'rol'      => $tipo,
+                        'nombre'   => $nombre,
+                        'correo'   => $correo,
+                        'telefono' => $telefono,
+                        'roe'      => $roe ?? '',
+                    ]);
 
                     header('Location: ban.php?pagina=trabajos');
                     exit;
