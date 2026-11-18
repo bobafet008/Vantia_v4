@@ -1,7 +1,7 @@
 <?php
 // Configuración de conexión para XAMPP y base de datos unificada Vantia
 $dbHost = 'localhost';
-$dbName = 'vantia_empleabilidad_v2';
+$dbName = 'BS_VANTIA';
 $dbUser = 'root';
 $dbPass = '';
 

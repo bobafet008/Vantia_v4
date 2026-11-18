@@ -1,9 +1,9 @@
 -- Base de datos Vantia (Empleo Juvenil Verificado)
-CREATE DATABASE IF NOT EXISTS vantia_empleabilidad_v2
+CREATE DATABASE IF NOT EXISTS BS_VANTIA
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-USE vantia_empleabilidad_v2;
+USE BS_VANTIA;
 
 -- 1. Tabla de Usuarios Menores de 18 años (16 y 17 años)
 CREATE TABLE IF NOT EXISTS usuarios_men (
