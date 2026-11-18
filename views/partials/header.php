@@ -37,7 +37,7 @@
       <?php if (!empty($_SESSION['usuario_id'])): ?>
         <span class="usuario-tag">
           <?= e($_SESSION['usuario'] ?? '') ?> 
-          <small class="tipo-badge <?= e($_SESSION['tipo']) ?>"><?= ucfirst(e($_SESSION['tipo'])) ?></small>
+          <small class="tipo-badge <?= e($_SESSION['tipo']) ?>"><?= ucfirst(e($_SESSION['subtipo'] ?? $_SESSION['tipo'])) ?></small>
         </span>
         <a class="boton-sm boton-outline" href="ban.php?pagina=salir">Cerrar sesión</a>
       <?php else: ?>

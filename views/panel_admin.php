@@ -7,7 +7,7 @@
     <p>Supervisión de empresas verificadas, tutores legales, menores de edad y mayores de edad en la plataforma.</p>
     
     <div style="margin-top:1rem;">
-      <a href="ban.php?pagina=trabajos" class="boton boton-sm" style="background:#e2f5e8; color:#1f7a46;">Bolsa pública de empleos →</a>
+      <a href="ban.php?pagina=trabajos" class="boton boton-sm" style="background:#e2f5e8; color:#1f7a46;">Bolsa pública de empleos</a>
     </div>
   </div>
 </section>
@@ -46,6 +46,14 @@
       <span class="numero">07 · ADMINS</span>
       <h2><?= (int) ($totalAdmins ?? 1) ?></h2>
     </div>
+    <div class="tarjeta">
+      <span class="numero">08 · EMPRENDIMIENTOS</span>
+      <h2><?= (int) ($totalEmprendimientos ?? 0) ?></h2>
+    </div>
+    <div class="tarjeta">
+      <span class="numero">09 · CORREOS BLOQUEADOS</span>
+      <h2><?= (int) ($totalCorreosBloqueados ?? 0) ?></h2>
+    </div>
   </div>
 
   <!-- TABLA 1: Empresas Registradas -->
@@ -78,6 +86,7 @@
             </tr>
           <?php else: ?>
             <?php foreach ($empresas as $emp): ?>
+              <?php if (($emp['tipo_cuenta'] ?? 'empresa') === 'emprendimiento') continue; ?>
               <tr>
                 <td>#<?= (int) $emp['id'] ?></td>
                 <td>
@@ -88,7 +97,23 @@
                     </div>
                   <?php endif; ?>
                 </td>
-                <td><a href="mailto:<?= e($emp['correo']) ?>" class="enlace-contacto"><?= e($emp['correo']) ?></a></td>
+                <td>
+                  <a href="mailto:<?= e($emp['correo']) ?>" class="enlace-contacto"><?= e($emp['correo']) ?></a>
+                  <?php 
+                    $cNormEmp = strtolower(trim($emp['correo']));
+                    $bloqEmp = $mapaBloqueados[$cNormEmp] ?? null;
+                    $estaBloqEmp = !empty($bloqEmp) && ((int)($bloqEmp['bloqueado'] ?? 0) === 1 || (int)($bloqEmp['intentos'] ?? 0) >= 3);
+                  ?>
+                  <?php if ($estaBloqEmp): ?>
+                    <div style="margin-top:4px;">
+                      <span class="badge" style="background:#fee2e2; color:#991b1b; font-size:10px; font-weight:bold; display:inline-block;">Bloqueado (<?= (int)$bloqEmp['intentos'] ?> fallos)</span>
+                    </div>
+                  <?php elseif (!empty($bloqEmp['intentos']) && (int)$bloqEmp['intentos'] > 0): ?>
+                    <div style="margin-top:4px;">
+                      <span class="badge" style="background:#fef3c7; color:#92400e; font-size:10px; display:inline-block;"><?= (int)$bloqEmp['intentos'] ?> / 3 fallos</span>
+                    </div>
+                  <?php endif; ?>
+                </td>
                 <td><?= !empty($emp['telefono']) ? e($emp['telefono']) : '<span class="texto-suave">-</span>' ?></td>
                 <td>
                   <div>NIT: <code><?= e($emp['nit'] ?? 'S/N') ?></code></div>
@@ -139,6 +164,18 @@
                       </button>
                     </form>
 
+                    <?php if ($estaBloqEmp): ?>
+                      <form action="ban.php?pagina=desbloquear_correo" method="post" style="display:inline;" onsubmit="return confirm('¿Desbloquear el correo <?= e(addslashes($emp['correo'])) ?> y restablecer intentos a 0?');">
+                        <input type="hidden" name="correo" value="<?= e($emp['correo']) ?>">
+                        <button type="submit" class="boton-sm" style="background:#059669; color:white;">Desbloquear Correo</button>
+                      </form>
+                    <?php else: ?>
+                      <form action="ban.php?pagina=bloquear_correo" method="post" style="display:inline;" onsubmit="return confirm('¿Bloquear el acceso para <?= e(addslashes($emp['correo'])) ?>?');">
+                        <input type="hidden" name="correo" value="<?= e($emp['correo']) ?>">
+                        <button type="submit" class="boton-sm" style="background:#475569; color:white;">Bloquear Correo</button>
+                      </form>
+                    <?php endif; ?>
+
                     <?php if (estaBaneado($emp)): ?>
                       <form action="ban.php?pagina=desbanear_cuenta" method="post" style="display:inline;" onsubmit="return confirm('¿Deseas reactivar y revocar la suspensión de esta empresa?');">
                         <input type="hidden" name="id" value="<?= (int) $emp['id'] ?>">
@@ -153,6 +190,157 @@
 
                     <form action="ban.php?pagina=eliminar_empresa" method="post" style="display:inline;" onsubmit="return confirm('¿Seguro que deseas eliminar esta empresa y todas sus vacantes?');">
                       <input type="hidden" name="empresa_id" value="<?= (int) $emp['id'] ?>">
+                      <button type="submit" class="boton-sm boton-peligro">Eliminar</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TABLA EMPRENDIMIENTOS: Emprendimientos Registrados -->
+  <div class="bloque-panel" style="margin-bottom:3rem;">
+    <div class="titulo-seccion">
+      <div>
+        <span class="etiqueta">EMPRENDIMIENTOS REGISTRADOS</span>
+        <h2>Proyectos, Talleres y Emprendimientos Independientes</h2>
+        <p class="texto-suave">Emprendimientos registrados en la plataforma para impulsar talento joven.</p>
+      </div>
+    </div>
+
+    <div class="tabla-contenedor">
+      <table class="tabla-panel">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Emprendimiento</th>
+            <th>Rubro</th>
+            <th>Correo</th>
+            <th>Teléfono</th>
+            <th>CI / Foto del puesto</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php if (empty($emprendimientos)): ?>
+            <tr>
+              <td colspan="8" style="text-align:center; padding:1.5rem; color:var(--gris);">No hay emprendimientos registrados actualmente.</td>
+            </tr>
+          <?php else: ?>
+            <?php foreach ($emprendimientos as $emp): ?>
+              <tr>
+                <td>#<?= (int) $emp['id'] ?></td>
+                <td>
+                  <strong><?= e($emp['nombre']) ?></strong>
+                  <?php if (!empty($emp['representante'])): ?>
+                    <div style="font-size:0.82rem; color:var(--texto-suave, #64748b); margin-top:2px;">
+                      Resp: <?= e($emp['representante']) ?>
+                    </div>
+                  <?php endif; ?>
+                </td>
+                <td>
+                  <span class="badge-menor" style="background:#e0e7ff; color:#3730a3; font-size:11px;">
+                    <?= e($emp['rubro']) ?>
+                  </span>
+                </td>
+                <td>
+                  <a href="mailto:<?= e($emp['correo']) ?>" class="enlace-contacto"><?= e($emp['correo']) ?></a>
+                  <?php 
+                    $cNormEmp = strtolower(trim($emp['correo']));
+                    $bloqEmp = $mapaBloqueados[$cNormEmp] ?? null;
+                    $estaBloqEmp = !empty($bloqEmp) && ((int)($bloqEmp['bloqueado'] ?? 0) === 1 || (int)($bloqEmp['intentos'] ?? 0) >= 3);
+                  ?>
+                  <?php if ($estaBloqEmp): ?>
+                    <div style="margin-top:4px;">
+                      <span class="badge" style="background:#fee2e2; color:#991b1b; font-size:10px; font-weight:bold; display:inline-block;">Bloqueado (<?= (int)$bloqEmp['intentos'] ?> fallos)</span>
+                    </div>
+                  <?php elseif (!empty($bloqEmp['intentos']) && (int)$bloqEmp['intentos'] > 0): ?>
+                    <div style="margin-top:4px;">
+                      <span class="badge" style="background:#fef3c7; color:#92400e; font-size:10px; display:inline-block;"><?= (int)$bloqEmp['intentos'] ?> / 3 fallos</span>
+                    </div>
+                  <?php endif; ?>
+                </td>
+                <td><?= !empty($emp['telefono']) ? e($emp['telefono']) : '<span class="texto-suave">-</span>' ?></td>
+                <td>
+                  <div>CI: <code><?= e($emp['ci'] ?? $emp['nit_ci'] ?? 'S/N') ?></code></div>
+                  <div style="margin-top:6px;">
+                    <?php if (!empty($emp['foto_puesto']) && preg_match('/\.(png|jpe?g|webp|gif|svg)$/i', $emp['foto_puesto'])): ?>
+                      <div style="font-size:0.75rem; font-weight:600; color:var(--texto-suave); margin-bottom:3px;">Foto del puesto:</div>
+                      <a href="<?= e(rutaArchivo($emp['foto_puesto'])) ?>" target="_blank" title="Ver foto del puesto">
+                        <img src="<?= e(rutaArchivo($emp['foto_puesto'])) ?>" alt="Foto del puesto" style="width:50px; height:50px; object-fit:contain; border:1px solid #cbd5e1; border-radius:4px; background:#fff; padding:2px; box-shadow:0 1px 3px rgba(0,0,0,0.08); transition:transform 0.15s ease;" onmouseover="this.style.transform='scale(1.8)'" onmouseout="this.style.transform='scale(1)'">
+                      </a>
+                    <?php else: ?>
+                      <div>Foto: <code><?= e($emp['foto_puesto'] ?? 'S/N') ?></code></div>
+                    <?php endif; ?>
+                  </div>
+                </td>
+                <td>
+                  <div style="margin-bottom:4px;">
+                    <?php if (!empty($emp['verificado'])): ?>
+                      <span class="etiqueta-verificada">Activo</span>
+                    <?php else: ?>
+                      <span class="badge-menor" style="background:#fee2e2; color:#991b1b;">Pendiente</span>
+                    <?php endif; ?>
+                  </div>
+                  <?php if (estaBaneado($emp)): ?>
+                    <div style="margin-top:4px;">
+                      <?php if (empty($emp['baneado_hasta'])): ?>
+                        <span class="badge-estado badge-rechazado" style="font-size:10px;">Suspensión permanente</span>
+                      <?php else: ?>
+                        <span class="badge-estado" style="background:#fed7aa; color:#9a3412; font-size:10px;" title="Hasta: <?= e($emp['baneado_hasta']) ?>">
+                          Baneo hasta <?= date('d/m/Y', strtotime($emp['baneado_hasta'])) ?>
+                        </span>
+                      <?php endif; ?>
+                      <?php if (!empty($emp['motivo_baneo'])): ?>
+                        <div style="font-size:10px; color:#991b1b; margin-top:2px; max-width:140px; word-break:break-word;">
+                          <?= e($emp['motivo_baneo']) ?>
+                        </div>
+                      <?php endif; ?>
+                    </div>
+                  <?php else: ?>
+                    <span class="badge-estado badge-contratado" style="font-size:10px;">Habilitado</span>
+                  <?php endif; ?>
+                </td>
+                <td>
+                  <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <form action="ban.php?pagina=toggle_verificar_emprendimiento" method="post" style="display:inline;">
+                      <input type="hidden" name="emprendimiento_id" value="<?= (int) $emp['id'] ?>">
+                      <button type="submit" class="boton-sm <?= !empty($emp['verificado']) ? 'boton-outline-oscuro' : 'boton-exito' ?>">
+                        <?= !empty($emp['verificado']) ? 'Desactivar' : 'Verificar' ?>
+                      </button>
+                    </form>
+
+                    <?php if ($estaBloqEmp): ?>
+                      <form action="ban.php?pagina=desbloquear_correo" method="post" style="display:inline;" onsubmit="return confirm('¿Desbloquear el correo <?= e(addslashes($emp['correo'])) ?> y restablecer intentos a 0?');">
+                        <input type="hidden" name="correo" value="<?= e($emp['correo']) ?>">
+                        <button type="submit" class="boton-sm" style="background:#059669; color:white;">Desbloquear Correo</button>
+                      </form>
+                    <?php else: ?>
+                      <form action="ban.php?pagina=bloquear_correo" method="post" style="display:inline;" onsubmit="return confirm('¿Bloquear el acceso para <?= e(addslashes($emp['correo'])) ?>?');">
+                        <input type="hidden" name="correo" value="<?= e($emp['correo']) ?>">
+                        <button type="submit" class="boton-sm" style="background:#475569; color:white;">Bloquear Correo</button>
+                      </form>
+                    <?php endif; ?>
+
+                    <?php if (estaBaneado($emp)): ?>
+                      <form action="ban.php?pagina=desbanear_cuenta" method="post" style="display:inline;" onsubmit="return confirm('¿Deseas reactivar y revocar la suspensión de este emprendimiento?');">
+                        <input type="hidden" name="id" value="<?= (int) $emp['id'] ?>">
+                        <input type="hidden" name="tabla" value="emprendimientos">
+                        <button type="submit" class="boton-sm" style="background:#10b981; color:white;">Reactivar</button>
+                      </form>
+                    <?php else: ?>
+                      <button type="button" class="boton-sm" style="background:#f97316; color:white;" onclick="abrirModalBaneo(<?= (int)$emp['id'] ?>, 'emprendimientos', '<?= e(addslashes($emp['nombre'])) ?>')">
+                        Suspender
+                      </button>
+                    <?php endif; ?>
+
+                    <form action="ban.php?pagina=eliminar_emprendimiento" method="post" style="display:inline;" onsubmit="return confirm('¿Seguro que deseas eliminar este emprendimiento y todas sus vacantes?');">
+                      <input type="hidden" name="emprendimiento_id" value="<?= (int) $emp['id'] ?>">
                       <button type="submit" class="boton-sm boton-peligro">Eliminar</button>
                     </form>
                   </div>
@@ -209,7 +397,23 @@
                     </div>
                   <?php endif; ?>
                 </td>
-                <td><a href="mailto:<?= e($umen['correo']) ?>" class="enlace-contacto"><?= e($umen['correo']) ?></a></td>
+                <td>
+                  <a href="mailto:<?= e($umen['correo']) ?>" class="enlace-contacto"><?= e($umen['correo']) ?></a>
+                  <?php 
+                    $cNormMen = strtolower(trim($umen['correo']));
+                    $bloqMen = $mapaBloqueados[$cNormMen] ?? null;
+                    $estaBloqMen = !empty($bloqMen) && ((int)($bloqMen['bloqueado'] ?? 0) === 1 || (int)($bloqMen['intentos'] ?? 0) >= 3);
+                  ?>
+                  <?php if ($estaBloqMen): ?>
+                    <div style="margin-top:4px;">
+                      <span class="badge" style="background:#fee2e2; color:#991b1b; font-size:10px; font-weight:bold; display:inline-block;">Bloqueado (<?= (int)$bloqMen['intentos'] ?> fallos)</span>
+                    </div>
+                  <?php elseif (!empty($bloqMen['intentos']) && (int)$bloqMen['intentos'] > 0): ?>
+                    <div style="margin-top:4px;">
+                      <span class="badge" style="background:#fef3c7; color:#92400e; font-size:10px; display:inline-block;"><?= (int)$bloqMen['intentos'] ?> / 3 fallos</span>
+                    </div>
+                  <?php endif; ?>
+                </td>
                 <td><?= !empty($umen['telefono']) ? e($umen['telefono']) : '<span class="texto-suave">-</span>' ?></td>
                 <td>
                   <?= e($umen['fecha_nacimiento']) ?>
@@ -247,6 +451,18 @@
                 </td>
                 <td>
                   <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <?php if ($estaBloqMen): ?>
+                      <form action="ban.php?pagina=desbloquear_correo" method="post" style="display:inline;" onsubmit="return confirm('¿Desbloquear el correo <?= e(addslashes($umen['correo'])) ?> y restablecer intentos a 0?');">
+                        <input type="hidden" name="correo" value="<?= e($umen['correo']) ?>">
+                        <button type="submit" class="boton-sm" style="background:#059669; color:white;">Desbloquear Correo</button>
+                      </form>
+                    <?php else: ?>
+                      <form action="ban.php?pagina=bloquear_correo" method="post" style="display:inline;" onsubmit="return confirm('¿Bloquear el acceso para <?= e(addslashes($umen['correo'])) ?>?');">
+                        <input type="hidden" name="correo" value="<?= e($umen['correo']) ?>">
+                        <button type="submit" class="boton-sm" style="background:#475569; color:white;">Bloquear Correo</button>
+                      </form>
+                    <?php endif; ?>
+
                     <?php if (estaBaneado($umen)): ?>
                       <form action="ban.php?pagina=desbanear_cuenta" method="post" style="display:inline;" onsubmit="return confirm('¿Deseas reactivar este postulante?');">
                         <input type="hidden" name="id" value="<?= (int) $umen['id'] ?>">
@@ -419,6 +635,20 @@
                 </td>
                 <td>
                   <a href="mailto:<?= e($umay['correo']) ?>" class="enlace-contacto"><?= e($umay['correo']) ?></a>
+                  <?php 
+                    $cNormMay = strtolower(trim($umay['correo']));
+                    $bloqMay = $mapaBloqueados[$cNormMay] ?? null;
+                    $estaBloqMay = !empty($bloqMay) && ((int)($bloqMay['bloqueado'] ?? 0) === 1 || (int)($bloqMay['intentos'] ?? 0) >= 3);
+                  ?>
+                  <?php if ($estaBloqMay): ?>
+                    <div style="margin-top:4px;">
+                      <span class="badge" style="background:#fee2e2; color:#991b1b; font-size:10px; font-weight:bold; display:inline-block;">Bloqueado (<?= (int)$bloqMay['intentos'] ?> fallos)</span>
+                    </div>
+                  <?php elseif (!empty($bloqMay['intentos']) && (int)$bloqMay['intentos'] > 0): ?>
+                    <div style="margin-top:4px;">
+                      <span class="badge" style="background:#fef3c7; color:#92400e; font-size:10px; display:inline-block;"><?= (int)$bloqMay['intentos'] ?> / 3 fallos</span>
+                    </div>
+                  <?php endif; ?>
                 </td>
                 <td><?= !empty($umay['telefono']) ? e($umay['telefono']) : '<span class="texto-suave">-</span>' ?></td>
                 <td>
@@ -452,6 +682,18 @@
                 <td>
                   <?php if ((int)$umay['id'] !== (int)($_SESSION['usuario_id'] ?? 0)): ?>
                     <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                      <?php if ($estaBloqMay): ?>
+                        <form action="ban.php?pagina=desbloquear_correo" method="post" style="display:inline;" onsubmit="return confirm('¿Desbloquear el correo <?= e(addslashes($umay['correo'])) ?> y restablecer intentos a 0?');">
+                          <input type="hidden" name="correo" value="<?= e($umay['correo']) ?>">
+                          <button type="submit" class="boton-sm" style="background:#059669; color:white;">Desbloquear Correo</button>
+                        </form>
+                      <?php else: ?>
+                        <form action="ban.php?pagina=bloquear_correo" method="post" style="display:inline;" onsubmit="return confirm('¿Bloquear el acceso para <?= e(addslashes($umay['correo'])) ?>?');">
+                          <input type="hidden" name="correo" value="<?= e($umay['correo']) ?>">
+                          <button type="submit" class="boton-sm" style="background:#475569; color:white;">Bloquear Correo</button>
+                        </form>
+                      <?php endif; ?>
+
                       <?php if (estaBaneado($umay)): ?>
                         <form action="ban.php?pagina=desbanear_cuenta" method="post" style="display:inline;" onsubmit="return confirm('¿Deseas reactivar este usuario?');">
                           <input type="hidden" name="id" value="<?= (int) $umay['id'] ?>">
@@ -524,6 +766,117 @@
                   <?php endif; ?>
                 </td>
                 <td style="font-size:12px; color:#64748b;"><?= date('d/m/Y H:i', strtotime($adm['fecha_registro'])) ?></td>
+              </tr>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TABLA 6: Control de Seguridad y Bloqueo de Correos / Gmail -->
+  <div id="seccionBloqueos" class="bloque-panel" style="margin-bottom:3rem;">
+    <div class="titulo-seccion">
+      <div>
+        <span class="etiqueta">SEGURIDAD Y PROTECCION DE ACCESO</span>
+        <h2>Control de Intentos y Bloqueo de Correos / Gmail</h2>
+        <p class="texto-suave">Protección contra accesos no autorizados. Al acumular 3 intentos fallidos consecutivos, el correo queda bloqueado de forma automática. El administrador puede bloquear o desbloquear cualquier correo directamente.</p>
+      </div>
+      <span class="total-badge"><?= (int) ($totalCorreosBloqueados ?? 0) ?> bloqueados</span>
+    </div>
+
+    <!-- Formulario de Acción Rápida por Correo -->
+    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:18px 20px; margin-bottom:24px;">
+      <h3 style="font-size:15px; margin-top:0; margin-bottom:6px; color:#0f172a;">Acción Rápida por Dirección de Correo</h3>
+      <p style="font-size:13px; color:#64748b; margin-bottom:14px;">Ingresa cualquier dirección de correo (Gmail u otro) para desbloquear su acceso o bloquearlo inmediatamente de forma preventiva.</p>
+      <form action="ban.php?pagina=desbloquear_correo" method="post" style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+        <input type="email" name="correo" placeholder="ejemplo@gmail.com" required style="flex:1; min-width:240px; height:40px; padding:6px 14px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px;">
+        <button type="submit" class="boton-sm" style="height:40px; padding:0 18px; background:#059669; color:white; font-weight:600; border-radius:6px;">
+          Desbloquear Correo
+        </button>
+        <button type="submit" formaction="ban.php?pagina=bloquear_correo" class="boton-sm" style="height:40px; padding:0 18px; background:#dc2626; color:white; font-weight:600; border-radius:6px;" onclick="return confirm('¿Confirmas que deseas bloquear el acceso a este correo?');">
+          Bloquear Preventivamente
+        </button>
+      </form>
+    </div>
+
+    <!-- Tabla de Correos con Intentos o Bloqueados -->
+    <div class="tabla-contenedor">
+      <table class="tabla-panel">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Correo Electrónico / Gmail</th>
+            <th>Intentos Fallidos</th>
+            <th>Estado de Acceso</th>
+            <th>Fecha de Bloqueo</th>
+            <th>Último Intento</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php if (empty($bloqueosCorreo)): ?>
+            <tr>
+              <td colspan="7" style="text-align:center; padding:1.5rem; color:var(--gris);">
+                No hay registros de intentos fallidos ni correos bloqueados en este momento.
+              </td>
+            </tr>
+          <?php else: ?>
+            <?php foreach ($bloqueosCorreo as $b): ?>
+              <?php $estaBloq = ((int)($b['bloqueado'] ?? 0) === 1 || (int)($b['intentos'] ?? 0) >= 3); ?>
+              <tr>
+                <td>#<?= (int) $b['id'] ?></td>
+                <td>
+                  <strong><?= e($b['correo']) ?></strong>
+                </td>
+                <td>
+                  <?php if ($estaBloq): ?>
+                    <span style="color:#991b1b; font-weight:700;">
+                      <?= (int) $b['intentos'] ?> / 3 (Limite superado)
+                    </span>
+                  <?php else: ?>
+                    <span style="color:#d97706; font-weight:600;">
+                      <?= (int) $b['intentos'] ?> / 3 intentos
+                    </span>
+                  <?php endif; ?>
+                </td>
+                <td>
+                  <?php if ($estaBloq): ?>
+                    <span class="badge" style="background:#fee2e2; color:#991b1b; font-weight:700; font-size:11px; padding:3px 8px; border-radius:4px;">
+                      BLOQUEADO
+                    </span>
+                  <?php else: ?>
+                    <span class="badge" style="background:#fef3c7; color:#92400e; font-size:11px; padding:3px 8px; border-radius:4px;">
+                      En seguimiento
+                    </span>
+                  <?php endif; ?>
+                </td>
+                <td style="font-size:12px; color:#64748b;">
+                  <?= !empty($b['bloqueado_en']) ? date('d/m/Y H:i:s', strtotime($b['bloqueado_en'])) : '<span class="texto-suave">-</span>' ?>
+                </td>
+                <td style="font-size:12px; color:#64748b;">
+                  <?= !empty($b['ultimo_intento']) ? date('d/m/Y H:i:s', strtotime($b['ultimo_intento'])) : '<span class="texto-suave">-</span>' ?>
+                </td>
+                <td>
+                  <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <?php if ($estaBloq || (int)($b['intentos'] ?? 0) > 0): ?>
+                      <form action="ban.php?pagina=desbloquear_correo" method="post" style="display:inline;" onsubmit="return confirm('¿Desbloquear el correo <?= e(addslashes($b['correo'])) ?> y restablecer sus intentos a 0?');">
+                        <input type="hidden" name="correo" value="<?= e($b['correo']) ?>">
+                        <button type="submit" class="boton-sm" style="background:#059669; color:white;">
+                          Desbloquear
+                        </button>
+                      </form>
+                    <?php endif; ?>
+                    <?php if (!$estaBloq): ?>
+                      <form action="ban.php?pagina=bloquear_correo" method="post" style="display:inline;" onsubmit="return confirm('¿Bloquear el correo <?= e(addslashes($b['correo'])) ?> preventivamente?');">
+                        <input type="hidden" name="correo" value="<?= e($b['correo']) ?>">
+                        <button type="submit" class="boton-sm" style="background:#dc2626; color:white;">
+                          Bloquear
+                        </button>
+                      </form>
+                    <?php endif; ?>
+                  </div>
+                </td>
               </tr>
             <?php endforeach; ?>
           <?php endif; ?>

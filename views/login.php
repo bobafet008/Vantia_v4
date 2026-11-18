@@ -38,6 +38,8 @@
         <a href="ban.php?pagina=registro_empleado">Registrarme como joven / empleado</a>
         <span>·</span>
         <a href="ban.php?pagina=registro_empresa">Registrar mi empresa</a>
+        <span>·</span>
+        <a href="ban.php?pagina=registro_emprendimiento">Registrar emprendimiento</a>
       </div>
     </div>
   </div>

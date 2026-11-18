@@ -13,17 +13,17 @@
       <div style="display:flex; gap:10px; margin-top:1rem; flex-wrap:wrap;">
         <a href="#nueva-vacante" class="boton boton-sm">+ Publicar nueva vacante</a>
         <a href="#postulantes" class="boton boton-sm boton-oscuro">Gestionar postulantes (<?= count($postulaciones ?? []) ?>)</a>
-        <a href="ban.php?pagina=trabajos" class="boton boton-sm" style="background:#e2f5e8; color:#1f7a46;">Ver bolsa pública de empleos →</a>
+        <a href="ban.php?pagina=trabajos" class="boton boton-sm" style="background:#e2f5e8; color:#1f7a46;">Ver bolsa pública de empleos</a>
       </div>
     </div>
 
     <?php if (!empty($empresa['roe'])): ?>
       <div style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); border-radius:10px; padding:12px; text-align:center; min-width:130px;">
-        <a href="<?= e(rutaArchivo($empresa['roe'])) ?>" target="_blank" title="Ver código QR ROE">
-          <img src="<?= e(rutaArchivo($empresa['roe'])) ?>" alt="Código QR ROE" style="width:75px; height:75px; object-fit:contain; background:#fff; border-radius:6px; padding:3px; display:block; margin:0 auto 6px;">
+        <a href="<?= e(rutaArchivo($empresa['roe'])) ?>" target="_blank" title="Ver imagen de perfil o ROE">
+          <img src="<?= e(rutaArchivo($empresa['roe'])) ?>" alt="Foto del puesto o ROE" style="width:75px; height:75px; object-fit:contain; background:#fff; border-radius:6px; padding:3px; display:block; margin:0 auto 6px;">
         </a>
-        <span style="font-size:0.75rem; color:#e2e8f0; font-weight:600; display:block;">Certificado ROE</span>
-        <span style="font-size:0.7rem; color:#38bdf8;">QR Verificado</span>
+        <span style="font-size:0.75rem; color:#e2e8f0; font-weight:600; display:block;"><?= (($empresa['tipo_cuenta'] ?? '') === 'emprendimiento') ? 'Foto del puesto' : 'Certificado ROE' ?></span>
+        <span style="font-size:0.7rem; color:#38bdf8;"><?= (($empresa['tipo_cuenta'] ?? '') === 'emprendimiento') ? 'Activo' : 'QR Verificado' ?></span>
       </div>
     <?php endif; ?>
   </div>

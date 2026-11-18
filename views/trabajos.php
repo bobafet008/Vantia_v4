@@ -45,10 +45,10 @@
             <p class="empresa-nombre" style="margin:0;"><strong><?= e($empleo['empresa']) ?></strong></p>
             <?php if (!empty($empleo['roe'])): ?>
               <div style="display:inline-flex; align-items:center; gap:8px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:3px 8px;">
-                <a href="<?= e(rutaArchivo($empleo['roe'])) ?>" target="_blank" title="Ver Certificado / Código QR ROE">
-                  <img src="<?= e(rutaArchivo($empleo['roe'])) ?>" alt="ROE QR" style="width:34px; height:34px; object-fit:contain; background:#fff; border:1px solid #cbd5e1; border-radius:4px; padding:1px; vertical-align:middle; transition:transform 0.15s ease;" onmouseover="this.style.transform='scale(1.8)'" onmouseout="this.style.transform='scale(1)'">
+                <a href="<?= e(rutaArchivo($empleo['roe'])) ?>" target="_blank" title="<?= (($empleo['tipo_cuenta'] ?? '') === 'emprendimiento') ? 'Ver foto del puesto' : 'Ver Certificado / Código QR ROE' ?>">
+                  <img src="<?= e(rutaArchivo($empleo['roe'])) ?>" alt="<?= (($empleo['tipo_cuenta'] ?? '') === 'emprendimiento') ? 'Foto del puesto' : 'ROE QR' ?>" style="width:34px; height:34px; object-fit:contain; background:#fff; border:1px solid #cbd5e1; border-radius:4px; padding:1px; vertical-align:middle; transition:transform 0.15s ease;" onmouseover="this.style.transform='scale(1.8)'" onmouseout="this.style.transform='scale(1)'">
                 </a>
-                <span style="font-size:0.75rem; font-weight:600; color:#1e293b;">ROE Verificado</span>
+                <span style="font-size:0.75rem; font-weight:600; color:#1e293b;"><?= (($empleo['tipo_cuenta'] ?? '') === 'emprendimiento') ? 'Foto del puesto' : 'ROE Verificado' ?></span>
               </div>
             <?php endif; ?>
           </div>
@@ -90,11 +90,11 @@
                 </form>
               <?php endif; ?>
             <?php elseif (empty($_SESSION['usuario_id'])): ?>
-              <a href="ban.php?pagina=login&tipo=empleado" class="boton boton-sm boton-oscuro">Inicia sesión para postularte →</a>
+              <a href="ban.php?pagina=login&tipo=empleado" class="boton boton-sm boton-oscuro">Inicia sesión para postularte</a>
             <?php elseif (($_SESSION['tipo'] ?? '') === 'empresa'): ?>
-              <a href="ban.php?pagina=panel_empresa" class="boton boton-sm boton-oscuro">Ir a mi Panel de Empresa →</a>
+              <a href="ban.php?pagina=panel_empresa" class="boton boton-sm boton-oscuro">Ir a mi Panel de Gestion</a>
             <?php elseif (($_SESSION['tipo'] ?? '') === 'admin'): ?>
-              <a href="ban.php?pagina=panel_admin" class="boton boton-sm boton-oscuro">Ir al Panel de Administración →</a>
+              <a href="ban.php?pagina=panel_admin" class="boton boton-sm boton-oscuro">Ir al Panel de Administración</a>
             <?php endif; ?>
           </div>
         </article>

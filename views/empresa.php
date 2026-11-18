@@ -15,17 +15,20 @@
       <h2>Iniciar sesión</h2>
       <p>Ingresa a tu cuenta de empresa para publicar vacantes y revisar los candidatos postulados.</p>
       <?php if (!empty($_SESSION['usuario_id']) && ($_SESSION['tipo'] ?? '') === 'empresa'): ?>
-        <a class="boton" href="ban.php?pagina=panel_empresa">Ir al panel de empresa →</a>
+        <a class="boton" href="ban.php?pagina=panel_empresa">Ir al panel de gestion</a>
       <?php else: ?>
-        <a class="boton" href="ban.php?pagina=login&tipo=empresa">Iniciar sesión →</a>
+        <a class="boton" href="ban.php?pagina=login&tipo=empresa">Iniciar sesion</a>
       <?php endif; ?>
     </article>
 
     <article class="tarjeta">
       <span class="numero">02 · REGISTRO</span>
-      <h2>Registrar empresa</h2>
-      <p>Si aún no tienes cuenta, registra los datos de tu organización con NIT y número de ROE.</p>
-      <a class="boton boton-oscuro" href="ban.php?pagina=registro_empresa">Crear registro →</a>
+      <h2>Registrar empresa o emprendimiento</h2>
+      <p>Si aun no tienes cuenta, registra los datos de tu empresa formal o tu emprendimiento independiente.</p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a class="boton boton-oscuro" href="ban.php?pagina=registro_empresa">Registrar empresa</a>
+        <a class="boton boton-outline" href="ban.php?pagina=registro_emprendimiento">Registrar emprendimiento</a>
+      </div>
     </article>
   </div>
 </section>

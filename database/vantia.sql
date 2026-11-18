@@ -74,6 +74,7 @@ LEFT JOIN tutores t ON t.usuario_men_id = un.id;
 CREATE TABLE IF NOT EXISTS empresas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(150) NOT NULL,
+    tipo_cuenta VARCHAR(30) NOT NULL DEFAULT 'empresa',
     nombre_empresa VARCHAR(150) GENERATED ALWAYS AS (nombre) VIRTUAL,
     nit VARCHAR(50) DEFAULT NULL,
     roe VARCHAR(255) NOT NULL,
@@ -92,7 +93,26 @@ CREATE TABLE IF NOT EXISTS empresas (
     creada_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 5. Tabla de Empleos / Vacantes
+-- 5. Tabla de Emprendimientos (Negocios independientes y proyectos)
+CREATE TABLE IF NOT EXISTS emprendimientos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(150) NOT NULL,
+    representante VARCHAR(150) NOT NULL,
+    rubro VARCHAR(100) NOT NULL,
+    ci VARCHAR(50) DEFAULT NULL,
+    correo VARCHAR(150) NOT NULL UNIQUE,
+    contrasena VARCHAR(255) NOT NULL,
+    telefono VARCHAR(30) NOT NULL,
+    foto_puesto VARCHAR(255) NOT NULL DEFAULT 'uploads/roe/roe_default.png',
+    descripcion TEXT NOT NULL,
+    verificado TINYINT(1) NOT NULL DEFAULT 1,
+    baneado TINYINT(1) NOT NULL DEFAULT 0,
+    baneado_hasta DATETIME DEFAULT NULL,
+    motivo_baneo VARCHAR(255) DEFAULT NULL,
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 6. Tabla de Empleos / Vacantes
 CREATE TABLE IF NOT EXISTS empleos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     empresa_id INT NOT NULL,
@@ -162,3 +182,14 @@ VALUES (
     1
 )
 ON DUPLICATE KEY UPDATE activo = 1;
+
+-- 9. Tabla de Control de Intentos Fallidos y Bloqueo de Correos / Gmail
+CREATE TABLE IF NOT EXISTS bloqueos_correo (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    correo VARCHAR(150) NOT NULL UNIQUE,
+    intentos INT NOT NULL DEFAULT 0,
+    bloqueado TINYINT(1) NOT NULL DEFAULT 0,
+    bloqueado_en DATETIME DEFAULT NULL,
+    ultimo_intento DATETIME DEFAULT NULL,
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

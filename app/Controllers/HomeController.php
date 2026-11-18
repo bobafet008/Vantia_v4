@@ -22,7 +22,7 @@ class HomeController
         require_once __DIR__ . '/../Models/Postulacion.php';
 
         $empleos = $conexion->query(
-            "SELECT e.*, emp.nombre AS empresa, emp.nit, emp.roe, emp.verificada
+            "SELECT e.*, emp.nombre AS empresa, emp.tipo_cuenta, emp.nit, emp.roe, emp.verificada
              FROM empleos e
              INNER JOIN empresas emp ON emp.id = e.empresa_id
              WHERE e.activo = 1
@@ -379,24 +379,33 @@ class HomeController
         require_once __DIR__ . '/../Models/UsuarioMay.php';
         require_once __DIR__ . '/../Models/UsuarioMen.php';
         require_once __DIR__ . '/../Models/Empresa.php';
+        require_once __DIR__ . '/../Models/Emprendimiento.php';
         require_once __DIR__ . '/../Models/Tutor.php';
         require_once __DIR__ . '/../Models/UsuarioAdmin.php';
+        require_once __DIR__ . '/../Models/BloqueoCorreo.php';
 
         $modeloMay = new UsuarioMay($conexion);
         $modeloMen = new UsuarioMen($conexion);
         $modeloEmpresa = new Empresa($conexion);
+        $modeloEmprendimiento = new Emprendimiento($conexion);
         $modeloTutor = new Tutor($conexion);
         $modeloAdmin = new UsuarioAdmin($conexion);
+        $modeloBloqueo = new BloqueoCorreo($conexion);
 
         $usuariosMay = $modeloMay->obtenerTodos();
         $usuariosMen = $modeloMen->obtenerTodos();
         $tutores = $modeloTutor->obtenerTodos();
         $empresas = $modeloEmpresa->obtenerTodas();
+        $emprendimientos = $modeloEmprendimiento->obtenerTodos();
         $administradores = $modeloAdmin->obtenerTodos();
+        $bloqueosCorreo = $modeloBloqueo->obtenerTodos();
+        $totalCorreosBloqueados = $modeloBloqueo->contarBloqueados();
+        $mapaBloqueados = $modeloBloqueo->obtenerMapaBloqueados();
 
         $totalEmpleos = (int) $conexion->query('SELECT COUNT(*) FROM empleos')->fetchColumn();
         $totalPostulaciones = (int) $conexion->query('SELECT COUNT(*) FROM postulaciones')->fetchColumn();
         $totalEmpresas = $modeloEmpresa->contar();
+        $totalEmprendimientos = $modeloEmprendimiento->contar();
         $totalMenores = $modeloMen->contar();
         $totalTutores = $modeloTutor->contar();
         $totalMayores = $modeloMay->contarCandidatos();
@@ -408,11 +417,16 @@ class HomeController
             'usuariosMen' => $usuariosMen,
             'tutores' => $tutores,
             'empresas' => $empresas,
+            'emprendimientos' => $emprendimientos,
             'administradores' => $administradores,
+            'bloqueosCorreo' => $bloqueosCorreo,
+            'totalCorreosBloqueados' => $totalCorreosBloqueados,
+            'mapaBloqueados' => $mapaBloqueados,
             'totalAdmins' => $totalAdmins,
             'totalEmpleos' => $totalEmpleos,
             'totalPostulaciones' => $totalPostulaciones,
             'totalEmpresas' => $totalEmpresas,
+            'totalEmprendimientos' => $totalEmprendimientos,
             'totalMenores' => $totalMenores,
             'totalTutores' => $totalTutores,
             'totalMayores' => $totalMayores,
@@ -443,6 +457,52 @@ class HomeController
         exit;
     }
 
+    public function toggleVerificarEmprendimiento()
+    {
+        if (empty($_SESSION['usuario_id']) || ($_SESSION['tipo'] ?? '') !== 'admin') {
+            accesoDenegado('Acción reservada exclusivamente para el Administrador del sistema.', 'Panel de Administración');
+        }
+
+        $id = (int) ($_POST['emprendimiento_id'] ?? $_POST['usuario_id'] ?? 0);
+
+        if ($id > 0) {
+            require __DIR__ . '/../../config/database.php';
+            require_once __DIR__ . '/../Models/Emprendimiento.php';
+            require_once __DIR__ . '/../Models/Empresa.php';
+            $modEmp = new Emprendimiento($conexion);
+            $modEmp->toggleVerificacion($id);
+            $modEmpresa = new Empresa($conexion);
+            $modEmpresa->toggleVerificacion($id);
+            $_SESSION['admin_exito'] = 'El estado de verificación del emprendimiento ha sido actualizado.';
+        }
+
+        header('Location: ban.php?pagina=panel_admin');
+        exit;
+    }
+
+    public function eliminarEmprendimiento()
+    {
+        if (empty($_SESSION['usuario_id']) || ($_SESSION['tipo'] ?? '') !== 'admin') {
+            accesoDenegado('Acción reservada exclusivamente para el Administrador del sistema.', 'Panel de Administración');
+        }
+
+        $id = (int) ($_POST['emprendimiento_id'] ?? 0);
+
+        if ($id > 0) {
+            require __DIR__ . '/../../config/database.php';
+            require_once __DIR__ . '/../Models/Emprendimiento.php';
+            require_once __DIR__ . '/../Models/Empresa.php';
+            $modEmp = new Emprendimiento($conexion);
+            $modEmp->eliminar($id);
+            $modEmpresa = new Empresa($conexion);
+            $modEmpresa->eliminar($id);
+            $_SESSION['admin_exito'] = 'El emprendimiento y sus vacantes asociadas han sido eliminados.';
+        }
+
+        header('Location: ban.php?pagina=panel_admin');
+        exit;
+    }
+
     public function eliminarEmpresa()
     {
         if (empty($_SESSION['usuario_id']) || ($_SESSION['tipo'] ?? '') !== 'admin') {
@@ -454,9 +514,12 @@ class HomeController
         if ($empresaId > 0) {
             require __DIR__ . '/../../config/database.php';
             require_once __DIR__ . '/../Models/Empresa.php';
+            require_once __DIR__ . '/../Models/Emprendimiento.php';
             $modelo = new Empresa($conexion);
             $modelo->eliminar($empresaId);
-            $_SESSION['admin_exito'] = 'La empresa y sus ofertas asociadas han sido eliminadas.';
+            $modEmp = new Emprendimiento($conexion);
+            $modEmp->eliminar($empresaId);
+            $_SESSION['admin_exito'] = 'La empresa o emprendimiento y sus ofertas asociadas han sido eliminadas.';
         }
 
         header('Location: ban.php?pagina=panel_admin');
@@ -508,7 +571,7 @@ class HomeController
         $duracion = (int) ($_POST['duracion_dias'] ?? 0);
         $motivo = trim($_POST['motivo'] ?? 'Incumplimiento de las normas de la comunidad');
 
-        $tablasValidas = ['empresas', 'usuarios_may', 'usuarios_men'];
+        $tablasValidas = ['empresas', 'emprendimientos', 'usuarios_may', 'usuarios_men'];
         if ($id <= 0 || !in_array($tabla, $tablasValidas, true)) {
             $_SESSION['admin_error'] = 'Identificador o tipo de entidad inválido.';
             header('Location: ban.php?pagina=panel_admin');
@@ -534,6 +597,14 @@ class HomeController
         $stmt = $conexion->prepare($sql);
         $stmt->execute([$baneadoHasta, $motivo ?: null, $id]);
 
+        if ($tabla === 'emprendimientos') {
+            $sync = $conexion->prepare("UPDATE empresas SET baneado = 1, baneado_hasta = ?, motivo_baneo = ? WHERE id = ?");
+            $sync->execute([$baneadoHasta, $motivo ?: null, $id]);
+        } elseif ($tabla === 'empresas') {
+            $sync = $conexion->prepare("UPDATE emprendimientos SET baneado = 1, baneado_hasta = ?, motivo_baneo = ? WHERE id = ?");
+            $sync->execute([$baneadoHasta, $motivo ?: null, $id]);
+        }
+
         $tipoTexto = $baneadoHasta ? "temporalmente por $duracion día(s) (hasta el " . date('d/m/Y H:i', strtotime($baneadoHasta)) . ")" : "permanentemente";
         $_SESSION['admin_exito'] = "La cuenta ha sido suspendida $tipoTexto con éxito.";
 
@@ -549,17 +620,74 @@ class HomeController
 
         $id = (int) ($_POST['id'] ?? 0);
         $tabla = $_POST['tabla'] ?? '';
-        $tablasValidas = ['empresas', 'usuarios_may', 'usuarios_men'];
+        $tablasValidas = ['empresas', 'emprendimientos', 'usuarios_may', 'usuarios_men'];
 
         if ($id > 0 && in_array($tabla, $tablasValidas, true)) {
             require __DIR__ . '/../../config/database.php';
             $sql = "UPDATE $tabla SET baneado = 0, baneado_hasta = NULL, motivo_baneo = NULL WHERE id = ?";
             $stmt = $conexion->prepare($sql);
             $stmt->execute([$id]);
+
+            if ($tabla === 'emprendimientos') {
+                $sync = $conexion->prepare("UPDATE empresas SET baneado = 0, baneado_hasta = NULL, motivo_baneo = NULL WHERE id = ?");
+                $sync->execute([$id]);
+            } elseif ($tabla === 'empresas') {
+                $sync = $conexion->prepare("UPDATE emprendimientos SET baneado = 0, baneado_hasta = NULL, motivo_baneo = NULL WHERE id = ?");
+                $sync->execute([$id]);
+            }
+
             $_SESSION['admin_exito'] = 'La suspensión de la cuenta ha sido revocada exitosamente.';
         }
 
         header('Location: ban.php?pagina=panel_admin');
+        exit;
+    }
+
+    public function bloquearCorreo()
+    {
+        if (empty($_SESSION['usuario_id']) || ($_SESSION['tipo'] ?? '') !== 'admin') {
+            accesoDenegado('Acción reservada exclusivamente para el Administrador del sistema.', 'Panel de Administración');
+        }
+
+        $correo = trim($_POST['correo'] ?? '');
+
+        if ($correo === '' || !filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+            $_SESSION['admin_error'] = 'Debes ingresar un correo electrónico válido para bloquear.';
+            header('Location: ban.php?pagina=panel_admin#seccionBloqueos');
+            exit;
+        }
+
+        require __DIR__ . '/../../config/database.php';
+        require_once __DIR__ . '/../Models/BloqueoCorreo.php';
+        $modeloBloqueo = new BloqueoCorreo($conexion);
+        $modeloBloqueo->bloquear($correo);
+
+        $_SESSION['admin_exito'] = 'El correo ' . htmlspecialchars($correo) . ' ha sido bloqueado exitosamente.';
+        header('Location: ban.php?pagina=panel_admin#seccionBloqueos');
+        exit;
+    }
+
+    public function desbloquearCorreo()
+    {
+        if (empty($_SESSION['usuario_id']) || ($_SESSION['tipo'] ?? '') !== 'admin') {
+            accesoDenegado('Acción reservada exclusivamente para el Administrador del sistema.', 'Panel de Administración');
+        }
+
+        $correo = trim($_POST['correo'] ?? '');
+
+        if ($correo === '' || !filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+            $_SESSION['admin_error'] = 'Debes especificar un correo válido para desbloquear.';
+            header('Location: ban.php?pagina=panel_admin#seccionBloqueos');
+            exit;
+        }
+
+        require __DIR__ . '/../../config/database.php';
+        require_once __DIR__ . '/../Models/BloqueoCorreo.php';
+        $modeloBloqueo = new BloqueoCorreo($conexion);
+        $modeloBloqueo->desbloquear($correo);
+
+        $_SESSION['admin_exito'] = 'El correo ' . htmlspecialchars($correo) . ' ha sido desbloqueado y sus intentos han sido restablecidos a 0.';
+        header('Location: ban.php?pagina=panel_admin#seccionBloqueos');
         exit;
     }
 
@@ -618,8 +746,8 @@ class HomeController
             exit;
         }
 
-        if (!filter_var($nuevoCorreo, FILTER_VALIDATE_EMAIL)) {
-            $_SESSION['flash_error'] = 'Por favor, introduce una dirección de correo electrónico válida.';
+        if (strpos($nuevoCorreo, '@') === false || !filter_var($nuevoCorreo, FILTER_VALIDATE_EMAIL)) {
+            $_SESSION['flash_error'] = 'Por favor, introduce una dirección de correo electrónico válida con signo @.';
             header('Location: ban.php?pagina=panel_empleado#seccionCorreo');
             exit;
         }
@@ -655,9 +783,15 @@ class HomeController
         }
 
         if (!$enUso) {
-            $stmt4 = $conexion->prepare("SELECT id FROM usuarios_admin WHERE correo = ? LIMIT 1");
+            $stmt4 = $conexion->prepare("SELECT id FROM emprendimientos WHERE correo = ? LIMIT 1");
             $stmt4->execute([$nuevoCorreo]);
             if ($stmt4->fetch()) $enUso = true;
+        }
+
+        if (!$enUso) {
+            $stmt5 = $conexion->prepare("SELECT id FROM usuarios_admin WHERE correo = ? LIMIT 1");
+            $stmt5->execute([$nuevoCorreo]);
+            if ($stmt5->fetch()) $enUso = true;
         }
 
         if ($enUso) {
@@ -709,6 +843,30 @@ class HomeController
 
         if (strlen($nuevaContrasena) < 6) {
             $_SESSION['flash_error'] = 'La nueva contraseña debe tener al menos 6 caracteres.';
+            header('Location: ban.php?pagina=panel_empleado#seccionContrasena');
+            exit;
+        }
+
+        if (!preg_match('/[A-Z]/', $nuevaContrasena)) {
+            $_SESSION['flash_error'] = 'La nueva contraseña debe incluir al menos una letra mayúscula.';
+            header('Location: ban.php?pagina=panel_empleado#seccionContrasena');
+            exit;
+        }
+
+        if (!preg_match('/[a-z]/', $nuevaContrasena)) {
+            $_SESSION['flash_error'] = 'La nueva contraseña debe incluir al menos una letra minúscula.';
+            header('Location: ban.php?pagina=panel_empleado#seccionContrasena');
+            exit;
+        }
+
+        if (!preg_match('/[0-9]/', $nuevaContrasena)) {
+            $_SESSION['flash_error'] = 'La nueva contraseña debe incluir al menos un número.';
+            header('Location: ban.php?pagina=panel_empleado#seccionContrasena');
+            exit;
+        }
+
+        if (!preg_match('/[^a-zA-Z0-9]/', $nuevaContrasena)) {
+            $_SESSION['flash_error'] = 'La nueva contraseña debe incluir al menos un carácter especial (ej. !@#$%&*).';
             header('Location: ban.php?pagina=panel_empleado#seccionContrasena');
             exit;
         }

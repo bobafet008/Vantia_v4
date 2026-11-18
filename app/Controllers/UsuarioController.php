@@ -3,7 +3,10 @@ class UsuarioController
 {
     public function registro()
     {
-        $tipo = ($_GET['tipo'] ?? '') === 'empresa' ? 'empresa' : 'empleado';
+        $tipo = $_GET['tipo'] ?? 'empleado';
+        if (!in_array($tipo, ['empleado', 'empresa', 'emprendimiento'], true)) {
+            $tipo = 'empleado';
+        }
         vista('registro', ['tipo' => $tipo]);
     }
 
@@ -15,6 +18,11 @@ class UsuarioController
     public function registroEmpresa()
     {
         vista('registro', ['tipo' => 'empresa']);
+    }
+
+    public function registroEmprendimiento()
+    {
+        vista('registro', ['tipo' => 'emprendimiento']);
     }
 
     public function guardar()
@@ -32,30 +40,47 @@ class UsuarioController
         $telefono = trim($_POST['telefono'] ?? '');
 
         // Validación inicial común
-        if ($tipo !== 'empleado' && $tipo !== 'empresa') {
+        if ($tipo !== 'empleado' && $tipo !== 'empresa' && $tipo !== 'emprendimiento') {
             $error = 'Selecciona un tipo de cuenta válido.';
-        } elseif ($nombre === '' || !filter_var($correo, FILTER_VALIDATE_EMAIL)) {
-            $error = 'Completa el nombre y proporciona un correo válido.';
-        } elseif (strlen($contrasena) < 6) {
-            $error = 'La contraseña debe tener al menos 6 caracteres.';
-        } elseif ($confirmarContrasena !== '' && $contrasena !== $confirmarContrasena) {
-            $error = 'Las contraseñas no coinciden. Por favor verifícalas.';
+        } elseif ($nombre === '') {
+            $error = 'Por favor completa el nombre de usuario u organización.';
+        } elseif ($correo === '' || strpos($correo, '@') === false || !filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+            $error = 'El correo electrónico debe contener un símbolo @ y tener un formato válido (ejemplo: usuario@correo.com).';
         } elseif ($telefono === '') {
             $error = 'El número de teléfono / WhatsApp es obligatorio.';
+        } elseif (!ctype_digit($telefono) || strlen($telefono) !== 8) {
+            $error = 'El número de teléfono solo debe contener números y tener exactamente 8 dígitos.';
+        } elseif (strlen($contrasena) < 6) {
+            $error = 'La contraseña debe tener al menos 6 caracteres.';
+        } elseif (!preg_match('/[A-Z]/', $contrasena)) {
+            $error = 'La contraseña debe incluir al menos una letra mayúscula.';
+        } elseif (!preg_match('/[a-z]/', $contrasena)) {
+            $error = 'La contraseña debe incluir al menos una letra minúscula.';
+        } elseif (!preg_match('/[0-9]/', $contrasena)) {
+            $error = 'La contraseña debe incluir al menos un número.';
+        } elseif (!preg_match('/[^a-zA-Z0-9]/', $contrasena)) {
+            $error = 'La contraseña debe incluir al menos un carácter especial (ej. !@#$%&*).';
+        } elseif ($confirmarContrasena !== '' && $contrasena !== $confirmarContrasena) {
+            $error = 'Las contraseñas no coinciden. Por favor verifícalas.';
         }
 
         require __DIR__ . '/../../config/database.php';
         require_once __DIR__ . '/../Models/Usuario.php';
         require_once __DIR__ . '/../Models/Empresa.php';
+        require_once __DIR__ . '/../Models/Emprendimiento.php';
         require_once __DIR__ . '/../Models/UsuarioAdmin.php';
 
-        $modeloUsuario = new Usuario($conexion);
-        $modeloEmpresa = new Empresa($conexion);
-        $modeloAdmin   = new UsuarioAdmin($conexion);
+        $modeloUsuario        = new Usuario($conexion);
+        $modeloEmpresa        = new Empresa($conexion);
+        $modeloEmprendimiento = new Emprendimiento($conexion);
+        $modeloAdmin          = new UsuarioAdmin($conexion);
 
-        // Verificar si el correo ya existe en cualquier tipo de cuenta (mayor, menor, empresa o admin)
+        // Verificar si el correo ya existe en cualquier tipo de cuenta (mayor, menor, empresa, emprendimiento o admin)
         if (!isset($error)) {
-            if (!empty($modeloUsuario->buscarPorCorreo($correo)) || !empty($modeloEmpresa->buscarPorCorreo($correo)) || !empty($modeloAdmin->buscarPorCorreo($correo))) {
+            if (!empty($modeloUsuario->buscarPorCorreo($correo)) ||
+                !empty($modeloEmpresa->buscarPorCorreo($correo)) ||
+                !empty($modeloEmprendimiento->buscarPorCorreo($correo)) ||
+                !empty($modeloAdmin->buscarPorCorreo($correo))) {
                 $error = 'Ese correo electrónico ya se encuentra registrado en la plataforma.';
             }
         }
@@ -94,6 +119,7 @@ class UsuarioController
                 } else {
                     $datosEmpresa = [
                         'nombre' => $nombre,
+                        'tipo_cuenta' => 'empresa',
                         'representante' => $representante,
                         'nit' => $nit,
                         'roe' => $roePath,
@@ -103,6 +129,63 @@ class UsuarioController
                         'descripcion' => $descripcion ?: null,
                         'documento_legal_path' => null,
                         'verificada' => 1,
+                    ];
+                }
+            } elseif ($tipo === 'emprendimiento') {
+                $representante = trim($_POST['representante'] ?? '');
+                $ci = trim($_POST['ci'] ?? $_POST['nit'] ?? '');
+                $rubro = trim($_POST['rubro_emprendimiento'] ?? '');
+                $descripcion = trim($_POST['descripcion_empresa'] ?? '');
+
+                // Procesamiento de foto del puesto o imagen (opcional con imagen por defecto)
+                $roePath = 'uploads/roe/roe_default.png';
+                if (isset($_FILES['roe_archivo']) && $_FILES['roe_archivo']['error'] === UPLOAD_ERR_OK) {
+                    $subido = subirArchivo('roe_archivo', 'roe', 'roe');
+                    if ($subido === false) {
+                        $error = 'La foto del puesto o imagen del emprendimiento debe ser una imagen válida (JPG, PNG) y no superar los 5MB.';
+                    } elseif ($subido !== null) {
+                        $roePath = 'uploads/' . $subido;
+                    }
+                } elseif (!empty($_POST['roe_actual'])) {
+                    $roePath = trim($_POST['roe_actual']);
+                }
+
+                if ($representante === '') {
+                    $error = 'El nombre del emprendedor(a) o responsable es obligatorio.';
+                } elseif ($descripcion === '') {
+                    $error = 'Por favor, ingresa una descripción de las actividades de tu emprendimiento.';
+                } else {
+                    $descFinal = '';
+                    if ($rubro !== '') {
+                        $descFinal .= "Rubro: $rubro. ";
+                    }
+                    $descFinal .= $descripcion;
+
+                    $datosEmprendimiento = [
+                        'nombre'        => $nombre,
+                        'representante' => $representante,
+                        'rubro'         => $rubro ?: 'General',
+                        'ci'            => $ci ?: null,
+                        'correo'        => $correo,
+                        'contrasena'    => $hashContrasena,
+                        'telefono'      => $telefono,
+                        'foto_puesto'   => $roePath,
+                        'descripcion'   => $descripcion,
+                        'verificado'    => 1,
+                    ];
+
+                    $datosEmpresa = [
+                        'nombre'        => $nombre,
+                        'tipo_cuenta'   => 'emprendimiento',
+                        'representante' => $representante,
+                        'nit'           => $ci ?: null,
+                        'roe'           => $roePath,
+                        'correo'        => $correo,
+                        'contrasena'    => $hashContrasena,
+                        'telefono'      => $telefono,
+                        'descripcion'   => trim($descFinal) ?: null,
+                        'documento_legal_path' => null,
+                        'verificada'    => 1,
                     ];
                 }
             } else {
@@ -200,7 +283,37 @@ class UsuarioController
             return;
         }
 
-        if ($tipo === 'empresa') {
+        if ($tipo === 'emprendimiento') {
+            try {
+                // Guardar en la tabla emprendimientos
+                $nuevoId = $modeloEmprendimiento->crear($datosEmprendimiento);
+
+                // Sincronizar en empresas para compatibilidad relacional
+                $datosEmpresa['id'] = $nuevoId;
+                $modeloEmpresa->crearConId($datosEmpresa);
+
+                session_regenerate_id(true);
+                $_SESSION['usuario_id'] = $nuevoId;
+                $_SESSION['usuario'] = $nombre;
+                $_SESSION['correo'] = $correo;
+                $_SESSION['tipo'] = 'empresa';
+                $_SESSION['subtipo'] = 'emprendimiento';
+                $_SESSION['es_menor'] = 0;
+                $_SESSION['representante'] = $representante ?: null;
+                $_SESSION['tabla_usuario'] = 'emprendimientos';
+
+                header('Location: ban.php?pagina=panel_empresa');
+                exit;
+            } catch (PDOException $errorBase) {
+                error_log('Error registro emprendimiento: ' . $errorBase->getMessage());
+                vista('registro', [
+                    'tipo' => 'emprendimiento',
+                    'error' => 'No se pudo completar el registro del emprendimiento. Verifica los datos o intenta nuevamente.',
+                    'form' => $_POST,
+                ]);
+                return;
+            }
+        } elseif ($tipo === 'empresa') {
             try {
                 $modeloEmpresa->crear($datosEmpresa);
                 $nuevoId = (int) $conexion->lastInsertId();
@@ -210,6 +323,7 @@ class UsuarioController
                 $_SESSION['usuario'] = $nombre;
                 $_SESSION['correo'] = $correo;
                 $_SESSION['tipo'] = 'empresa';
+                $_SESSION['subtipo'] = 'empresa';
                 $_SESSION['es_menor'] = 0;
                 $_SESSION['representante'] = $representante ?: null;
                 $_SESSION['tabla_usuario'] = 'empresas';

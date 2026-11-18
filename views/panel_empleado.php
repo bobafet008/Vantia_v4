@@ -202,7 +202,9 @@
 
           <div>
             <label for="pass_nueva" style="font-weight:bold; font-size:0.85rem;">Nueva contraseña (mínimo 6 caracteres) *</label>
-            <input type="password" id="pass_nueva" name="nueva_contrasena" required minlength="6" placeholder="Mínimo 6 caracteres" style="margin-top:4px;">
+            <input type="password" id="pass_nueva" name="nueva_contrasena" required minlength="6" placeholder="Mínimo 6 caracteres con mayúscula, minúscula, número y símbolo" style="margin-top:4px;">
+            <small style="display:block; color:var(--gris); margin-top:2px;">Debe incluir al menos 1 mayúscula, 1 minúscula, 1 número y 1 carácter especial.</small>
+            <div id="errorPolicyPanel" class="mensaje-error" style="display:none; margin-top:6px; font-size:12px;"></div>
           </div>
 
           <div>
@@ -246,6 +248,42 @@ document.addEventListener('DOMContentLoaded', function() {
   const passNueva = document.getElementById('pass_nueva');
   const passConfirm = document.getElementById('pass_confirmar');
   const errorPass = document.getElementById('errorMismatchPanel');
+  const errorPolicy = document.getElementById('errorPolicyPanel');
+
+  function validarPolitica() {
+    if (!passNueva) return true;
+    const val = passNueva.value;
+    if (!val) {
+      if (errorPolicy) errorPolicy.style.display = 'none';
+      passNueva.setCustomValidity('');
+      return true;
+    }
+    const tieneMayus = /[A-Z]/.test(val);
+    const tieneMinus = /[a-z]/.test(val);
+    const tieneNum = /[0-9]/.test(val);
+    const tieneEspecial = /[^a-zA-Z0-9]/.test(val);
+
+    let faltantes = [];
+    if (!tieneMayus) faltantes.push('1 mayúscula');
+    if (!tieneMinus) faltantes.push('1 minúscula');
+    if (!tieneNum) faltantes.push('1 número');
+    if (!tieneEspecial) faltantes.push('1 carácter especial');
+    if (val.length < 6) faltantes.push('mínimo 6 caracteres');
+
+    if (faltantes.length > 0) {
+      const msg = 'La contraseña requiere: ' + faltantes.join(', ') + '.';
+      if (errorPolicy) {
+        errorPolicy.textContent = msg;
+        errorPolicy.style.display = 'block';
+      }
+      passNueva.setCustomValidity(msg);
+      return false;
+    } else {
+      if (errorPolicy) errorPolicy.style.display = 'none';
+      passNueva.setCustomValidity('');
+      return true;
+    }
+  }
 
   function validarCoincidencia() {
     if (passConfirm.value && passNueva.value !== passConfirm.value) {
@@ -260,13 +298,21 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   if (passNueva && passConfirm) {
-    passNueva.addEventListener('input', validarCoincidencia);
+    passNueva.addEventListener('input', function() {
+      validarPolitica();
+      if (passConfirm.value) validarCoincidencia();
+    });
     passConfirm.addEventListener('input', validarCoincidencia);
   }
 
   if (formPass) {
     formPass.addEventListener('submit', function(e) {
-      if (!validarCoincidencia()) {
+      const okPol = validarPolitica();
+      const okCoin = validarCoincidencia();
+      if (!okPol) {
+        e.preventDefault();
+        passNueva.focus();
+      } else if (!okCoin) {
         e.preventDefault();
         passConfirm.focus();
       }

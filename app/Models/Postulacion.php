@@ -75,7 +75,7 @@ class Postulacion
     {
         $sql = 'SELECT p.*, e.titulo AS empleo_titulo, e.categoria, e.tipo AS empleo_tipo,
                        e.salario, e.ubicacion, emp.id AS empresa_id, emp.nombre AS empresa_nombre,
-                       emp.nit AS empresa_nit, emp.roe AS empresa_roe, 
+                       emp.nit AS empresa_nit, emp.roe AS empresa_roe, emp.tipo_cuenta AS empresa_tipo_cuenta,
                        emp.representante AS empresa_representante, emp.verificada AS empresa_verificada
                 FROM postulaciones p
                 INNER JOIN empleos e ON e.id = p.empleo_id
