@@ -8,16 +8,16 @@ USE BS_VANTIA;
 -- 1. Tabla de Usuarios Menores de 18 años (16 y 17 años)
 CREATE TABLE IF NOT EXISTS usuarios_men (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(120) NOT NULL,
-    correo VARCHAR(150) NOT NULL UNIQUE,
-    contrasena VARCHAR(255) NOT NULL,
-    telefono VARCHAR(30) DEFAULT NULL,
+    nombre VARCHAR(30) NOT NULL,
+    correo VARCHAR(50) NOT NULL UNIQUE,
+    contrasena VARCHAR(60) NOT NULL,
+    telefono BIGINT DEFAULT NULL,
     fecha_nacimiento DATE NOT NULL,
-    cv_path VARCHAR(255) DEFAULT NULL,
-    permiso_tutor_path VARCHAR(255) DEFAULT NULL,
+    cv_path VARCHAR(80) DEFAULT NULL,
+    permiso_tutor_path VARCHAR(80) DEFAULT NULL,
     baneado TINYINT(1) NOT NULL DEFAULT 0,
     baneado_hasta DATETIME DEFAULT NULL,
-    motivo_baneo VARCHAR(255) DEFAULT NULL,
+    motivo_baneo VARCHAR(80) DEFAULT NULL,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -25,11 +25,11 @@ CREATE TABLE IF NOT EXISTS usuarios_men (
 CREATE TABLE IF NOT EXISTS tutores (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_men_id INT NOT NULL,
-    nombre VARCHAR(100) NOT NULL,
-    ci VARCHAR(30) DEFAULT NULL,
-    correo VARCHAR(150) DEFAULT NULL,
-    telefono VARCHAR(30) NOT NULL,
-    relacion VARCHAR(50) NOT NULL DEFAULT 'Tutor legal',
+    nombre VARCHAR(30) NOT NULL,
+    ci VARCHAR(15) DEFAULT NULL,
+    correo VARCHAR(50) DEFAULT NULL,
+    telefono BIGINT NOT NULL,
+    relacion VARCHAR(25) NOT NULL DEFAULT 'Tutor legal',
     creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uk_tutor_usuario_men (usuario_men_id),
     CONSTRAINT fk_tutores_usuario_men FOREIGN KEY (usuario_men_id) REFERENCES usuarios_men(id) ON DELETE CASCADE
@@ -38,16 +38,16 @@ CREATE TABLE IF NOT EXISTS tutores (
 -- 3. Tabla de Usuarios Mayores de 18 años y Administradores
 CREATE TABLE IF NOT EXISTS usuarios_may (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(120) NOT NULL,
-    correo VARCHAR(150) NOT NULL UNIQUE,
-    contrasena VARCHAR(255) NOT NULL,
+    nombre VARCHAR(30) NOT NULL,
+    correo VARCHAR(50) NOT NULL UNIQUE,
+    contrasena VARCHAR(60) NOT NULL,
     tipo ENUM('empleado', 'admin') NOT NULL DEFAULT 'empleado',
-    telefono VARCHAR(30) DEFAULT NULL,
+    telefono BIGINT DEFAULT NULL,
     fecha_nacimiento DATE DEFAULT NULL,
-    cv_path VARCHAR(255) DEFAULT NULL,
+    cv_path VARCHAR(80) DEFAULT NULL,
     baneado TINYINT(1) NOT NULL DEFAULT 0,
     baneado_hasta DATETIME DEFAULT NULL,
-    motivo_baneo VARCHAR(255) DEFAULT NULL,
+    motivo_baneo VARCHAR(80) DEFAULT NULL,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -70,59 +70,63 @@ SELECT
 FROM usuarios_men un
 LEFT JOIN tutores t ON t.usuario_men_id = un.id;
 
--- 4. Tabla de Empresas (Organizaciones con NIT y ROE)
+-- 4. Tabla de Empresas (Organizaciones formales con NIT y ROE)
 CREATE TABLE IF NOT EXISTS empresas (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(150) NOT NULL,
-    tipo_cuenta VARCHAR(30) NOT NULL DEFAULT 'empresa',
-    nombre_empresa VARCHAR(150) GENERATED ALWAYS AS (nombre) VIRTUAL,
-    nit VARCHAR(50) DEFAULT NULL,
-    roe VARCHAR(255) NOT NULL,
-    representante VARCHAR(150) NOT NULL,
-    telefono VARCHAR(30) NOT NULL,
-    correo VARCHAR(150) NOT NULL UNIQUE,
-    email VARCHAR(150) GENERATED ALWAYS AS (correo) VIRTUAL,
-    contrasena VARCHAR(255) NOT NULL,
-    password VARCHAR(255) GENERATED ALWAYS AS (contrasena) VIRTUAL,
+    nombre VARCHAR(30) NOT NULL,
+    tipo_cuenta VARCHAR(20) NOT NULL DEFAULT 'empresa',
+    nombre_empresa VARCHAR(50) GENERATED ALWAYS AS (nombre) VIRTUAL,
+    nit BIGINT DEFAULT NULL,
+    roe VARCHAR(80) NOT NULL,
+    representante VARCHAR(40) NOT NULL,
+    telefono BIGINT NOT NULL,
+    correo VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(50) GENERATED ALWAYS AS (correo) VIRTUAL,
+    contrasena VARCHAR(60) NOT NULL,
+    password VARCHAR(60) GENERATED ALWAYS AS (contrasena) VIRTUAL,
     descripcion TEXT DEFAULT NULL,
-    documento_legal_path VARCHAR(255) DEFAULT NULL,
+    documento_legal_path VARCHAR(80) DEFAULT NULL,
     verificada TINYINT(1) NOT NULL DEFAULT 1,
     baneado TINYINT(1) NOT NULL DEFAULT 0,
     baneado_hasta DATETIME DEFAULT NULL,
-    motivo_baneo VARCHAR(255) DEFAULT NULL,
+    motivo_baneo VARCHAR(80) DEFAULT NULL,
     creada_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 5. Tabla de Emprendimientos (Negocios independientes y proyectos)
+-- 4.1 Tabla de Emprendimientos (Negocios e iniciativas emergentes con Titular y CI)
 CREATE TABLE IF NOT EXISTS emprendimientos (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(150) NOT NULL,
-    representante VARCHAR(150) NOT NULL,
-    rubro VARCHAR(100) NOT NULL,
-    ci VARCHAR(50) DEFAULT NULL,
-    correo VARCHAR(150) NOT NULL UNIQUE,
-    contrasena VARCHAR(255) NOT NULL,
-    telefono VARCHAR(30) NOT NULL,
-    foto_puesto VARCHAR(255) NOT NULL DEFAULT 'uploads/roe/roe_default.png',
-    descripcion TEXT NOT NULL,
-    verificado TINYINT(1) NOT NULL DEFAULT 1,
+    nombre VARCHAR(30) NOT NULL,
+    nombre_emprendimiento VARCHAR(50) GENERATED ALWAYS AS (nombre) VIRTUAL,
+    rubro VARCHAR(30) NOT NULL,
+    titular_nombre VARCHAR(30) NOT NULL,
+    titular_ci BIGINT NOT NULL,
+    telefono BIGINT NOT NULL,
+    correo VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(50) GENERATED ALWAYS AS (correo) VIRTUAL,
+    contrasena VARCHAR(60) NOT NULL,
+    password VARCHAR(60) GENERATED ALWAYS AS (contrasena) VIRTUAL,
+    descripcion TEXT DEFAULT NULL,
+    logo_path VARCHAR(80) DEFAULT NULL,
+    documento_legal_path VARCHAR(80) DEFAULT NULL,
+    verificada TINYINT(1) NOT NULL DEFAULT 1,
     baneado TINYINT(1) NOT NULL DEFAULT 0,
     baneado_hasta DATETIME DEFAULT NULL,
-    motivo_baneo VARCHAR(255) DEFAULT NULL,
-    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    motivo_baneo VARCHAR(80) DEFAULT NULL,
+    creada_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 6. Tabla de Empleos / Vacantes
+-- 5. Tabla de Empleos / Vacantes
 CREATE TABLE IF NOT EXISTS empleos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     empresa_id INT NOT NULL,
-    titulo VARCHAR(150) NOT NULL,
-    categoria VARCHAR(80) NOT NULL,
+    titulo VARCHAR(40) NOT NULL,
+    categoria VARCHAR(30) NOT NULL,
     tipo ENUM('medio_tiempo', 'practicas', 'fines_semana', 'remoto') NOT NULL,
     descripcion TEXT NOT NULL,
     requisitos TEXT DEFAULT NULL,
-    salario VARCHAR(50) DEFAULT NULL,
-    ubicacion VARCHAR(120) DEFAULT NULL,
+    salario BIGINT DEFAULT NULL,
+    ubicacion VARCHAR(60) DEFAULT NULL,
     activo TINYINT(1) NOT NULL DEFAULT 1,
     creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX (empresa_id),
@@ -161,11 +165,11 @@ CREATE TABLE IF NOT EXISTS calificaciones (
 -- 8. Tabla de Usuarios Administradores
 CREATE TABLE IF NOT EXISTS usuarios_admin (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(120) NOT NULL,
-    correo VARCHAR(150) NOT NULL UNIQUE,
-    contrasena VARCHAR(255) NOT NULL,
-    telefono VARCHAR(30) DEFAULT NULL,
-    cargo VARCHAR(100) NOT NULL DEFAULT 'Administrador General',
+    nombre VARCHAR(30) NOT NULL,
+    correo VARCHAR(50) NOT NULL UNIQUE,
+    contrasena VARCHAR(60) NOT NULL,
+    telefono BIGINT DEFAULT NULL,
+    cargo VARCHAR(35) NOT NULL DEFAULT 'Administrador General',
     activo TINYINT(1) NOT NULL DEFAULT 1,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -177,7 +181,7 @@ VALUES (
     'Administrador General',
     'admin@vantia.com',
     '$2y$10$Q58KCi7JnxX7ugFBKuizP.Y.CUdsUbgpJ6RJ7lC63Doy8Kmbv5Ayi',
-    '70000000',
+    70000000,
     'Administrador General',
     1
 )
@@ -186,7 +190,7 @@ ON DUPLICATE KEY UPDATE activo = 1;
 -- 9. Tabla de Control de Intentos Fallidos y Bloqueo de Correos / Gmail
 CREATE TABLE IF NOT EXISTS bloqueos_correo (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    correo VARCHAR(150) NOT NULL UNIQUE,
+    correo VARCHAR(50) NOT NULL UNIQUE,
     intentos INT NOT NULL DEFAULT 0,
     bloqueado TINYINT(1) NOT NULL DEFAULT 0,
     bloqueado_en DATETIME DEFAULT NULL,

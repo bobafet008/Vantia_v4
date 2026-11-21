@@ -1,7 +1,19 @@
-DirectoryIndex ban.php
 Options -Indexes
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteRule ^index\.php(.*)$ ban.php$1 [QSA,L]
+    RewriteBase /vantia_v4/
+
+    RewriteCond %{THE_REQUEST} \s/+vantia_v4/public/ban\.php[?\s] [NC]
+    RewriteRule ^public/ban\.php$ ban.php [R=301,L,QSA]
+
+    RewriteCond %{THE_REQUEST} \s/+vantia_v4/public/([^\s?]*) [NC]
+    RewriteRule ^public/(.*)$ $1 [R=301,L]
+
+    RewriteRule ^css/(.*)$ public/css/$1 [L]
+    RewriteRule ^js/(.*)$ public/js/$1 [L]
+    RewriteRule ^img/(.*)$ public/img/$1 [L]
+    RewriteRule ^assets/(.*)$ public/assets/$1 [L]
 </IfModule>
+
+DirectoryIndex index.php ban.php

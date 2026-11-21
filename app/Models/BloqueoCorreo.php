@@ -14,7 +14,7 @@ class BloqueoCorreo
         try {
             $sql = "CREATE TABLE IF NOT EXISTS bloqueos_correo (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                correo VARCHAR(150) NOT NULL UNIQUE,
+                correo VARCHAR(50) NOT NULL UNIQUE,
                 intentos INT NOT NULL DEFAULT 0,
                 bloqueado TINYINT(1) NOT NULL DEFAULT 0,
                 bloqueado_en DATETIME DEFAULT NULL,

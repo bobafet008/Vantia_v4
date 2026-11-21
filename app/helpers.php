@@ -94,10 +94,11 @@ function rutaArchivo($ruta)
     if (str_starts_with($ruta, 'http://') || str_starts_with($ruta, 'https://') || str_starts_with($ruta, 'data:')) {
         return $ruta;
     }
-    if (str_starts_with($ruta, 'uploads/')) {
-        return '../' . $ruta;
+    $archivo = ltrim(preg_replace('#^(\.\./)?uploads/#', '', (string) $ruta), '/');
+    if (str_contains($_SERVER['REQUEST_URI'] ?? '', '/public/')) {
+        return '../uploads/' . $archivo;
     }
-    return '../uploads/' . ltrim($ruta, '/');
+    return 'uploads/' . $archivo;
 }
 
 // Elimina físicamente un archivo de la carpeta uploads si existe

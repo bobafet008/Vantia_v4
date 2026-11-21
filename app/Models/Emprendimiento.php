@@ -14,19 +14,19 @@ class Emprendimiento
         try {
             $sql = "CREATE TABLE IF NOT EXISTS emprendimientos (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                nombre VARCHAR(150) NOT NULL,
-                representante VARCHAR(150) NOT NULL,
-                rubro VARCHAR(100) NOT NULL,
-                ci VARCHAR(50) DEFAULT NULL,
-                correo VARCHAR(150) NOT NULL UNIQUE,
-                contrasena VARCHAR(255) NOT NULL,
-                telefono VARCHAR(30) NOT NULL,
-                foto_puesto VARCHAR(255) NOT NULL DEFAULT 'uploads/roe/roe_default.png',
+                nombre VARCHAR(30) NOT NULL,
+                representante VARCHAR(40) NOT NULL,
+                rubro VARCHAR(30) NOT NULL,
+                ci BIGINT DEFAULT NULL,
+                correo VARCHAR(50) NOT NULL UNIQUE,
+                contrasena VARCHAR(60) NOT NULL,
+                telefono BIGINT NOT NULL,
+                foto_puesto VARCHAR(80) NOT NULL DEFAULT 'uploads/roe/roe_default.png',
                 descripcion TEXT NOT NULL,
                 verificado TINYINT(1) NOT NULL DEFAULT 1,
                 baneado TINYINT(1) NOT NULL DEFAULT 0,
                 baneado_hasta DATETIME DEFAULT NULL,
-                motivo_baneo VARCHAR(255) DEFAULT NULL,
+                motivo_baneo VARCHAR(80) DEFAULT NULL,
                 creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
             $this->conexion->exec($sql);

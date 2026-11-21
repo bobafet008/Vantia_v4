@@ -14,7 +14,7 @@ class Empresa
         try {
             $col = $this->conexion->query("SHOW COLUMNS FROM empresas LIKE 'tipo_cuenta'")->fetch();
             if (!$col) {
-                $this->conexion->exec("ALTER TABLE empresas ADD COLUMN tipo_cuenta VARCHAR(30) NOT NULL DEFAULT 'empresa' AFTER nombre");
+                $this->conexion->exec("ALTER TABLE empresas ADD COLUMN tipo_cuenta VARCHAR(20) NOT NULL DEFAULT 'empresa' AFTER nombre");
             }
         } catch (Exception $e) {
             // Silencioso

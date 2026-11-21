@@ -14,11 +14,11 @@ class Tutor
         try {
             $colCi = $this->conexion->query("SHOW COLUMNS FROM tutores LIKE 'ci'")->fetch();
             if (!$colCi) {
-                $this->conexion->exec("ALTER TABLE tutores ADD COLUMN ci VARCHAR(30) NULL AFTER nombre");
+                $this->conexion->exec("ALTER TABLE tutores ADD COLUMN ci VARCHAR(15) NULL AFTER nombre");
             }
             $colCorreo = $this->conexion->query("SHOW COLUMNS FROM tutores LIKE 'correo'")->fetch();
             if (!$colCorreo) {
-                $this->conexion->exec("ALTER TABLE tutores ADD COLUMN correo VARCHAR(150) NULL AFTER ci");
+                $this->conexion->exec("ALTER TABLE tutores ADD COLUMN correo VARCHAR(50) NULL AFTER ci");
             }
         } catch (Exception $e) {
             // Continuar si no se tienen permisos directos de ALTER
