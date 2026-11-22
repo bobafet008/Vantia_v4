@@ -70,6 +70,21 @@ class BloqueoCorreo
             $sqlBloq = 'UPDATE bloqueos_correo SET bloqueado = 1, bloqueado_en = NOW() WHERE correo = :correo';
             $stmtBloq = $this->conexion->prepare($sqlBloq);
             $stmtBloq->execute(['correo' => $correoNorm]);
+
+            try {
+                require_once __DIR__ . '/RegistroAdmin.php';
+                $regAdmin = new RegistroAdmin($this->conexion);
+                $regAdmin->registrar(
+                    null,
+                    'bloqueo_correo',
+                    'Bloqueo tras 3 intentos fallidos',
+                    'Correo bloqueado automáticamente al alcanzar 3 intentos fallidos de contraseña',
+                    $correoNorm
+                );
+            } catch (Exception $e) {
+                // Silencioso
+            }
+
             return ['intentos' => $intentos, 'bloqueado' => true, 'restantes' => 0];
         }
 

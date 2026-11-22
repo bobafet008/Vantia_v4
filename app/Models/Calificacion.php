@@ -10,19 +10,33 @@ class Calificacion
 
     public function guardar($empresaId, $candidatoId, $candidatoTipo = 'mayor', $puntuacion, $comentario = null)
     {
-        $sql = 'INSERT INTO calificaciones (empresa_id, candidato_id, candidato_tipo, puntuacion, comentario, creado_en)
-                VALUES (:empresa_id, :candidato_id, :candidato_tipo, :puntuacion, :comentario, NOW())
+        $usuarioMayId = ($candidatoTipo === 'mayor') ? (int) $candidatoId : null;
+        $usuarioMenId = ($candidatoTipo === 'menor') ? (int) $candidatoId : null;
+
+        $stmtEmp = $this->conexion->prepare('SELECT id FROM emprendimientos WHERE id = :id LIMIT 1');
+        $stmtEmp->execute(['id' => (int) $empresaId]);
+        $esEmprendimiento = $stmtEmp->fetchColumn();
+        $emprendimientoId = $esEmprendimiento ? (int) $empresaId : null;
+
+        $sql = 'INSERT INTO calificaciones (empresa_id, emprendimiento_id, usuario_may_id, usuario_men_id, candidato_id, candidato_tipo, puntuacion, comentario, creado_en)
+                VALUES (:empresa_id, :emprendimiento_id, :usuario_may_id, :usuario_men_id, :candidato_id, :candidato_tipo, :puntuacion, :comentario, NOW())
                 ON DUPLICATE KEY UPDATE 
-                    puntuacion = VALUES(puntuacion), 
-                    comentario = VALUES(comentario), 
-                    creado_en = NOW()';
+                    emprendimiento_id = VALUES(emprendimiento_id),
+                    usuario_may_id    = VALUES(usuario_may_id),
+                    usuario_men_id    = VALUES(usuario_men_id),
+                    puntuacion        = VALUES(puntuacion), 
+                    comentario        = VALUES(comentario), 
+                    creado_en         = NOW()';
         $consulta = $this->conexion->prepare($sql);
         return $consulta->execute([
-            'empresa_id'     => (int) $empresaId,
-            'candidato_id'   => (int) $candidatoId,
-            'candidato_tipo' => $candidatoTipo === 'menor' ? 'menor' : 'mayor',
-            'puntuacion'     => (int) $puntuacion,
-            'comentario'     => $comentario,
+            'empresa_id'        => (int) $empresaId,
+            'emprendimiento_id' => $emprendimientoId,
+            'usuario_may_id'    => $usuarioMayId,
+            'usuario_men_id'    => $usuarioMenId,
+            'candidato_id'      => (int) $candidatoId,
+            'candidato_tipo'    => $candidatoTipo === 'menor' ? 'menor' : 'mayor',
+            'puntuacion'        => (int) $puntuacion,
+            'comentario'        => $comentario,
         ]);
     }
 

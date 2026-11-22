@@ -10,14 +10,27 @@ class Postulacion
 
     public function crear($empleoId, $candidatoId, $candidatoTipo = 'mayor', $mensaje = null)
     {
-        $sql = 'INSERT INTO postulaciones (empleo_id, candidato_id, candidato_tipo, mensaje, estado)
-                VALUES (:empleo_id, :candidato_id, :candidato_tipo, :mensaje, "pendiente")';
+        $stmtEmpresa = $this->conexion->prepare('SELECT empresa_id, emprendimiento_id FROM empleos WHERE id = :empleo_id LIMIT 1');
+        $stmtEmpresa->execute(['empleo_id' => (int) $empleoId]);
+        $empleoData = $stmtEmpresa->fetch(PDO::FETCH_ASSOC);
+        $empresaId = (int) ($empleoData['empresa_id'] ?? 0);
+        $emprendimientoId = !empty($empleoData['emprendimiento_id']) ? (int) $empleoData['emprendimiento_id'] : null;
+
+        $usuarioMayId = ($candidatoTipo === 'mayor') ? (int) $candidatoId : null;
+        $usuarioMenId = ($candidatoTipo === 'menor') ? (int) $candidatoId : null;
+
+        $sql = 'INSERT INTO postulaciones (empleo_id, empresa_id, emprendimiento_id, usuario_may_id, usuario_men_id, candidato_id, candidato_tipo, mensaje, estado)
+                VALUES (:empleo_id, :empresa_id, :emprendimiento_id, :usuario_may_id, :usuario_men_id, :candidato_id, :candidato_tipo, :mensaje, "pendiente")';
         $consulta = $this->conexion->prepare($sql);
         return $consulta->execute([
-            'empleo_id'      => (int) $empleoId,
-            'candidato_id'   => (int) $candidatoId,
-            'candidato_tipo' => $candidatoTipo === 'menor' ? 'menor' : 'mayor',
-            'mensaje'        => $mensaje,
+            'empleo_id'         => (int) $empleoId,
+            'empresa_id'        => $empresaId,
+            'emprendimiento_id' => $emprendimientoId,
+            'usuario_may_id'    => $usuarioMayId,
+            'usuario_men_id'    => $usuarioMenId,
+            'candidato_id'      => (int) $candidatoId,
+            'candidato_tipo'    => $candidatoTipo === 'menor' ? 'menor' : 'mayor',
+            'mensaje'           => $mensaje,
         ]);
     }
 

@@ -155,3 +155,42 @@ function mensajeBaneo($cuenta)
     $hasta = date('d/m/Y H:i', strtotime($cuenta['baneado_hasta']));
     return 'Tu cuenta se encuentra suspendida temporalmente hasta el ' . $hasta . '.' . $motivo;
 }
+
+// Formatea fechas para agrupar visualmente bitácoras y registros del sistema
+function formatoFechaGrupo($fecha)
+{
+    if (empty($fecha)) {
+        return 'Fecha no especificada';
+    }
+    $timestamp = is_numeric($fecha) ? (int) $fecha : strtotime((string) $fecha);
+    if (!$timestamp) {
+        return (string) $fecha;
+    }
+
+    $hoy = date('Y-m-d');
+    $ayer = date('Y-m-d', strtotime('-1 day'));
+    $diaYmd = date('Y-m-d', $timestamp);
+
+    $meses = [
+        1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
+        5 => 'Mayo', 6 => 'Junio', 7 => 'Julio', 8 => 'Agosto',
+        9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
+    ];
+    $dias = [
+        0 => 'Domingo', 1 => 'Lunes', 2 => 'Martes', 3 => 'Miércoles',
+        4 => 'Jueves', 5 => 'Viernes', 6 => 'Sábado'
+    ];
+
+    $diaNom = $dias[(int) date('w', $timestamp)];
+    $diaNum = date('j', $timestamp);
+    $mesNom = $meses[(int) date('n', $timestamp)];
+    $anio = date('Y', $timestamp);
+
+    if ($diaYmd === $hoy) {
+        return "Hoy · $diaNom, $diaNum de $mesNom de $anio";
+    } elseif ($diaYmd === $ayer) {
+        return "Ayer · $diaNom, $diaNum de $mesNom de $anio";
+    } else {
+        return "$diaNom, $diaNum de $mesNom de $anio";
+    }
+}

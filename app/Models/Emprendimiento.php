@@ -26,7 +26,7 @@ class Emprendimiento
                 verificado TINYINT(1) NOT NULL DEFAULT 1,
                 baneado TINYINT(1) NOT NULL DEFAULT 0,
                 baneado_hasta DATETIME DEFAULT NULL,
-                motivo_baneo VARCHAR(80) DEFAULT NULL,
+                motivo_baneo VARCHAR(60) DEFAULT NULL,
                 creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
             $this->conexion->exec($sql);

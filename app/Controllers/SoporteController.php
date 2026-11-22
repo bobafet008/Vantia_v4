@@ -31,6 +31,30 @@ class SoporteController {
                 exit;
             }
 
+            // Guardar registro de la consulta de atención al cliente en la base de datos
+            require __DIR__ . '/../../config/database.php';
+            require_once __DIR__ . '/../Models/MensajeSoporte.php';
+            require_once __DIR__ . '/../Models/RegistroAdmin.php';
+
+            $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+            try {
+                $modeloSoporte = new MensajeSoporte($conexion);
+                $modeloSoporte->crear($nombre, $email, $rol, $asunto, $mensaje, $ip);
+
+                // Registrar en bitácora de auditoría general
+                $regAdmin = new RegistroAdmin($conexion);
+                $regAdmin->registrar(
+                    null,
+                    'soporte',
+                    'Consulta Atención al Cliente (' . substr($asunto, 0, 18) . ')',
+                    substr("Gmail de $nombre ($email): $asunto", 0, 80),
+                    $email,
+                    $ip
+                );
+            } catch (Exception $e) {
+                error_log("Error al registrar consulta de soporte: " . $e->getMessage());
+            }
+
             $config = require __DIR__ . '/../../config/mail.php';
             $correoAdmin = $config['usuario'];
 

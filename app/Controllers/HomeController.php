@@ -240,12 +240,16 @@ class HomeController
         if ($titulo === '' || $categoria === '' || $descripcion === '' || !in_array($tipo, $tiposValidos, true)) {
             $_SESSION['empleo_error'] = 'Completa los campos obligatorios y selecciona un tipo de empleo válido.';
         } else {
+            $esEmprendimiento = (($_SESSION['subtipo'] ?? '') === 'emprendimiento' || ($_SESSION['tabla_usuario'] ?? '') === 'emprendimientos');
+            $emprendimientoId = $esEmprendimiento ? (int) $_SESSION['usuario_id'] : null;
+
             $consulta = $conexion->prepare(
-                'INSERT INTO empleos (empresa_id, titulo, categoria, tipo, descripcion, requisitos, salario, ubicacion)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+                'INSERT INTO empleos (empresa_id, emprendimiento_id, titulo, categoria, tipo, descripcion, requisitos, salario, ubicacion)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
             );
             $consulta->execute([
                 (int) $_SESSION['usuario_id'],
+                $emprendimientoId,
                 $titulo,
                 $categoria,
                 $tipo,
@@ -383,6 +387,7 @@ class HomeController
         require_once __DIR__ . '/../Models/Tutor.php';
         require_once __DIR__ . '/../Models/UsuarioAdmin.php';
         require_once __DIR__ . '/../Models/BloqueoCorreo.php';
+        require_once __DIR__ . '/../Models/RegistroAdmin.php';
 
         $modeloMay = new UsuarioMay($conexion);
         $modeloMen = new UsuarioMen($conexion);
@@ -391,6 +396,7 @@ class HomeController
         $modeloTutor = new Tutor($conexion);
         $modeloAdmin = new UsuarioAdmin($conexion);
         $modeloBloqueo = new BloqueoCorreo($conexion);
+        $modeloRegistro = new RegistroAdmin($conexion);
 
         $usuariosMay = $modeloMay->obtenerTodos();
         $usuariosMen = $modeloMen->obtenerTodos();
@@ -411,6 +417,71 @@ class HomeController
         $totalMayores = $modeloMay->contarCandidatos();
         $totalAdmins = $modeloAdmin->contar();
         $totalCandidatos = $totalMenores + $totalMayores;
+        $totalUsuariosGlobal = $totalCandidatos + $totalEmpresas + $totalEmprendimientos;
+
+        // 1. Cuentas actualmente suspendidas (Baneos)
+        $sqlBaneados = "
+            SELECT id, nombre, correo, telefono, 'menor' AS tipo_entidad, 'usuarios_men' AS tabla, baneado_hasta, motivo_baneo, fecha_registro AS fecha
+            FROM usuarios_men WHERE baneado = 1
+            UNION ALL
+            SELECT id, nombre, correo, telefono, 'mayor' AS tipo_entidad, 'usuarios_may' AS tabla, baneado_hasta, motivo_baneo, fecha_registro AS fecha
+            FROM usuarios_may WHERE baneado = 1
+            UNION ALL
+            SELECT id, nombre, correo, telefono, 'empresa' AS tipo_entidad, 'empresas' AS tabla, baneado_hasta, motivo_baneo, creada_en AS fecha
+            FROM empresas WHERE baneado = 1 AND tipo_cuenta != 'emprendimiento'
+            UNION ALL
+            SELECT id, nombre, correo, telefono, 'emprendimiento' AS tipo_entidad, 'emprendimientos' AS tabla, baneado_hasta, motivo_baneo, creado_en AS fecha
+            FROM emprendimientos WHERE baneado = 1
+            ORDER BY fecha DESC
+        ";
+        $cuentasBaneadas = $conexion->query($sqlBaneados)->fetchAll(PDO::FETCH_ASSOC);
+
+        // 2. Registro cronológico de nuevos usuarios
+        $sqlNuevos = "
+            SELECT id, nombre, correo, telefono, 'menor' AS rol, 'usuarios_men' AS tabla, fecha_registro AS fecha, baneado
+            FROM usuarios_men
+            UNION ALL
+            SELECT id, nombre, correo, telefono, 'mayor' AS rol, 'usuarios_may' AS tabla, fecha_registro AS fecha, baneado
+            FROM usuarios_may
+            UNION ALL
+            SELECT id, nombre, correo, telefono, 'empresa' AS rol, 'empresas' AS tabla, creada_en AS fecha, baneado
+            FROM empresas WHERE tipo_cuenta != 'emprendimiento'
+            UNION ALL
+            SELECT id, nombre, correo, telefono, 'emprendimiento' AS rol, 'emprendimientos' AS tabla, creado_en AS fecha, baneado
+            FROM emprendimientos
+            ORDER BY fecha DESC
+            LIMIT 60
+        ";
+        $nuevosUsuarios = $conexion->query($sqlNuevos)->fetchAll(PDO::FETCH_ASSOC);
+
+        // 3. Bloqueos de correo específicamente tras fallar 3 veces la contraseña
+        $correosBloqueadosFallos = $conexion->query(
+            "SELECT * FROM bloqueos_correo WHERE intentos >= 3 OR (bloqueado = 1 AND intentos > 0) ORDER BY bloqueado_en DESC, ultimo_intento DESC"
+        )->fetchAll(PDO::FETCH_ASSOC);
+
+        // 4. Registros y bitácora del sistema y administradores
+        $registrosAdmin = $modeloRegistro->obtenerUltimos(100);
+        $registrosBaneos = $modeloRegistro->obtenerUltimos(50, 'baneo');
+        $registrosDesbaneos = $modeloRegistro->obtenerUltimos(50, 'desbaneo');
+        $totalRegistrosEventos = (int) $conexion->query('SELECT COUNT(*) FROM registros_admin')->fetchColumn();
+
+        // 5. Métricas de Reportes
+        $nuevosUltimos7Dias = (int) $conexion->query("
+            SELECT (
+                (SELECT COUNT(*) FROM usuarios_men WHERE fecha_registro >= DATE_SUB(NOW(), INTERVAL 7 DAY)) +
+                (SELECT COUNT(*) FROM usuarios_may WHERE fecha_registro >= DATE_SUB(NOW(), INTERVAL 7 DAY)) +
+                (SELECT COUNT(*) FROM empresas WHERE creada_en >= DATE_SUB(NOW(), INTERVAL 7 DAY)) +
+                (SELECT COUNT(*) FROM emprendimientos WHERE creado_en >= DATE_SUB(NOW(), INTERVAL 7 DAY))
+            ) AS total
+        ")->fetchColumn();
+
+        $empresasVerificadas = (int) $conexion->query('SELECT COUNT(*) FROM empresas WHERE verificada = 1 AND tipo_cuenta != \'emprendimiento\'')->fetchColumn();
+        $emprendimientosVerificados = (int) $conexion->query('SELECT COUNT(*) FROM emprendimientos WHERE verificado = 1')->fetchColumn();
+
+        require_once __DIR__ . '/../Models/MensajeSoporte.php';
+        $modeloSoporte = new MensajeSoporte($conexion);
+        $mensajesSoporte = $modeloSoporte->obtenerTodos(100);
+        $totalSoportePendientes = $modeloSoporte->contarPendientes();
 
         vista('panel_admin', [
             'usuariosMay' => $usuariosMay,
@@ -431,10 +502,336 @@ class HomeController
             'totalTutores' => $totalTutores,
             'totalMayores' => $totalMayores,
             'totalCandidatos' => $totalCandidatos,
+            'totalUsuariosGlobal' => $totalUsuariosGlobal,
+            'cuentasBaneadas' => $cuentasBaneadas,
+            'nuevosUsuarios' => $nuevosUsuarios,
+            'correosBloqueadosFallos' => $correosBloqueadosFallos,
+            'registrosAdmin' => $registrosAdmin,
+            'registrosBaneos' => $registrosBaneos,
+            'registrosDesbaneos' => $registrosDesbaneos,
+            'totalRegistrosEventos' => $totalRegistrosEventos,
+            'nuevosUltimos7Dias' => $nuevosUltimos7Dias,
+            'empresasVerificadas' => $empresasVerificadas,
+            'emprendimientosVerificados' => $emprendimientosVerificados,
+            'mensajesSoporte' => $mensajesSoporte,
+            'totalSoportePendientes' => $totalSoportePendientes,
             'exito' => $_SESSION['admin_exito'] ?? '',
             'error' => $_SESSION['admin_error'] ?? '',
         ]);
         unset($_SESSION['admin_exito'], $_SESSION['admin_error']);
+    }
+
+    public function panelRegistros()
+    {
+        if (empty($_SESSION['usuario_id']) || ($_SESSION['tipo'] ?? '') !== 'admin') {
+            accesoDenegado('Este panel es de uso exclusivo para Administradores de la plataforma Vantia. Tu cuenta actual no cuenta con privilegios administrativos.', 'Panel de Registros');
+        }
+
+        require __DIR__ . '/../../config/database.php';
+        require_once __DIR__ . '/../Models/UsuarioMay.php';
+        require_once __DIR__ . '/../Models/UsuarioMen.php';
+        require_once __DIR__ . '/../Models/Empresa.php';
+        require_once __DIR__ . '/../Models/Emprendimiento.php';
+        require_once __DIR__ . '/../Models/Tutor.php';
+        require_once __DIR__ . '/../Models/BloqueoCorreo.php';
+        require_once __DIR__ . '/../Models/RegistroAdmin.php';
+
+        $modeloMay = new UsuarioMay($conexion);
+        $modeloMen = new UsuarioMen($conexion);
+        $modeloEmpresa = new Empresa($conexion);
+        $modeloEmprendimiento = new Emprendimiento($conexion);
+        $modeloTutor = new Tutor($conexion);
+        $modeloBloqueo = new BloqueoCorreo($conexion);
+        $modeloRegistro = new RegistroAdmin($conexion);
+
+        $totalEmpresas = $modeloEmpresa->contar();
+        $totalEmprendimientos = $modeloEmprendimiento->contar();
+        $totalMenores = $modeloMen->contar();
+        $totalTutores = $modeloTutor->contar();
+        $totalMayores = $modeloMay->contarCandidatos();
+        $totalCandidatos = $totalMenores + $totalMayores;
+        $totalUsuariosGlobal = $totalCandidatos + $totalEmpresas + $totalEmprendimientos;
+        $totalEmpleos = (int) $conexion->query('SELECT COUNT(*) FROM empleos')->fetchColumn();
+        $totalPostulaciones = (int) $conexion->query('SELECT COUNT(*) FROM postulaciones')->fetchColumn();
+
+        // 1. Cuentas actualmente baneadas
+        $sqlBaneados = "
+            SELECT id, nombre, correo, telefono, 'menor' AS tipo_entidad, 'usuarios_men' AS tabla, baneado_hasta, motivo_baneo, fecha_registro AS fecha
+            FROM usuarios_men WHERE baneado = 1
+            UNION ALL
+            SELECT id, nombre, correo, telefono, 'mayor' AS tipo_entidad, 'usuarios_may' AS tabla, baneado_hasta, motivo_baneo, fecha_registro AS fecha
+            FROM usuarios_may WHERE baneado = 1
+            UNION ALL
+            SELECT id, nombre, correo, telefono, 'empresa' AS tipo_entidad, 'empresas' AS tabla, baneado_hasta, motivo_baneo, creada_en AS fecha
+            FROM empresas WHERE baneado = 1 AND tipo_cuenta != 'emprendimiento'
+            UNION ALL
+            SELECT id, nombre, correo, telefono, 'emprendimiento' AS tipo_entidad, 'emprendimientos' AS tabla, baneado_hasta, motivo_baneo, creado_en AS fecha
+            FROM emprendimientos WHERE baneado = 1
+            ORDER BY fecha DESC
+        ";
+        $cuentasBaneadas = $conexion->query($sqlBaneados)->fetchAll(PDO::FETCH_ASSOC);
+
+        // 2. Registro cronológico de nuevos usuarios
+        $sqlNuevos = "
+            SELECT id, nombre, correo, telefono, 'menor' AS rol, 'usuarios_men' AS tabla, fecha_registro AS fecha, baneado
+            FROM usuarios_men
+            UNION ALL
+            SELECT id, nombre, correo, telefono, 'mayor' AS rol, 'usuarios_may' AS tabla, fecha_registro AS fecha, baneado
+            FROM usuarios_may
+            UNION ALL
+            SELECT id, nombre, correo, telefono, 'empresa' AS rol, 'empresas' AS tabla, creada_en AS fecha, baneado
+            FROM empresas WHERE tipo_cuenta != 'emprendimiento'
+            UNION ALL
+            SELECT id, nombre, correo, telefono, 'emprendimiento' AS rol, 'emprendimientos' AS tabla, creado_en AS fecha, baneado
+            FROM emprendimientos
+            ORDER BY fecha DESC
+            LIMIT 80
+        ";
+        $nuevosUsuarios = $conexion->query($sqlNuevos)->fetchAll(PDO::FETCH_ASSOC);
+
+        // 3. Bloqueos de correo específicamente tras fallar 3 veces la contraseña
+        $correosBloqueadosFallos = $conexion->query(
+            "SELECT * FROM bloqueos_correo WHERE intentos >= 3 OR (bloqueado = 1 AND intentos > 0) ORDER BY bloqueado_en DESC, ultimo_intento DESC"
+        )->fetchAll(PDO::FETCH_ASSOC);
+
+        // 4. Registros y bitácora del administrador
+        $registrosAdmin = $modeloRegistro->obtenerUltimos(150);
+        $registrosBaneos = $modeloRegistro->obtenerUltimos(60, 'baneo');
+        $registrosDesbaneos = $modeloRegistro->obtenerUltimos(60, 'desbaneo');
+        $totalRegistrosEventos = (int) $conexion->query('SELECT COUNT(*) FROM registros_admin')->fetchColumn();
+
+        // 5. Métricas de Reportes
+        $nuevosUltimos7Dias = (int) $conexion->query("
+            SELECT (
+                (SELECT COUNT(*) FROM usuarios_men WHERE fecha_registro >= DATE_SUB(NOW(), INTERVAL 7 DAY)) +
+                (SELECT COUNT(*) FROM usuarios_may WHERE fecha_registro >= DATE_SUB(NOW(), INTERVAL 7 DAY)) +
+                (SELECT COUNT(*) FROM empresas WHERE creada_en >= DATE_SUB(NOW(), INTERVAL 7 DAY)) +
+                (SELECT COUNT(*) FROM emprendimientos WHERE creado_en >= DATE_SUB(NOW(), INTERVAL 7 DAY))
+            ) AS total
+        ")->fetchColumn();
+
+        $empresasVerificadas = (int) $conexion->query('SELECT COUNT(*) FROM empresas WHERE verificada = 1 AND tipo_cuenta != \'emprendimiento\'')->fetchColumn();
+        $emprendimientosVerificados = (int) $conexion->query('SELECT COUNT(*) FROM emprendimientos WHERE verificado = 1')->fetchColumn();
+
+        require_once __DIR__ . '/../Models/MensajeSoporte.php';
+        $modeloSoporte = new MensajeSoporte($conexion);
+        $mensajesSoporte = $modeloSoporte->obtenerTodos(150);
+        $totalSoportePendientes = $modeloSoporte->contarPendientes();
+
+        vista('panel_registros', [
+            'totalUsuariosGlobal' => $totalUsuariosGlobal,
+            'cuentasBaneadas' => $cuentasBaneadas,
+            'nuevosUsuarios' => $nuevosUsuarios,
+            'correosBloqueadosFallos' => $correosBloqueadosFallos,
+            'registrosAdmin' => $registrosAdmin,
+            'registrosBaneos' => $registrosBaneos,
+            'registrosDesbaneos' => $registrosDesbaneos,
+            'totalRegistrosEventos' => $totalRegistrosEventos,
+            'nuevosUltimos7Dias' => $nuevosUltimos7Dias,
+            'empresasVerificadas' => $empresasVerificadas,
+            'emprendimientosVerificados' => $emprendimientosVerificados,
+            'mensajesSoporte' => $mensajesSoporte,
+            'totalSoportePendientes' => $totalSoportePendientes,
+            'totalEmpresas' => $totalEmpresas,
+            'totalEmprendimientos' => $totalEmprendimientos,
+            'totalTutores' => $totalTutores,
+            'totalMenores' => $totalMenores,
+            'totalMayores' => $totalMayores,
+            'totalCandidatos' => $totalCandidatos,
+            'totalEmpleos' => $totalEmpleos,
+            'totalPostulaciones' => $totalPostulaciones,
+            'exito' => $_SESSION['admin_exito'] ?? '',
+            'error' => $_SESSION['admin_error'] ?? '',
+        ]);
+        unset($_SESSION['admin_exito'], $_SESSION['admin_error']);
+    }
+
+    public function pdfReporteDiario()
+    {
+        if (empty($_SESSION['usuario_id']) || ($_SESSION['tipo'] ?? '') !== 'admin') {
+            accesoDenegado('Acceso exclusivo para el administrador del sistema.', 'Panel de Reportes');
+        }
+
+        $fecha = trim($_GET['fecha'] ?? date('Y-m-d'));
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha)) {
+            $fecha = date('Y-m-d');
+        }
+
+        $tipo = trim($_GET['tipo'] ?? '');
+        $esSoloAdmin = ($tipo === 'admin' || $tipo === 'acciones_admin');
+
+        require __DIR__ . '/../../config/database.php';
+        require_once __DIR__ . '/../Models/RegistroAdmin.php';
+        require_once __DIR__ . '/../Libraries/PdfReporteDiario.php';
+
+        // 1. Nuevos usuarios registrados en la fecha
+        $nuevosUsuarios = [];
+        try {
+            $sqlMen = "SELECT id, 'menor' AS rol, nombre, correo, telefono, fecha_registro AS fecha, baneado FROM usuarios_men WHERE DATE(fecha_registro) = ? ORDER BY fecha_registro DESC";
+            $stmtMen = $conexion->prepare($sqlMen);
+            $stmtMen->execute([$fecha]);
+            $menores = $stmtMen->fetchAll(PDO::FETCH_ASSOC);
+
+            $sqlMay = "SELECT id, tipo AS rol, nombre, correo, telefono, fecha_registro AS fecha, baneado FROM usuarios_may WHERE DATE(fecha_registro) = ? AND tipo != 'admin' ORDER BY fecha_registro DESC";
+            $stmtMay = $conexion->prepare($sqlMay);
+            $stmtMay->execute([$fecha]);
+            $mayores = $stmtMay->fetchAll(PDO::FETCH_ASSOC);
+
+            $sqlEmp = "SELECT id, 'empresa' AS rol, nombre, correo, telefono, creada_en AS fecha, baneado FROM empresas WHERE DATE(creada_en) = ? ORDER BY creada_en DESC";
+            $stmtEmp = $conexion->prepare($sqlEmp);
+            $stmtEmp->execute([$fecha]);
+            $empresas = $stmtEmp->fetchAll(PDO::FETCH_ASSOC);
+
+            $sqlEmpr = "SELECT id, 'emprendimiento' AS rol, nombre, correo, telefono, creado_en AS fecha, baneado FROM emprendimientos WHERE DATE(creado_en) = ? ORDER BY creado_en DESC";
+            $stmtEmpr = $conexion->prepare($sqlEmpr);
+            $stmtEmpr->execute([$fecha]);
+            $emprendimientos = $stmtEmpr->fetchAll(PDO::FETCH_ASSOC);
+
+            $nuevosUsuarios = array_merge($menores, $mayores, $empresas, $emprendimientos);
+            usort($nuevosUsuarios, function ($a, $b) {
+                return strcmp($b['fecha'] ?? '', $a['fecha'] ?? '');
+            });
+        } catch (Exception $e) {}
+
+        // 2. Baneos registrados en la fecha (con join para obtener nombre del admin responsable)
+        $baneos = [];
+        try {
+            $sqlBaneos = "SELECT r.*, a.nombre AS admin_nombre 
+                          FROM registros_admin r
+                          LEFT JOIN usuarios_admin a ON a.id = r.admin_id
+                          WHERE r.tipo_evento = 'baneo' AND DATE(r.fecha_registro) = ? 
+                          ORDER BY r.fecha_registro DESC";
+            $stmtBaneos = $conexion->prepare($sqlBaneos);
+            $stmtBaneos->execute([$fecha]);
+            $baneos = $stmtBaneos->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {}
+
+        // 3. Desbaneos registrados en la fecha
+        $desbaneos = [];
+        try {
+            $sqlDesbaneos = "SELECT r.*, a.nombre AS admin_nombre 
+                             FROM registros_admin r
+                             LEFT JOIN usuarios_admin a ON a.id = r.admin_id
+                             WHERE r.tipo_evento = 'desbaneo' AND DATE(r.fecha_registro) = ? 
+                             ORDER BY r.fecha_registro DESC";
+            $stmtDesbaneos = $conexion->prepare($sqlDesbaneos);
+            $stmtDesbaneos->execute([$fecha]);
+            $desbaneos = $stmtDesbaneos->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {}
+
+        // 4. Bloqueos de correo tras 3 contrasenas en la fecha
+        $bloqueos3 = [];
+        try {
+            $sqlBloq = "SELECT * FROM bloqueos_correo WHERE (DATE(bloqueado_en) = ? OR DATE(ultimo_intento) = ?) AND (bloqueado = 1 OR intentos >= 3) ORDER BY id DESC";
+            $stmtBloq = $conexion->prepare($sqlBloq);
+            $stmtBloq->execute([$fecha, $fecha]);
+            $bloqueos3 = $stmtBloq->fetchAll(PDO::FETCH_ASSOC);
+
+            $sqlBloqAdmin = "SELECT r.*, a.nombre AS admin_nombre 
+                             FROM registros_admin r
+                             LEFT JOIN usuarios_admin a ON a.id = r.admin_id
+                             WHERE r.tipo_evento = 'bloqueo_correo' AND DATE(r.fecha_registro) = ? 
+                             ORDER BY r.fecha_registro DESC";
+            $stmtBloqAdmin = $conexion->prepare($sqlBloqAdmin);
+            $stmtBloqAdmin->execute([$fecha]);
+            $bloqAdmin = $stmtBloqAdmin->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($bloqAdmin as $ba) {
+                $existe = false;
+                foreach ($bloqueos3 as $b3) {
+                    if (strtolower(trim($b3['correo'] ?? '')) === strtolower(trim($ba['usuario_afectado'] ?? ''))) {
+                        $existe = true;
+                        break;
+                    }
+                }
+                if (!$existe) {
+                    $bloqueos3[] = [
+                        'bloqueado_en' => $ba['fecha_registro'],
+                        'correo' => $ba['usuario_afectado'],
+                        'intentos' => 3,
+                        'bloqueado' => 1
+                    ];
+                }
+            }
+        } catch (Exception $e) {}
+
+        // 5. Registros y auditoria completa de acciones del administrador en la fecha
+        $registrosAdmin = [];
+        try {
+            $sqlAdmin = "SELECT r.*, a.nombre AS admin_nombre, a.correo AS admin_correo 
+                         FROM registros_admin r
+                         LEFT JOIN usuarios_admin a ON a.id = r.admin_id
+                         WHERE DATE(r.fecha_registro) = ? 
+                         ORDER BY r.fecha_registro DESC";
+            $stmtAdmin = $conexion->prepare($sqlAdmin);
+            $stmtAdmin->execute([$fecha]);
+            $registrosAdmin = $stmtAdmin->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {}
+
+        // 6. Consultas y correos recibidos en Atención al Cliente en la fecha
+        $mensajesSoporte = [];
+        try {
+            $sqlSoporte = "SELECT * FROM mensajes_soporte WHERE DATE(creado_en) = ? ORDER BY creado_en DESC";
+            $stmtSoporte = $conexion->prepare($sqlSoporte);
+            $stmtSoporte->execute([$fecha]);
+            $mensajesSoporte = $stmtSoporte->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {}
+
+        $adminNombre = $_SESSION['usuario'] ?? 'Administrador Central';
+
+        $pdf = new PdfReporteDiario($fecha, [
+            'nuevosUsuarios' => $nuevosUsuarios,
+            'baneos' => $baneos,
+            'desbaneos' => $desbaneos,
+            'bloqueos3' => $bloqueos3,
+            'registrosAdmin' => $registrosAdmin,
+            'mensajesSoporte' => $mensajesSoporte,
+        ], $adminNombre, $esSoloAdmin ? 'admin' : 'diario');
+
+        $descargar = !empty($_GET['descargar']);
+        $nombreArchivo = ($esSoloAdmin ? "acciones_admin_" : "reporte_registros_") . $fecha . ".pdf";
+        $pdf->output($nombreArchivo, !$descargar);
+        exit;
+    }
+
+    public function cambiarEstadoSoporte()
+    {
+        if (empty($_SESSION['usuario_id']) || ($_SESSION['tipo'] ?? '') !== 'admin') {
+            accesoDenegado('Acción exclusiva para administradores.', 'Panel de Reportes');
+        }
+
+        $id = (int) ($_POST['id'] ?? 0);
+        $nuevoEstado = trim($_POST['estado'] ?? 'respondido');
+        if (!in_array($nuevoEstado, ['pendiente', 'respondido'], true)) {
+            $nuevoEstado = 'respondido';
+        }
+
+        require __DIR__ . '/../../config/database.php';
+        require_once __DIR__ . '/../Models/MensajeSoporte.php';
+        require_once __DIR__ . '/../Models/RegistroAdmin.php';
+
+        if ($id > 0) {
+            $modeloSoporte = new MensajeSoporte($conexion);
+            $modeloSoporte->cambiarEstado($id, $nuevoEstado);
+
+            try {
+                $item = $conexion->query("SELECT email, asunto FROM mensajes_soporte WHERE id = $id LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+                $correo = $item['email'] ?? "ID $id";
+                $modeloRegistro = new RegistroAdmin($conexion);
+                $modeloRegistro->registrar(
+                    (int) $_SESSION['usuario_id'],
+                    'soporte',
+                    'Estado Atención al Cliente',
+                    "Consulta #$id marcada como " . ucfirst($nuevoEstado),
+                    $correo
+                );
+            } catch (Exception $e) {}
+
+            $_SESSION['admin_exito'] = "El mensaje de Atención al Cliente #$id fue marcado como '$nuevoEstado'.";
+        }
+
+        $origen = $_POST['origen'] ?? 'panel_reportes';
+        header("Location: ban.php?pagina=" . urlencode($origen) . "#seccionAtencionCliente");
+        exit;
     }
 
     public function toggleVerificarEmpresa()
@@ -448,8 +845,24 @@ class HomeController
         if ($empresaId > 0) {
             require __DIR__ . '/../../config/database.php';
             require_once __DIR__ . '/../Models/Empresa.php';
+            require_once __DIR__ . '/../Models/RegistroAdmin.php';
+
             $modelo = new Empresa($conexion);
             $modelo->toggleVerificacion($empresaId);
+
+            try {
+                $empInfo = $conexion->query("SELECT nombre, correo, verificada FROM empresas WHERE id = $empresaId LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+                $estadoTxt = !empty($empInfo['verificada']) ? 'Verificada' : 'No verificada';
+                $modeloRegistro = new RegistroAdmin($conexion);
+                $modeloRegistro->registrar(
+                    (int) $_SESSION['usuario_id'],
+                    'verificacion',
+                    'Actualización de Verificación',
+                    "Empresa {$empInfo['nombre']}: estado $estadoTxt",
+                    $empInfo['correo'] ?? ($empInfo['nombre'] ?? "ID $empresaId")
+                );
+            } catch (Exception $e) {}
+
             $_SESSION['admin_exito'] = 'El estado de verificación de la empresa ha sido actualizado.';
         }
 
@@ -469,10 +882,26 @@ class HomeController
             require __DIR__ . '/../../config/database.php';
             require_once __DIR__ . '/../Models/Emprendimiento.php';
             require_once __DIR__ . '/../Models/Empresa.php';
+            require_once __DIR__ . '/../Models/RegistroAdmin.php';
+
             $modEmp = new Emprendimiento($conexion);
             $modEmp->toggleVerificacion($id);
             $modEmpresa = new Empresa($conexion);
             $modEmpresa->toggleVerificacion($id);
+
+            try {
+                $empInfo = $conexion->query("SELECT nombre, correo, verificado FROM emprendimientos WHERE id = $id LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+                $estadoTxt = !empty($empInfo['verificado']) ? 'Verificado' : 'No verificado';
+                $modeloRegistro = new RegistroAdmin($conexion);
+                $modeloRegistro->registrar(
+                    (int) $_SESSION['usuario_id'],
+                    'verificacion',
+                    'Actualización de Verificación',
+                    "Emprendimiento {$empInfo['nombre']}: estado $estadoTxt",
+                    $empInfo['correo'] ?? ($empInfo['nombre'] ?? "ID $id")
+                );
+            } catch (Exception $e) {}
+
             $_SESSION['admin_exito'] = 'El estado de verificación del emprendimiento ha sido actualizado.';
         }
 
@@ -492,10 +921,24 @@ class HomeController
             require __DIR__ . '/../../config/database.php';
             require_once __DIR__ . '/../Models/Emprendimiento.php';
             require_once __DIR__ . '/../Models/Empresa.php';
+            require_once __DIR__ . '/../Models/RegistroAdmin.php';
+
             $modEmp = new Emprendimiento($conexion);
             $modEmp->eliminar($id);
             $modEmpresa = new Empresa($conexion);
             $modEmpresa->eliminar($id);
+
+            try {
+                $modeloRegistro = new RegistroAdmin($conexion);
+                $modeloRegistro->registrar(
+                    (int) $_SESSION['usuario_id'],
+                    'accion_admin',
+                    'Eliminación de Emprendimiento',
+                    "Emprendimiento ID $id y sus vacantes han sido eliminados",
+                    "ID $id"
+                );
+            } catch (Exception $e) {}
+
             $_SESSION['admin_exito'] = 'El emprendimiento y sus vacantes asociadas han sido eliminados.';
         }
 
@@ -515,10 +958,24 @@ class HomeController
             require __DIR__ . '/../../config/database.php';
             require_once __DIR__ . '/../Models/Empresa.php';
             require_once __DIR__ . '/../Models/Emprendimiento.php';
+            require_once __DIR__ . '/../Models/RegistroAdmin.php';
+
             $modelo = new Empresa($conexion);
             $modelo->eliminar($empresaId);
             $modEmp = new Emprendimiento($conexion);
             $modEmp->eliminar($empresaId);
+
+            try {
+                $modeloRegistro = new RegistroAdmin($conexion);
+                $modeloRegistro->registrar(
+                    (int) $_SESSION['usuario_id'],
+                    'accion_admin',
+                    'Eliminación de Empresa',
+                    "Empresa ID $empresaId y sus vacantes asociadas han sido eliminadas",
+                    "ID $empresaId"
+                );
+            } catch (Exception $e) {}
+
             $_SESSION['admin_exito'] = 'La empresa o emprendimiento y sus ofertas asociadas han sido eliminadas.';
         }
 
@@ -538,10 +995,24 @@ class HomeController
 
         if ($usuarioId > 0) {
             require __DIR__ . '/../../config/database.php';
+            require_once __DIR__ . '/../Models/RegistroAdmin.php';
+
             if ($tabla === 'usuarios_men') {
                 require_once __DIR__ . '/../Models/UsuarioMen.php';
                 $modelo = new UsuarioMen($conexion);
                 $modelo->eliminar($usuarioId);
+
+                try {
+                    $modeloRegistro = new RegistroAdmin($conexion);
+                    $modeloRegistro->registrar(
+                        (int) $_SESSION['usuario_id'],
+                        'accion_admin',
+                        'Eliminación de Usuario Menor',
+                        "Usuario menor ID $usuarioId ha sido eliminado del sistema",
+                        "ID $usuarioId"
+                    );
+                } catch (Exception $e) {}
+
                 $_SESSION['admin_exito'] = 'El joven menor de edad ha sido eliminado del sistema.';
             } else {
                 if ($usuarioId === $miId) {
@@ -550,6 +1021,18 @@ class HomeController
                     require_once __DIR__ . '/../Models/UsuarioMay.php';
                     $modelo = new UsuarioMay($conexion);
                     $modelo->eliminar($usuarioId);
+
+                    try {
+                        $modeloRegistro = new RegistroAdmin($conexion);
+                        $modeloRegistro->registrar(
+                            (int) $_SESSION['usuario_id'],
+                            'accion_admin',
+                            'Eliminación de Usuario Mayor',
+                            "Usuario mayor ID $usuarioId ha sido eliminado del sistema",
+                            "ID $usuarioId"
+                        );
+                    } catch (Exception $e) {}
+
                     $_SESSION['admin_exito'] = 'El usuario ha sido eliminado correctamente del sistema.';
                 }
             }
@@ -585,6 +1068,7 @@ class HomeController
         }
 
         require __DIR__ . '/../../config/database.php';
+        require_once __DIR__ . '/../Models/RegistroAdmin.php';
 
         $baneadoHasta = null;
         if ($tipoBaneo === 'temporal' && $duracion > 0) {
@@ -592,6 +1076,11 @@ class HomeController
             $fecha->modify("+$duracion days");
             $baneadoHasta = $fecha->format('Y-m-d H:i:s');
         }
+
+        // Obtener datos previos para el registro de auditoría
+        $entidad = $conexion->query("SELECT nombre, correo FROM $tabla WHERE id = $id LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+        $entNombre = $entidad['nombre'] ?? ("ID: " . $id);
+        $entCorreo = $entidad['correo'] ?? null;
 
         $sql = "UPDATE $tabla SET baneado = 1, baneado_hasta = ?, motivo_baneo = ? WHERE id = ?";
         $stmt = $conexion->prepare($sql);
@@ -606,9 +1095,26 @@ class HomeController
         }
 
         $tipoTexto = $baneadoHasta ? "temporalmente por $duracion día(s) (hasta el " . date('d/m/Y H:i', strtotime($baneadoHasta)) . ")" : "permanentemente";
+
+        try {
+            $modeloRegistro = new RegistroAdmin($conexion);
+            $modeloRegistro->registrar(
+                (int) $_SESSION['usuario_id'],
+                'baneo',
+                'Suspensión de Cuenta (' . ucfirst(str_replace('usuarios_', '', $tabla)) . ')',
+                "Cuenta suspendida $tipoTexto. Motivo: $motivo",
+                $entCorreo ?: $entNombre
+            );
+        } catch (Exception $e) {}
+
         $_SESSION['admin_exito'] = "La cuenta ha sido suspendida $tipoTexto con éxito.";
 
-        header('Location: ban.php?pagina=panel_admin');
+        $origen = $_POST['origen'] ?? '';
+        if ($origen === 'panel_registros' || $origen === 'panel_reportes') {
+            header('Location: ban.php?pagina=panel_reportes#seccionBaneos');
+        } else {
+            header('Location: ban.php?pagina=panel_admin');
+        }
         exit;
     }
 
@@ -624,6 +1130,13 @@ class HomeController
 
         if ($id > 0 && in_array($tabla, $tablasValidas, true)) {
             require __DIR__ . '/../../config/database.php';
+            require_once __DIR__ . '/../Models/RegistroAdmin.php';
+
+            // Obtener información previa de la cuenta
+            $entidad = $conexion->query("SELECT nombre, correo FROM $tabla WHERE id = $id LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+            $entNombre = $entidad['nombre'] ?? ("ID: " . $id);
+            $entCorreo = $entidad['correo'] ?? null;
+
             $sql = "UPDATE $tabla SET baneado = 0, baneado_hasta = NULL, motivo_baneo = NULL WHERE id = ?";
             $stmt = $conexion->prepare($sql);
             $stmt->execute([$id]);
@@ -636,10 +1149,26 @@ class HomeController
                 $sync->execute([$id]);
             }
 
+            try {
+                $modeloRegistro = new RegistroAdmin($conexion);
+                $modeloRegistro->registrar(
+                    (int) $_SESSION['usuario_id'],
+                    'desbaneo',
+                    'Suspensión Revocada / Desbaneo',
+                    "Se levantó la suspensión para: $entNombre ($tabla)",
+                    $entCorreo ?: $entNombre
+                );
+            } catch (Exception $e) {}
+
             $_SESSION['admin_exito'] = 'La suspensión de la cuenta ha sido revocada exitosamente.';
         }
 
-        header('Location: ban.php?pagina=panel_admin');
+        $origen = $_POST['origen'] ?? '';
+        if ($origen === 'panel_registros' || $origen === 'panel_reportes') {
+            header('Location: ban.php?pagina=panel_reportes#seccionDesbaneos');
+        } else {
+            header('Location: ban.php?pagina=panel_admin');
+        }
         exit;
     }
 
@@ -650,20 +1179,36 @@ class HomeController
         }
 
         $correo = trim($_POST['correo'] ?? '');
+        $origen = $_POST['origen'] ?? '';
 
         if ($correo === '' || !filter_var($correo, FILTER_VALIDATE_EMAIL)) {
             $_SESSION['admin_error'] = 'Debes ingresar un correo electrónico válido para bloquear.';
-            header('Location: ban.php?pagina=panel_admin#seccionBloqueos');
+            $dest = ($origen === 'panel_registros' || $origen === 'panel_reportes') ? 'ban.php?pagina=panel_reportes#seccionBloqueos3' : 'ban.php?pagina=panel_admin#seccionBloqueos';
+            header("Location: $dest");
             exit;
         }
 
         require __DIR__ . '/../../config/database.php';
         require_once __DIR__ . '/../Models/BloqueoCorreo.php';
+        require_once __DIR__ . '/../Models/RegistroAdmin.php';
+
         $modeloBloqueo = new BloqueoCorreo($conexion);
         $modeloBloqueo->bloquear($correo);
 
+        try {
+            $modeloRegistro = new RegistroAdmin($conexion);
+            $modeloRegistro->registrar(
+                (int) $_SESSION['usuario_id'],
+                'bloqueo_correo',
+                'Bloqueo Manual de Correo',
+                'Correo bloqueado preventivamente por el administrador',
+                $correo
+            );
+        } catch (Exception $e) {}
+
         $_SESSION['admin_exito'] = 'El correo ' . htmlspecialchars($correo) . ' ha sido bloqueado exitosamente.';
-        header('Location: ban.php?pagina=panel_admin#seccionBloqueos');
+        $dest = ($origen === 'panel_registros' || $origen === 'panel_reportes') ? 'ban.php?pagina=panel_reportes#seccionBloqueos3' : 'ban.php?pagina=panel_admin#seccionBloqueos';
+        header("Location: $dest");
         exit;
     }
 
@@ -674,20 +1219,36 @@ class HomeController
         }
 
         $correo = trim($_POST['correo'] ?? '');
+        $origen = $_POST['origen'] ?? '';
 
         if ($correo === '' || !filter_var($correo, FILTER_VALIDATE_EMAIL)) {
             $_SESSION['admin_error'] = 'Debes especificar un correo válido para desbloquear.';
-            header('Location: ban.php?pagina=panel_admin#seccionBloqueos');
+            $dest = ($origen === 'panel_registros' || $origen === 'panel_reportes') ? 'ban.php?pagina=panel_reportes#seccionBloqueos3' : 'ban.php?pagina=panel_admin#seccionBloqueos';
+            header("Location: $dest");
             exit;
         }
 
         require __DIR__ . '/../../config/database.php';
         require_once __DIR__ . '/../Models/BloqueoCorreo.php';
+        require_once __DIR__ . '/../Models/RegistroAdmin.php';
+
         $modeloBloqueo = new BloqueoCorreo($conexion);
         $modeloBloqueo->desbloquear($correo);
 
+        try {
+            $modeloRegistro = new RegistroAdmin($conexion);
+            $modeloRegistro->registrar(
+                (int) $_SESSION['usuario_id'],
+                'desbloqueo_correo',
+                'Desbloqueo de Correo',
+                'Correo desbloqueado y restablecido a 0 intentos fallidos',
+                $correo
+            );
+        } catch (Exception $e) {}
+
         $_SESSION['admin_exito'] = 'El correo ' . htmlspecialchars($correo) . ' ha sido desbloqueado y sus intentos han sido restablecidos a 0.';
-        header('Location: ban.php?pagina=panel_admin#seccionBloqueos');
+        $dest = ($origen === 'panel_registros' || $origen === 'panel_reportes') ? 'ban.php?pagina=panel_reportes#seccionBloqueos3' : 'ban.php?pagina=panel_admin#seccionBloqueos';
+        header("Location: $dest");
         exit;
     }
 

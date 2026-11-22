@@ -37,6 +37,42 @@ class UsuarioMen
             $datosTutor['correo'] ?? null
         );
 
+        $tutorObj = $this->modeloTutor->obtenerPorUsuarioMenId($usuarioMenId);
+        $tutorId = $tutorObj ? (int) $tutorObj['id'] : 0;
+
+        if ($tutorId > 0) {
+            try {
+                $sqlControl = 'INSERT INTO usuario_tutor (
+                    tutor_id, usuario_men_id, tutor_nombre, tutor_ci, tutor_correo, tutor_telefono, tutor_relacion,
+                    menor_nombre, menor_correo, menor_telefono, menor_fecha_nacimiento, permiso_tutor_path, cv_path,
+                    tipo_control, estado, observaciones
+                ) VALUES (
+                    :tutor_id, :usuario_men_id, :tutor_nombre, :tutor_ci, :tutor_correo, :tutor_telefono, :tutor_relacion,
+                    :menor_nombre, :menor_correo, :menor_telefono, :menor_fecha_nacimiento, :permiso_tutor_path, :cv_path,
+                    "permiso_laboral", "aprobado", "Registro de consentimiento y tutela verificado en la plataforma"
+                )';
+                $stmtControl = $this->conexion->prepare($sqlControl);
+                $stmtControl->execute([
+                    'tutor_id'               => $tutorId,
+                    'usuario_men_id'         => $usuarioMenId,
+                    'tutor_nombre'           => $datosTutor['nombre'] ?? '',
+                    'tutor_ci'               => $datosTutor['ci'] ?? null,
+                    'tutor_correo'           => $datosTutor['correo'] ?? null,
+                    'tutor_telefono'         => $datosTutor['telefono'] ?? 0,
+                    'tutor_relacion'         => $datosTutor['relacion'] ?? 'Tutor legal',
+                    'menor_nombre'           => $datosMenor['nombre'] ?? '',
+                    'menor_correo'           => $datosMenor['correo'] ?? '',
+                    'menor_telefono'         => $datosMenor['telefono'] ?? null,
+                    'menor_fecha_nacimiento' => $datosMenor['fecha_nacimiento'] ?? date('Y-m-d'),
+                    'permiso_tutor_path'     => $datosMenor['permiso_tutor_path'] ?? null,
+                    'cv_path'                => $datosMenor['cv_path'] ?? null,
+                ]);
+            } catch (Exception $e) {
+                // Continuar si ocurre un fallo no crítico
+                error_log('Error al registrar control_tutor: ' . $e->getMessage());
+            }
+        }
+
         return $usuarioMenId;
     }
 

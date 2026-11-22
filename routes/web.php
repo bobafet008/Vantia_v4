@@ -15,6 +15,9 @@ return [
     'eliminar_empleo' => ['HomeController', 'eliminarEmpleo'],
     'cambiar_estado_postulacion' => ['HomeController', 'cambiarEstadoPostulacion'],
     'panel_admin' => ['HomeController', 'panelAdmin'],
+    'panel_registros' => ['HomeController', 'panelRegistros'],
+    'panel_reportes' => ['HomeController', 'panelRegistros'],
+    'pdf_reporte_diario' => ['HomeController', 'pdfReporteDiario'],
     'toggle_verificar_empresa' => ['HomeController', 'toggleVerificarEmpresa'],
     'eliminar_empresa' => ['HomeController', 'eliminarEmpresa'],
     'toggle_verificar_emprendimiento' => ['HomeController', 'toggleVerificarEmprendimiento'],
@@ -39,4 +42,5 @@ return [
     'desbanear_cuenta'         => ['HomeController', 'desbanearCuenta'],
     'bloquear_correo'          => ['HomeController', 'bloquearCorreo'],
     'desbloquear_correo'       => ['HomeController', 'desbloquearCorreo'],
+    'cambiar_estado_soporte'   => ['HomeController', 'cambiarEstadoSoporte'],
 ];

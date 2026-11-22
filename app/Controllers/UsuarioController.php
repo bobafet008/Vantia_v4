@@ -293,6 +293,18 @@ class UsuarioController
                 $datosEmpresa['id'] = $nuevoId;
                 $modeloEmpresa->crearConId($datosEmpresa);
 
+                try {
+                    require_once __DIR__ . '/../Models/RegistroAdmin.php';
+                    $regAdmin = new RegistroAdmin($conexion);
+                    $regAdmin->registrar(
+                        null,
+                        'nuevo_usuario',
+                        'Nuevo Emprendimiento Registrado',
+                        'Emprendimiento registrado: ' . $nombre . ' (' . ($rubro ?: 'General') . ')',
+                        $correo
+                    );
+                } catch (Exception $e) {}
+
                 session_regenerate_id(true);
                 $_SESSION['usuario_id'] = $nuevoId;
                 $_SESSION['usuario'] = $nombre;
@@ -318,6 +330,18 @@ class UsuarioController
             try {
                 $modeloEmpresa->crear($datosEmpresa);
                 $nuevoId = (int) $conexion->lastInsertId();
+
+                try {
+                    require_once __DIR__ . '/../Models/RegistroAdmin.php';
+                    $regAdmin = new RegistroAdmin($conexion);
+                    $regAdmin->registrar(
+                        null,
+                        'nuevo_usuario',
+                        'Nueva Empresa Registrada',
+                        'Empresa registrada: ' . $nombre . ' (NIT: ' . $nit . ')',
+                        $correo
+                    );
+                } catch (Exception $e) {}
 
                 session_regenerate_id(true);
                 $_SESSION['usuario_id'] = $nuevoId;
@@ -349,6 +373,18 @@ class UsuarioController
                 try {
                     $nuevoId = $modeloMen->crearConTutor($datosMenor, $datosTutor);
 
+                    try {
+                        require_once __DIR__ . '/../Models/RegistroAdmin.php';
+                        $regAdmin = new RegistroAdmin($conexion);
+                        $regAdmin->registrar(
+                            null,
+                            'nuevo_usuario',
+                            'Nuevo Joven Menor Registrado',
+                            'Joven menor (16-17) registrado: ' . $nombre . ' con tutor ' . $tutorNombre,
+                            $correo
+                        );
+                    } catch (Exception $e) {}
+
                     session_regenerate_id(true);
                     $_SESSION['usuario_id'] = $nuevoId;
                     $_SESSION['usuario'] = $nombre;
@@ -375,6 +411,18 @@ class UsuarioController
                 try {
                     $modeloMay->crear($datosMayor);
                     $nuevoId = (int) $conexion->lastInsertId();
+
+                    try {
+                        require_once __DIR__ . '/../Models/RegistroAdmin.php';
+                        $regAdmin = new RegistroAdmin($conexion);
+                        $regAdmin->registrar(
+                            null,
+                            'nuevo_usuario',
+                            'Nuevo Candidato Mayor Registrado',
+                            'Candidato mayor de edad registrado: ' . $nombre,
+                            $correo
+                        );
+                    } catch (Exception $e) {}
 
                     session_regenerate_id(true);
                     $_SESSION['usuario_id'] = $nuevoId;

@@ -6,8 +6,11 @@
     <h1>Administración de Vantia</h1>
     <p>Supervisión de empresas verificadas, tutores legales, menores de edad y mayores de edad en la plataforma.</p>
     
-    <div style="margin-top:1rem;">
+    <div style="margin-top:1rem; display:flex; gap:0.6rem; flex-wrap:wrap; align-items:center;">
       <a href="ban.php?pagina=trabajos" class="boton boton-sm" style="background:#e2f5e8; color:#1f7a46;">Bolsa pública de empleos</a>
+      <a href="ban.php?pagina=panel_reportes" class="boton boton-sm" style="background:#1e40af; color:#ffffff; font-weight:700; box-shadow:0 2px 4px rgba(30,64,175,0.25);">
+        Ir a Panel Reportes (Registros, Baneos, Auditoría)
+      </a>
     </div>
   </div>
 </section>
@@ -15,6 +18,19 @@
 <section class="contenedor seccion">
   <?php if (!empty($exito)): ?><div class="mensaje-exito" style="margin-bottom:1.5rem;"><?= e($exito) ?></div><?php endif; ?>
   <?php if (!empty($error)): ?><div class="mensaje-error" style="margin-bottom:1.5rem;"><?= e($error) ?></div><?php endif; ?>
+
+  <!-- Barra de Navegación Rápida entre Secciones -->
+  <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:2rem; padding:0.85rem 1.2rem; background:#ffffff; border-radius:10px; border:1px solid #e2e8f0; box-shadow:0 1px 3px rgba(0,0,0,0.04); align-items:center;">
+    <span style="font-size:12px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.04em; margin-right:4px;">Navegación Rápida:</span>
+    <a href="#seccionEmpresas" class="boton-sm" style="background:#f8fafc; color:#334155; border:1px solid #cbd5e1;">Empresas</a>
+    <a href="#seccionEmprendimientos" class="boton-sm" style="background:#f8fafc; color:#334155; border:1px solid #cbd5e1;">Emprendimientos</a>
+    <a href="#seccionMenores" class="boton-sm" style="background:#f8fafc; color:#334155; border:1px solid #cbd5e1;">Menores</a>
+    <a href="#seccionTutores" class="boton-sm" style="background:#f8fafc; color:#334155; border:1px solid #cbd5e1;">Tutores</a>
+    <a href="#seccionMayores" class="boton-sm" style="background:#f8fafc; color:#334155; border:1px solid #cbd5e1;">Mayores</a>
+    <a href="#seccionAdmins" class="boton-sm" style="background:#f8fafc; color:#334155; border:1px solid #cbd5e1;">Admins</a>
+    <a href="#seccionBloqueos" class="boton-sm" style="background:#f8fafc; color:#334155; border:1px solid #cbd5e1;">Correos</a>
+    <a href="ban.php?pagina=panel_reportes" class="boton-sm" style="background:#1d4ed8; color:#ffffff; font-weight:700; border:1px solid #1e40af;">PANEL REPORTES</a>
+  </div>
 
   <!-- Tarjetas de Estadísticas Globales -->
   <div class="tarjetas" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:1rem; margin-bottom:2.5rem;">
@@ -57,7 +73,7 @@
   </div>
 
   <!-- TABLA 1: Empresas Registradas -->
-  <div class="bloque-panel" style="margin-bottom:3rem;">
+  <div id="seccionEmpresas" class="bloque-panel" style="margin-bottom:3rem;">
     <div class="titulo-seccion">
       <div>
         <span class="etiqueta">EMPRESAS REGISTRADAS</span>
@@ -65,6 +81,8 @@
         <p class="texto-suave">Empresas registradas en la base de datos con verificación laboral.</p>
       </div>
     </div>
+
+
 
     <div class="tabla-contenedor">
       <table class="tabla-panel">
@@ -203,7 +221,7 @@
   </div>
 
   <!-- TABLA EMPRENDIMIENTOS: Emprendimientos Registrados -->
-  <div class="bloque-panel" style="margin-bottom:3rem;">
+  <div id="seccionEmprendimientos" class="bloque-panel" style="margin-bottom:3rem;">
     <div class="titulo-seccion">
       <div>
         <span class="etiqueta">EMPRENDIMIENTOS REGISTRADOS</span>
@@ -211,6 +229,8 @@
         <p class="texto-suave">Emprendimientos registrados en la plataforma para impulsar talento joven.</p>
       </div>
     </div>
+
+
 
     <div class="tabla-contenedor">
       <table class="tabla-panel">
@@ -354,7 +374,7 @@
   </div>
 
   <!-- TABLA 2: Jóvenes Menores de 18 años -->
-  <div class="bloque-panel" style="margin-bottom:3rem;">
+  <div id="seccionMenores" class="bloque-panel" style="margin-bottom:3rem;">
     <div class="titulo-seccion">
       <div>
         <span class="etiqueta">JÓVENES MENORES DE EDAD</span>
@@ -362,6 +382,8 @@
         <p class="texto-suave">Postulantes menores de edad que requieren consentimiento y datos de su tutor legal.</p>
       </div>
     </div>
+
+
 
     <div class="tabla-contenedor">
       <table class="tabla-panel">
@@ -491,7 +513,7 @@
   </div>
 
   <!-- TABLA 3: Tutores Legales y Jóvenes a su Cargo -->
-  <div class="bloque-panel" style="margin-bottom:3rem;">
+  <div id="seccionTutores" class="bloque-panel" style="margin-bottom:3rem;">
     <div class="titulo-seccion">
       <div>
         <span class="etiqueta">TUTORES LEGALES</span>
@@ -499,6 +521,8 @@
         <p class="texto-suave">Padres, madres o tutores legales responsables de los postulantes menores de edad (16 y 17 años).</p>
       </div>
     </div>
+
+
 
     <div class="tabla-contenedor">
       <table class="tabla-panel">
@@ -586,7 +610,7 @@
   </div>
 
   <!-- TABLA 4: Jóvenes Mayores de 18 años y Administradores -->
-  <div class="bloque-panel">
+  <div id="seccionMayores" class="bloque-panel" style="margin-bottom:3rem;">
     <div class="titulo-seccion">
       <div>
         <span class="etiqueta">JÓVENES MAYORES Y ADMINISTRADORES</span>
@@ -594,6 +618,8 @@
         <p class="texto-suave">Cuentas individuales de postulantes mayores de edad y personal administrativo.</p>
       </div>
     </div>
+
+
 
     <div class="tabla-contenedor">
       <table class="tabla-panel">
@@ -725,7 +751,7 @@
   </div>
 
   <!-- TABLA 5: Personal Administrativo (usuarios_admin) -->
-  <div class="bloque-panel" style="margin-bottom:3rem;">
+  <div id="seccionAdmins" class="bloque-panel" style="margin-bottom:3rem;">
     <div class="titulo-seccion">
       <div>
         <span class="etiqueta">EQUIPO Y ACCESO PRIVILEGIADO</span>
@@ -884,6 +910,1072 @@
       </table>
     </div>
   </div>
+
+  <!-- SECCIÓN INTEGRAL: REGISTROS Y AUDITORÍA DEL SISTEMA -->
+  <div id="seccionRegistros" class="bloque-panel" style="margin-top:3.5rem; margin-bottom:3rem; border:2px solid #2563eb; border-radius:14px; padding:28px; background:#ffffff; box-shadow:0 12px 24px -4px rgba(37,99,235,0.08);">
+    
+    <!-- Encabezado de la Sección de Registros -->
+    <div class="titulo-seccion" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1.2rem; border-bottom:2px solid #f1f5f9; padding-bottom:1.2rem; margin-bottom:1.8rem;">
+      <div>
+        <span class="etiqueta" style="background:#dbeafe; color:#1e40af; font-weight:800; letter-spacing:0.05em;">AUDITORÍA Y SUPERVISIÓN CENTRAL</span>
+        <h2 style="font-size:1.85rem; color:#0f172a; margin-top:6px; margin-bottom:6px; display:flex; align-items:center; gap:10px;">
+          Centro de Registros del Sistema
+        </h2>
+        <p class="texto-suave" style="font-size:14px; max-width:850px; margin:0; line-height:1.5;">
+          Módulo administrativo para el seguimiento exhaustivo de <strong>reportes ejecutivos</strong>, cuentas con <strong>baneos activos</strong>, historial de <strong>desbaneos</strong>, bitácora de <strong>nuevos usuarios</strong>, control de <strong>bloqueos de correo tras 3 contraseñas fallidas</strong> y la auditoría completa de <strong>acciones del administrador</strong>.
+        </p>
+      </div>
+
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <a href="ban.php?pagina=panel_reportes" class="boton boton-sm boton-primario" style="display:inline-flex; align-items:center; gap:6px;">
+          <svg style="width:14px; height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+          Abrir en Panel Dedicado
+        </a>
+        <span style="display:inline-flex; align-items:center; gap:6px; font-size:13px; background:#eff6ff; color:#1e40af; font-weight:700; padding:8px 14px; border-radius:9999px; border:1px solid #bfdbfe;">
+          <svg style="width:14px; height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <?= (int) ($totalRegistrosEventos ?? 0) ?> Eventos Auditados
+        </span>
+      </div>
+    </div>
+
+
+
+    <!-- Generador Oficial de Reportes en PDF por Día -->
+    <div style="margin-bottom:1.8rem; background:#f8fafc; border:1px solid #cbd5e1; border-left:4px solid #1e40af; border-radius:8px; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+      <div>
+        <strong style="font-size:14px; color:#0f172a; display:block;">Generar Reporte Diario de Registros en PDF</strong>
+        <span class="texto-suave" style="font-size:12.5px;">Exporta un documento formal de auditoría con todos los cambios y registros ocurridos en la fecha seleccionada.</span>
+      </div>
+      <form action="ban.php" method="get" target="_blank" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+        <input type="hidden" name="pagina" value="pdf_reporte_diario">
+        <label style="font-size:11.5px; font-weight:700; color:#475569;">Fecha:</label>
+        <input type="date" name="fecha" value="<?= date('Y-m-d') ?>" max="<?= date('Y-m-d') ?>" required style="height:34px; padding:4px 10px; border:1px solid #cbd5e1; border-radius:4px; font-size:12.5px;">
+        <button type="submit" class="boton-sm boton-primario" style="height:34px; padding:0 14px; font-weight:700;">
+          Ver PDF del Día
+        </button>
+        <button type="submit" name="tipo" value="admin" class="boton-sm" style="height:34px; padding:0 12px; background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-weight:700;">
+          PDF Acciones Admin
+        </button>
+        <button type="submit" name="descargar" value="1" class="boton-sm" style="height:34px; padding:0 12px; background:#f1f5f9; color:#1e293b; border:1px solid #cbd5e1; font-weight:600;">
+          Descargar
+        </button>
+      </form>
+    </div>
+
+    <!-- Pestañas de Navegación del Centro de Registros -->
+    <style>
+      .btn-tab-reg {
+        padding: 10px 18px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 13.5px;
+        font-weight: 600;
+        color: #475569;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+      }
+      .btn-tab-reg:hover {
+        background: #f1f5f9;
+        color: #1e293b;
+        border-color: #cbd5e1;
+      }
+      .btn-tab-reg.activo {
+        background: #1e40af;
+        color: #ffffff;
+        border-color: #1e40af;
+        box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.2);
+      }
+      .badge-tab-contador {
+        background: rgba(0,0,0,0.08);
+        padding: 2px 7px;
+        border-radius: 9999px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .btn-tab-reg.activo .badge-tab-contador {
+        background: rgba(255,255,255,0.25);
+        color: #ffffff;
+      }
+      .tab-panel-reg {
+        display: none;
+        animation: fadeTab 0.25s ease-in-out;
+      }
+      .tab-panel-reg.activo {
+        display: block;
+      }
+      @keyframes fadeTab {
+        from { opacity: 0; transform: translateY(4px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .tarjeta-kpi-reg {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 18px 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+      .tarjeta-kpi-reg:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px -2px rgba(0,0,0,0.06);
+      }
+      .badge-evento {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 9px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+      .badge-evento-baneo { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+      .badge-evento-desbaneo { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+      .badge-evento-bloqueo { background: #ffedd5; color: #9a3412; border: 1px solid #fed7aa; }
+      .badge-evento-desbloqueo { background: #e0f2fe; color: #075985; border: 1px solid #bae6fd; }
+      .badge-evento-nuevo { background: #ede9fe; color: #5b21b6; border: 1px solid #ddd6fe; }
+      .badge-evento-verificacion { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+      .badge-evento-accion { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
+    </style>
+
+    <div style="display:flex; gap:8px; border-bottom:2px solid #e2e8f0; padding-bottom:12px; margin-bottom:1.8rem; overflow-x:auto;">
+      <button type="button" class="btn-tab-reg activo" onclick="cambiarTabRegistros('reg-reportes', this)">
+        1. Reportes
+      </button>
+      <button type="button" class="btn-tab-reg" onclick="cambiarTabRegistros('reg-baneos', this)">
+        2. Baneos <span class="badge-tab-contador"><?= count($cuentasBaneadas ?? []) ?></span>
+      </button>
+      <button type="button" class="btn-tab-reg" onclick="cambiarTabRegistros('reg-desbaneos', this)">
+        3. Desbaneos <span class="badge-tab-contador"><?= count($registrosDesbaneos ?? []) ?></span>
+      </button>
+      <button type="button" class="btn-tab-reg" onclick="cambiarTabRegistros('reg-nuevos', this)">
+        4. Registro de Nuevos Usuarios <span class="badge-tab-contador"><?= count($nuevosUsuarios ?? []) ?></span>
+      </button>
+      <button type="button" class="btn-tab-reg" onclick="cambiarTabRegistros('reg-bloqueos3', this)">
+        5. Bloqueo 3 Contraseñas <span class="badge-tab-contador"><?= count($correosBloqueadosFallos ?? []) ?></span>
+      </button>
+      <button type="button" class="btn-tab-reg" onclick="cambiarTabRegistros('reg-adminlogs', this)">
+        6. Registros del Administrador <span class="badge-tab-contador"><?= count($registrosAdmin ?? []) ?></span>
+      </button>
+      <button type="button" class="btn-tab-reg" onclick="cambiarTabRegistros('reg-soporte', this)">
+        7. Atención al Cliente <span class="badge-tab-contador"><?= count($mensajesSoporte ?? []) ?></span>
+      </button>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SUB-APARTADO 1: REPORTES                   -->
+    <!-- ========================================== -->
+    <div id="reg-reportes" class="tab-panel-reg activo">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; flex-wrap:wrap; gap:0.5rem;">
+        <div>
+          <h3 style="margin:0; font-size:1.25rem; color:#0f172a;">Reportes Ejecutivos y Métricas Globales</h3>
+          <p class="texto-suave" style="font-size:13px; margin:2px 0 0 0;">Resumen del rendimiento, estados de seguridad y tasas de crecimiento de Vantia.</p>
+        </div>
+        <span style="font-size:12px; color:#64748b;">Generado automáticamente en tiempo real</span>
+      </div>
+
+      <!-- Tarjetas de Métricas Ejecutivas -->
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:1rem; margin-bottom:2rem;">
+        <div class="tarjeta-kpi-reg" style="border-left:4px solid #2563eb;">
+          <span style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">Usuarios Totales</span>
+          <div style="font-size:1.85rem; font-weight:800; color:#0f172a; margin:4px 0;"><?= (int) ($totalUsuariosGlobal ?? 0) ?></div>
+          <div style="font-size:12px; color:#2563eb; font-weight:600;">Candidatos, Empresas y Emprendimientos</div>
+        </div>
+
+        <div class="tarjeta-kpi-reg" style="border-left:4px solid #10b981;">
+          <span style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">Nuevos (Últimos 7 Días)</span>
+          <div style="font-size:1.85rem; font-weight:800; color:#065f46; margin:4px 0;">+<?= (int) ($nuevosUltimos7Dias ?? 0) ?></div>
+          <div style="font-size:12px; color:#059669; font-weight:600;">Altas registradas en la semana</div>
+        </div>
+
+        <div class="tarjeta-kpi-reg" style="border-left:4px solid #ef4444;">
+          <span style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">Cuentas Suspendidas (Baneadas)</span>
+          <div style="font-size:1.85rem; font-weight:800; color:#991b1b; margin:4px 0;"><?= count($cuentasBaneadas ?? []) ?></div>
+          <div style="font-size:12px; color:#dc2626; font-weight:600;">Sanciones activas en la plataforma</div>
+        </div>
+
+        <div class="tarjeta-kpi-reg" style="border-left:4px solid #f97316;">
+          <span style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">Correos Bloqueados (3 Fallos)</span>
+          <div style="font-size:1.85rem; font-weight:800; color:#c2410c; margin:4px 0;"><?= count($correosBloqueadosFallos ?? []) ?></div>
+          <div style="font-size:12px; color:#ea580c; font-weight:600;">Límite de contraseña alcanzado</div>
+        </div>
+      </div>
+
+      <!-- Cuadrícula de Desglose Operativo -->
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:1.25rem;">
+        
+        <!-- Desglose 1: Verificación de Entidades -->
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:18px;">
+          <h4 style="margin:0 0 12px 0; font-size:14px; color:#1e293b; display:flex; align-items:center; gap:6px;">
+            Validación y Verificación Laboral
+          </h4>
+          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #e2e8f0; font-size:13px;">
+            <span>Empresas Verificadas (con NIT / ROE):</span>
+            <strong><?= (int) ($empresasVerificadas ?? 0) ?> de <?= (int) ($totalEmpresas ?? 0) ?></strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #e2e8f0; font-size:13px;">
+            <span>Emprendimientos Verificados:</span>
+            <strong><?= (int) ($emprendimientosVerificados ?? 0) ?> de <?= (int) ($totalEmprendimientos ?? 0) ?></strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:8px 0; font-size:13px;">
+            <span>Tutores Legales Vinculados a Menores:</span>
+            <strong><?= (int) ($totalTutores ?? 0) ?> tutores</strong>
+          </div>
+        </div>
+
+        <!-- Desglose 2: Oferta y Demanda de Empleo -->
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:18px;">
+          <h4 style="margin:0 0 12px 0; font-size:14px; color:#1e293b; display:flex; align-items:center; gap:6px;">
+            Movimiento Laboral y Postulaciones
+          </h4>
+          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #e2e8f0; font-size:13px;">
+            <span>Vacantes Laborales Publicadas:</span>
+            <strong><?= (int) ($totalEmpleos ?? 0) ?> ofertas</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #e2e8f0; font-size:13px;">
+            <span>Postulaciones Totales Realizadas:</span>
+            <strong><?= (int) ($totalPostulaciones ?? 0) ?> aplicaciones</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:8px 0; font-size:13px;">
+            <span>Jóvenes Menores (16-17 años):</span>
+            <strong><?= (int) ($totalMenores ?? 0) ?> candidatos</strong>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Alertas de Seguridad Activas -->
+      <div style="margin-top:1.5rem; background:#fffbeb; border:1px solid #fef3c7; border-left:4px solid #f59e0b; border-radius:8px; padding:16px 20px;">
+        <h4 style="margin:0 0 6px 0; color:#92400e; font-size:14px; display:flex; align-items:center; gap:6px;">
+          Diagnóstico Activo de Seguridad
+        </h4>
+        <p style="margin:0; font-size:13px; color:#78350f; line-height:1.5;">
+          <?php if (!empty($correosBloqueadosFallos)): ?>
+            Se detectaron <strong><?= count($correosBloqueadosFallos) ?> cuenta(s) con bloqueo automático</strong> debido a que superaron los 3 intentos fallidos de contraseña. Puedes revisarlas y desbloquearlas en la pestaña <em>"5. Bloqueo 3 Contraseñas"</em>.
+          <?php else: ?>
+            El sistema se encuentra seguro. No existen bloqueos automáticos pendientes por contraseñas fallidas en este momento.
+          <?php endif; ?>
+        </p>
+      </div>
+    </div>
+
+
+
+    <!-- ========================================== -->
+    <!-- SUB-APARTADO 2: BANEOS                     -->
+    <!-- ========================================== -->
+    <div id="reg-baneos" class="tab-panel-reg">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.4rem; flex-wrap:wrap; gap:0.5rem;">
+        <div>
+          <h3 style="margin:0; font-size:1.35rem; color:#991b1b; display:flex; align-items:center; gap:8px;">
+            Cuentas con Suspensión Activa (Baneos)
+          </h3>
+          <p class="texto-suave" style="font-size:13.5px; margin:3px 0 0 0;">Listado separado por fechas de empresas, emprendimientos, postulantes mayores o menores con acceso suspendido.</p>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <label style="font-size:12px; font-weight:700; color:#475569;">Fecha:</label>
+          <input type="date" onchange="filtrarPorFecha(this.value, 'tablaBaneosActivos')" style="padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:12.5px;">
+          <button type="button" onclick="limpiarFiltroFecha('tablaBaneosActivos', this)" class="boton-sm" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; font-size:11.5px; padding:5px 9px;">Todas</button>
+          <span class="badge" style="background:#fee2e2; color:#991b1b; font-weight:700; padding:6px 14px; font-size:12.5px;">
+            <?= count($cuentasBaneadas ?? []) ?> Sanción(es) Activa(s)
+          </span>
+        </div>
+      </div>
+
+      <div class="tabla-contenedor" style="margin-bottom:2rem;">
+        <table class="tabla-panel" id="tablaBaneosActivos">
+          <thead>
+            <tr>
+              <th>Entidad / Rol</th>
+              <th>Nombre / Razón Social</th>
+              <th>Contacto</th>
+              <th>Tipo de Suspensión</th>
+              <th>Motivo de la Sanción</th>
+              <th>Hora / Fecha</th>
+              <th>Acción Inmediata</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php if (empty($cuentasBaneadas)): ?>
+              <tr>
+                <td colspan="7" style="text-align:center; padding:2.5rem; color:#059669; background:#f0fdf4;">
+                  <strong style="font-size:15px;">No hay cuentas suspendidas (baneadas) en la plataforma actualmente.</strong>
+                  <div style="font-size:12.5px; color:#166534; margin-top:6px;">Todas las empresas, emprendimientos y candidatos operan en estado activo normal.</div>
+                </td>
+              </tr>
+            <?php else: ?>
+              <?php 
+                $fechaGrupoBaneo = null;
+                foreach ($cuentasBaneadas as $cb): 
+                  $esTemporal = !empty($cb['baneado_hasta']);
+                  $hastaFormat = $esTemporal ? date('d/m/Y H:i', strtotime($cb['baneado_hasta'])) : null;
+                  $dia = !empty($cb['fecha']) ? date('Y-m-d', strtotime($cb['fecha'])) : 'sin_fecha';
+                  if ($dia !== $fechaGrupoBaneo):
+                    $fechaGrupoBaneo = $dia;
+              ?>
+                <tr class="fila-separador-fecha" data-fecha="<?= e($dia) ?>">
+                  <td colspan="7" style="background:#f1f5f9; border-top:2px solid #cbd5e1; border-bottom:1px solid #cbd5e1; padding:9px 16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                      <span style="font-weight:800; font-size:13px; color:#1e40af;">
+                        <?= formatoFechaGrupo($dia) ?>
+                      </span>
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <?php if ($dia !== 'sin_fecha'): ?>
+                          <a href="ban.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
+                            PDF Acciones del Día
+                          </a>
+                          <a href="ban.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-size:11px; padding:3px 9px; font-weight:600; text-decoration:none; border-radius:4px;">
+                            PDF Completo
+                          </a>
+                        <?php endif; ?>
+                        <span style="font-size:11px; font-weight:700; color:#475569; background:#ffffff; padding:2px 8px; border-radius:4px; border:1px solid #cbd5e1;">
+                          <?= $dia !== 'sin_fecha' ? date('d/m/Y', strtotime($dia)) : 'Sin fecha' ?>
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              <?php endif; ?>
+                <tr class="fila-dato-fecha" data-fecha="<?= e($dia) ?>">
+                  <td>
+                    <?php if ($cb['tipo_entidad'] === 'menor'): ?>
+                      <span class="badge-menor" style="background:#e0e7ff; color:#3730a3; font-weight:700;">Menor (16-17)</span>
+                    <?php elseif ($cb['tipo_entidad'] === 'mayor'): ?>
+                      <span class="badge-menor" style="background:#f1f5f9; color:#1e293b; font-weight:700;">Mayor (18+)</span>
+                    <?php elseif ($cb['tipo_entidad'] === 'empresa'): ?>
+                      <span class="badge-menor" style="background:#dbeafe; color:#1e40af; font-weight:700;">Empresa</span>
+                    <?php elseif ($cb['tipo_entidad'] === 'emprendimiento'): ?>
+                      <span class="badge-menor" style="background:#fef3c7; color:#92400e; font-weight:700;">Emprendimiento</span>
+                    <?php endif; ?>
+                  </td>
+                  <td>
+                    <strong><?= e($cb['nombre']) ?></strong>
+                    <div style="font-size:11px; color:#64748b;">ID: #<?= (int) $cb['id'] ?> · Tabla: <code><?= e($cb['tabla']) ?></code></div>
+                  </td>
+                  <td>
+                    <div><a href="mailto:<?= e($cb['correo']) ?>" class="enlace-contacto"><?= e($cb['correo']) ?></a></div>
+                    <?php if (!empty($cb['telefono'])): ?>
+                      <div style="font-size:11.5px; color:#64748b;">Tel: <?= e($cb['telefono']) ?></div>
+                    <?php endif; ?>
+                  </td>
+                  <td>
+                    <?php if ($esTemporal): ?>
+                      <span class="badge" style="background:#fef3c7; color:#92400e; font-weight:700;">
+                        Temporal hasta: <?= e($hastaFormat) ?>
+                      </span>
+                    <?php else: ?>
+                      <span class="badge" style="background:#fee2e2; color:#991b1b; font-weight:700;">
+                        Permanente
+                      </span>
+                    <?php endif; ?>
+                  </td>
+                  <td>
+                    <span style="font-size:13px; color:#475569;">
+                      <?= !empty($cb['motivo_baneo']) ? e($cb['motivo_baneo']) : 'Incumplimiento de normas' ?>
+                    </span>
+                  </td>
+                  <td style="font-size:12px; color:#64748b; white-space:nowrap;">
+                    <?= !empty($cb['fecha']) ? date('H:i:s · d/m/Y', strtotime($cb['fecha'])) : '-' ?>
+                  </td>
+                  <td>
+                    <form action="ban.php?pagina=desbanear_cuenta" method="post" onsubmit="return confirm('¿Deseas levantar inmediatamente la suspensión para <?= e(addslashes($cb['nombre'])) ?>?');">
+                      <input type="hidden" name="id" value="<?= (int) $cb['id'] ?>">
+                      <input type="hidden" name="tabla" value="<?= e($cb['tabla']) ?>">
+                      <input type="hidden" name="origen" value="panel_admin">
+                      <button type="submit" class="boton-sm" style="background:#10b981; color:white; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
+                        <svg style="width:13px; height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Levantar Baneo
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            <?php endif; ?>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Historial de Auditoría de Baneos -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin:2rem 0 1rem 0; flex-wrap:wrap; gap:0.5rem;">
+        <h4 style="margin:0; font-size:15px; color:#0f172a; display:flex; align-items:center; gap:6px;">
+          Bitácora de Suspensiones Aplicadas (Separadas por Fecha)
+        </h4>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input type="date" onchange="filtrarPorFecha(this.value, 'tablaBaneosHistorial')" style="padding:5px 8px; border:1px solid #cbd5e1; border-radius:5px; font-size:12px;">
+          <button type="button" onclick="limpiarFiltroFecha('tablaBaneosHistorial', this)" class="boton-sm" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; font-size:11px; padding:4px 8px;">Todas</button>
+        </div>
+      </div>
+
+      <div class="tabla-contenedor">
+        <table class="tabla-panel" id="tablaBaneosHistorial">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Administrador</th>
+              <th>Título</th>
+              <th>Descripción</th>
+              <th>Usuario Afectado</th>
+              <th>Hora y Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php if (empty($registrosBaneos)): ?>
+              <tr>
+                <td colspan="6" style="text-align:center; padding:1.5rem; color:#64748b;">No hay registros históricos de suspensiones en la bitácora.</td>
+              </tr>
+            <?php else: ?>
+              <?php 
+                $fechaGrupoHistBaneo = null;
+                foreach ($registrosBaneos as $rb): 
+                  $dia = !empty($rb['fecha_registro']) ? date('Y-m-d', strtotime($rb['fecha_registro'])) : 'sin_fecha';
+                  if ($dia !== $fechaGrupoHistBaneo):
+                    $fechaGrupoHistBaneo = $dia;
+              ?>
+                <tr class="fila-separador-fecha" data-fecha="<?= e($dia) ?>">
+                  <td colspan="6" style="background:#f1f5f9; border-top:2px solid #cbd5e1; border-bottom:1px solid #cbd5e1; padding:8px 14px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                      <span style="font-weight:800; font-size:12.5px; color:#1e40af;">
+                        <?= formatoFechaGrupo($dia) ?>
+                      </span>
+                      <?php if ($dia !== 'sin_fecha'): ?>
+                        <a href="ban.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:2px 8px; font-weight:700; text-decoration:none; border-radius:4px;">
+                          PDF del Día
+                        </a>
+                      <?php endif; ?>
+                    </div>
+                  </td>
+                </tr>
+              <?php endif; ?>
+                <tr class="fila-dato-fecha" data-fecha="<?= e($dia) ?>">
+                  <td>#<?= (int) $rb['id'] ?></td>
+                  <td><strong><?= e($rb['admin_nombre'] ?? 'Administrador') ?></strong></td>
+                  <td><span class="badge-evento badge-evento-baneo"><?= e($rb['titulo']) ?></span></td>
+                  <td style="font-size:13px;"><?= e($rb['descripcion']) ?></td>
+                  <td><code><?= e($rb['usuario_afectado'] ?? '-') ?></code></td>
+                  <td style="font-size:12px; color:#64748b; white-space:nowrap;"><?= date('H:i:s · d/m/Y', strtotime($rb['fecha_registro'])) ?></td>
+                </tr>
+              <?php endforeach; ?>
+            <?php endif; ?>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
+
+    <!-- ========================================== -->
+    <!-- SUB-APARTADO 3: DESBANEOS                  -->
+    <!-- ========================================== -->
+    <div id="reg-desbaneos" class="tab-panel-reg">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.4rem; flex-wrap:wrap; gap:0.5rem;">
+        <div>
+          <h3 style="margin:0; font-size:1.35rem; color:#065f46; display:flex; align-items:center; gap:8px;">
+            Historial de Desbaneos y Cuentas Reactivadas
+          </h3>
+          <p class="texto-suave" style="font-size:13.5px; margin:3px 0 0 0;">Registro separado por fechas de todas las sanciones levantadas y cuentas restauradas.</p>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <label style="font-size:12px; font-weight:700; color:#475569;">Fecha:</label>
+          <input type="date" onchange="filtrarPorFecha(this.value, 'tablaDesbaneos')" style="padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:12.5px;">
+          <button type="button" onclick="limpiarFiltroFecha('tablaDesbaneos', this)" class="boton-sm" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; font-size:11.5px; padding:5px 9px;">Todas</button>
+          <span class="badge" style="background:#d1fae5; color:#065f46; font-weight:700; padding:6px 14px; font-size:12.5px;">
+            <?= count($registrosDesbaneos ?? []) ?> Reactivaciones Registradas
+          </span>
+        </div>
+      </div>
+
+      <div class="tabla-contenedor">
+        <table class="tabla-panel" id="tablaDesbaneos">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Administrador Responsable</th>
+              <th>Evento</th>
+              <th>Detalle del Levantamiento</th>
+              <th>Cuenta / Beneficiario</th>
+              <th>IP Origen</th>
+              <th>Hora y Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php if (empty($registrosDesbaneos)): ?>
+              <tr>
+                <td colspan="7" style="text-align:center; padding:2.5rem; color:#64748b;">
+                  No se registran desbaneos en la bitácora del sistema aún.
+                </td>
+              </tr>
+            <?php else: ?>
+              <?php 
+                $fechaGrupoDesbaneo = null;
+                foreach ($registrosDesbaneos as $rd): 
+                  $dia = !empty($rd['fecha_registro']) ? date('Y-m-d', strtotime($rd['fecha_registro'])) : 'sin_fecha';
+                  if ($dia !== $fechaGrupoDesbaneo):
+                    $fechaGrupoDesbaneo = $dia;
+              ?>
+                <tr class="fila-separador-fecha" data-fecha="<?= e($dia) ?>">
+                  <td colspan="7" style="background:#f1f5f9; border-top:2px solid #cbd5e1; border-bottom:1px solid #cbd5e1; padding:9px 16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                      <span style="font-weight:800; font-size:13px; color:#1e40af;">
+                        <?= formatoFechaGrupo($dia) ?>
+                      </span>
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <?php if ($dia !== 'sin_fecha'): ?>
+                          <a href="ban.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
+                            PDF Acciones del Día
+                          </a>
+                          <a href="ban.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-size:11px; padding:3px 9px; font-weight:600; text-decoration:none; border-radius:4px;">
+                            PDF Completo
+                          </a>
+                        <?php endif; ?>
+                        <span style="font-size:11px; font-weight:700; color:#475569; background:#ffffff; padding:2px 8px; border-radius:4px; border:1px solid #cbd5e1;">
+                          <?= $dia !== 'sin_fecha' ? date('d/m/Y', strtotime($dia)) : 'Sin fecha' ?>
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              <?php endif; ?>
+                <tr class="fila-dato-fecha" data-fecha="<?= e($dia) ?>">
+                  <td>#<?= (int) $rd['id'] ?></td>
+                  <td>
+                    <strong><?= e($rd['admin_nombre'] ?? 'Administrador') ?></strong>
+                    <?php if (!empty($rd['admin_id'])): ?>
+                      <div style="font-size:11px; color:#64748b;">ID Admin: #<?= (int) $rd['admin_id'] ?></div>
+                    <?php endif; ?>
+                  </td>
+                  <td>
+                    <span class="badge-evento badge-evento-desbaneo"><?= e($rd['titulo']) ?></span>
+                  </td>
+                  <td style="font-size:13px; color:#1e293b;">
+                    <?= e($rd['descripcion']) ?>
+                  </td>
+                  <td>
+                    <code><?= e($rd['usuario_afectado'] ?? '-') ?></code>
+                  </td>
+                  <td style="font-size:12px; color:#64748b;">
+                    <?= e($rd['ip_origen'] ?? '127.0.0.1') ?>
+                  </td>
+                  <td style="font-size:12px; color:#64748b; white-space:nowrap;">
+                    <?= date('H:i:s · d/m/Y', strtotime($rd['fecha_registro'])) ?>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            <?php endif; ?>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
+
+    <!-- ========================================== -->
+    <!-- SUB-APARTADO 4: REGISTRO DE NUEVOS USUARIOS -->
+    <!-- ========================================== -->
+    <div id="reg-nuevos" class="tab-panel-reg">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.4rem; flex-wrap:wrap; gap:0.5rem;">
+        <div>
+          <h3 style="margin:0; font-size:1.35rem; color:#1e40af; display:flex; align-items:center; gap:8px;">
+            Registro de Nuevos Usuarios en la Plataforma
+          </h3>
+          <p class="texto-suave" style="font-size:13.5px; margin:3px 0 0 0;">Bitácora cronológica unificada de altas separadas por fechas: jóvenes menores (16-17), mayores (18+), empresas y emprendimientos.</p>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <a href="ban.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= date('Y-m-d') ?>" target="_blank" class="boton-sm" style="background:#1e40af; color:#ffffff; font-weight:700; border:1px solid #1e3a8a; padding:6px 12px; text-decoration:none; border-radius:6px; display:inline-flex; align-items:center; gap:5px;">
+            <svg style="width:13px; height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            PDF Acciones Admin
+          </a>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <label style="font-size:12px; font-weight:700; color:#475569;">Fecha:</label>
+            <input type="date" onchange="filtrarPorFecha(this.value, 'tablaNuevosUsuarios')" style="padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:12.5px;">
+            <button type="button" onclick="limpiarFiltroFecha('tablaNuevosUsuarios', this)" class="boton-sm" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; font-size:11.5px; padding:5px 9px;">Todas</button>
+          </div>
+          <input type="text" id="filtroNuevosUsuarios" placeholder="Buscar por nombre o correo..." onkeyup="filtrarTablaGenerica('filtroNuevosUsuarios', 'tablaNuevosUsuarios')" style="padding:7px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; width:220px;">
+        </div>
+      </div>
+
+      <div class="tabla-contenedor">
+        <table class="tabla-panel" id="tablaNuevosUsuarios">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Rol / Tipo de Cuenta</th>
+              <th>Nombre Completo / Razón Social</th>
+              <th>Correo Electrónico</th>
+              <th>Teléfono</th>
+              <th>Hora y Fecha</th>
+              <th>Estado de Cuenta</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php if (empty($nuevosUsuarios)): ?>
+              <tr>
+                <td colspan="7" style="text-align:center; padding:2.5rem; color:#64748b;">No hay nuevos usuarios registrados recientemente.</td>
+              </tr>
+            <?php else: ?>
+              <?php 
+                $fechaGrupoNuevo = null;
+                foreach ($nuevosUsuarios as $nu): 
+                  $dia = !empty($nu['fecha']) ? date('Y-m-d', strtotime($nu['fecha'])) : 'sin_fecha';
+                  if ($dia !== $fechaGrupoNuevo):
+                    $fechaGrupoNuevo = $dia;
+              ?>
+                <tr class="fila-separador-fecha" data-fecha="<?= e($dia) ?>">
+                  <td colspan="7" style="background:#f1f5f9; border-top:2px solid #cbd5e1; border-bottom:1px solid #cbd5e1; padding:9px 16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                      <span style="font-weight:800; font-size:13px; color:#1e40af;">
+                        <?= formatoFechaGrupo($dia) ?>
+                      </span>
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <?php if ($dia !== 'sin_fecha'): ?>
+                          <a href="ban.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
+                            PDF Acciones del Día
+                          </a>
+                          <a href="ban.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-size:11px; padding:3px 9px; font-weight:600; text-decoration:none; border-radius:4px;">
+                            PDF Completo
+                          </a>
+                        <?php endif; ?>
+                        <span style="font-size:11px; font-weight:700; color:#475569; background:#ffffff; padding:2px 8px; border-radius:4px; border:1px solid #cbd5e1;">
+                          <?= $dia !== 'sin_fecha' ? date('d/m/Y', strtotime($dia)) : 'Sin fecha' ?>
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              <?php endif; ?>
+                <tr class="fila-dato-fecha" data-fecha="<?= e($dia) ?>">
+                  <td>#<?= (int) $nu['id'] ?></td>
+                  <td>
+                    <?php if ($nu['rol'] === 'menor'): ?>
+                      <span class="badge-menor" style="background:#e0e7ff; color:#3730a3; font-weight:700;">Menor (16-17)</span>
+                    <?php elseif ($nu['rol'] === 'mayor'): ?>
+                      <span class="badge-menor" style="background:#f1f5f9; color:#0f172a; font-weight:700;">Mayor (18+)</span>
+                    <?php elseif ($nu['rol'] === 'empresa'): ?>
+                      <span class="badge-menor" style="background:#dbeafe; color:#1e40af; font-weight:700;">Empresa</span>
+                    <?php elseif ($nu['rol'] === 'emprendimiento'): ?>
+                      <span class="badge-menor" style="background:#fef3c7; color:#92400e; font-weight:700;">Emprendimiento</span>
+                    <?php else: ?>
+                      <span class="badge-menor" style="background:#f1f5f9; color:#475569;"><?= e(ucfirst($nu['rol'])) ?></span>
+                    <?php endif; ?>
+                  </td>
+                  <td>
+                    <strong><?= e($nu['nombre']) ?></strong>
+                  </td>
+                  <td>
+                    <a href="mailto:<?= e($nu['correo']) ?>" class="enlace-contacto"><?= e($nu['correo']) ?></a>
+                  </td>
+                  <td>
+                    <?= !empty($nu['telefono']) ? e($nu['telefono']) : '<span class="texto-suave">Sin registrar</span>' ?>
+                  </td>
+                  <td style="font-size:12px; color:#475569; white-space:nowrap;">
+                    <?= !empty($nu['fecha']) ? date('H:i:s · d/m/Y', strtotime($nu['fecha'])) : '-' ?>
+                  </td>
+                  <td>
+                    <?php if (!empty($nu['baneado'])): ?>
+                      <span class="badge" style="background:#fee2e2; color:#991b1b; font-weight:700;">Suspendido</span>
+                    <?php else: ?>
+                      <span class="badge" style="background:#d1fae5; color:#065f46; font-weight:700;">Activo</span>
+                    <?php endif; ?>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            <?php endif; ?>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
+
+    <!-- ========================================== -->
+    <!-- SUB-APARTADO 5: BLOQUEO TRAS 3 CONTRASEÑAS -->
+    <!-- ========================================== -->
+    <div id="reg-bloqueos3" class="tab-panel-reg">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.4rem; flex-wrap:wrap; gap:0.5rem;">
+        <div>
+          <h3 style="margin:0; font-size:1.35rem; color:#c2410c; display:flex; align-items:center; gap:8px;">
+            Bloqueo de Correos tras fallar 3 veces la Contraseña
+          </h3>
+          <p class="texto-suave" style="font-size:13.5px; margin:3px 0 0 0;">
+            Protección automática anti-fuerza bruta separada por fechas: Cuentas bloqueadas al ingresar 3 contraseñas erróneas.
+          </p>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <label style="font-size:12px; font-weight:700; color:#475569;">Fecha:</label>
+          <input type="date" onchange="filtrarPorFecha(this.value, 'tablaBloqueos3')" style="padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:12.5px;">
+          <button type="button" onclick="limpiarFiltroFecha('tablaBloqueos3', this)" class="boton-sm" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; font-size:11.5px; padding:5px 9px;">Todas</button>
+          <span class="badge" style="background:#ffedd5; color:#9a3412; font-weight:700; padding:6px 14px; font-size:12.5px;">
+            <?= count($correosBloqueadosFallos ?? []) ?> Bloqueos por Contraseña
+          </span>
+        </div>
+      </div>
+
+      <!-- Tarjeta explicativa de la Política -->
+      <div style="background:#fff7ed; border:1px solid #ffedd5; border-radius:8px; padding:16px 20px; margin-bottom:1.8rem; font-size:13.5px; color:#9a3412;">
+        <strong>Regla de Seguridad Activa:</strong> Al alcanzar 3 intentos fallidos de contraseña en el inicio de sesión, el acceso queda clausurado con registro de fecha y hora exacta. El administrador puede revisar el origen y desbloquear la cuenta con un solo clic para restablecer los intentos a cero.
+      </div>
+
+      <div class="tabla-contenedor">
+        <table class="tabla-panel" id="tablaBloqueos3">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Correo Electrónico Bloqueado</th>
+              <th>Intentos Fallidos</th>
+              <th>Fecha y Hora de Bloqueo</th>
+              <th>Último Intento Registrado</th>
+              <th>Estado de Seguridad</th>
+              <th>Acción de Desbloqueo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php if (empty($correosBloqueadosFallos)): ?>
+              <tr>
+                <td colspan="7" style="text-align:center; padding:2.5rem; color:#059669; background:#f0fdf4;">
+                  <strong style="font-size:15px;">No hay correos bloqueados por intentos fallidos de contraseña en este momento.</strong>
+                  <div style="font-size:12.5px; color:#166534; margin-top:6px;">No se registran ataques de fuerza bruta o bloqueos automáticos pendientes de atención.</div>
+                </td>
+              </tr>
+            <?php else: ?>
+              <?php 
+                $fechaGrupoBloq = null;
+                foreach ($correosBloqueadosFallos as $bf): 
+                  $fechaRef = !empty($bf['bloqueado_en']) ? $bf['bloqueado_en'] : $bf['ultimo_intento'];
+                  $dia = !empty($fechaRef) ? date('Y-m-d', strtotime($fechaRef)) : 'sin_fecha';
+                  if ($dia !== $fechaGrupoBloq):
+                    $fechaGrupoBloq = $dia;
+              ?>
+                <tr class="fila-separador-fecha" data-fecha="<?= e($dia) ?>">
+                  <td colspan="7" style="background:#f1f5f9; border-top:2px solid #cbd5e1; border-bottom:1px solid #cbd5e1; padding:9px 16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                      <span style="font-weight:800; font-size:13px; color:#1e40af;">
+                        <?= formatoFechaGrupo($dia) ?>
+                      </span>
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <?php if ($dia !== 'sin_fecha'): ?>
+                          <a href="ban.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
+                            PDF Acciones del Día
+                          </a>
+                          <a href="ban.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-size:11px; padding:3px 9px; font-weight:600; text-decoration:none; border-radius:4px;">
+                            PDF Completo
+                          </a>
+                        <?php endif; ?>
+                        <span style="font-size:11px; font-weight:700; color:#475569; background:#ffffff; padding:2px 8px; border-radius:4px; border:1px solid #cbd5e1;">
+                          <?= $dia !== 'sin_fecha' ? date('d/m/Y', strtotime($dia)) : 'Sin fecha' ?>
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              <?php endif; ?>
+                <tr class="fila-dato-fecha" data-fecha="<?= e($dia) ?>">
+                  <td>#<?= (int) $bf['id'] ?></td>
+                  <td>
+                    <strong><?= e($bf['correo']) ?></strong>
+                  </td>
+                  <td>
+                    <span class="badge" style="background:#fee2e2; color:#991b1b; font-weight:800; font-size:12.5px;">
+                      <?= (int) $bf['intentos'] ?> / 3 Intentos Fallidos
+                    </span>
+                  </td>
+                  <td style="font-size:12px; color:#64748b; white-space:nowrap;">
+                    <?= !empty($bf['bloqueado_en']) ? date('H:i:s · d/m/Y', strtotime($bf['bloqueado_en'])) : '<span class="texto-suave">Automático</span>' ?>
+                  </td>
+                  <td style="font-size:12px; color:#64748b; white-space:nowrap;">
+                    <?= !empty($bf['ultimo_intento']) ? date('H:i:s · d/m/Y', strtotime($bf['ultimo_intento'])) : '-' ?>
+                  </td>
+                  <td>
+                    <span class="badge badge-suspendida" style="background:#fee2e2; color:#991b1b; font-weight:700;">
+                      Bloqueado por Seguridad
+                    </span>
+                  </td>
+                  <td>
+                    <form action="ban.php?pagina=desbloquear_correo" method="post" onsubmit="return confirm('¿Desbloquear el correo <?= e(addslashes($bf['correo'])) ?> y reiniciar sus intentos fallidos a 0?');">
+                      <input type="hidden" name="correo" value="<?= e($bf['correo']) ?>">
+                      <input type="hidden" name="origen" value="panel_admin">
+                      <button type="submit" class="boton-sm" style="background:#059669; color:white; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
+                        <svg style="width:13px; height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
+                        Desbloquear y Reiniciar
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            <?php endif; ?>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
+
+    <!-- ========================================== -->
+    <!-- SUB-APARTADO 6: REGISTROS DEL ADMINISTRADOR -->
+    <!-- ========================================== -->
+    <div id="reg-adminlogs" class="tab-panel-reg">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.4rem; flex-wrap:wrap; gap:0.5rem;">
+        <div>
+          <h3 style="margin:0; font-size:1.35rem; color:#0f172a; display:flex; align-items:center; gap:8px;">
+            Registros y Bitácora del Administrador
+          </h3>
+          <p class="texto-suave" style="font-size:13.5px; margin:3px 0 0 0;">Historial cronológico de auditoría con todas las intervenciones separadas por día.</p>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <a href="ban.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= date('Y-m-d') ?>" target="_blank" class="boton-sm" style="background:#1e40af; color:#ffffff; font-weight:700; border:1px solid #1e3a8a; padding:6px 12px; text-decoration:none; border-radius:6px; display:inline-flex; align-items:center; gap:5px;">
+            <svg style="width:13px; height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            PDF Acciones Admin
+          </a>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <label style="font-size:12px; font-weight:700; color:#475569;">Fecha:</label>
+            <input type="date" onchange="filtrarPorFecha(this.value, 'tablaLogsAdmin')" style="padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:12.5px;">
+            <button type="button" onclick="limpiarFiltroFecha('tablaLogsAdmin', this)" class="boton-sm" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; font-size:11.5px; padding:5px 9px;">Todas</button>
+          </div>
+          <input type="text" id="filtroLogsAdmin" placeholder="Filtrar por texto..." onkeyup="filtrarTablaGenerica('filtroLogsAdmin', 'tablaLogsAdmin')" style="padding:7px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; width:220px;">
+        </div>
+      </div>
+
+      <div class="tabla-contenedor">
+        <table class="tabla-panel" id="tablaLogsAdmin">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Administrador</th>
+              <th>Tipo de Evento</th>
+              <th>Título de la Acción</th>
+              <th>Descripción Detallada</th>
+              <th>Usuario / Correo Afectado</th>
+              <th>IP Origen</th>
+              <th>Hora y Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php if (empty($registrosAdmin)): ?>
+              <tr>
+                <td colspan="8" style="text-align:center; padding:2.5rem; color:#64748b;">No hay eventos registrados en la bitácora todavía.</td>
+              </tr>
+            <?php else: ?>
+              <?php 
+                $fechaGrupoLogs = null;
+                foreach ($registrosAdmin as $ra): 
+                  $dia = !empty($ra['fecha_registro']) ? date('Y-m-d', strtotime($ra['fecha_registro'])) : 'sin_fecha';
+                  if ($dia !== $fechaGrupoLogs):
+                    $fechaGrupoLogs = $dia;
+              ?>
+                <tr class="fila-separador-fecha" data-fecha="<?= e($dia) ?>">
+                  <td colspan="8" style="background:#f1f5f9; border-top:2px solid #cbd5e1; border-bottom:1px solid #cbd5e1; padding:9px 16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                      <span style="font-weight:800; font-size:13px; color:#1e40af;">
+                        <?= formatoFechaGrupo($dia) ?>
+                      </span>
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <?php if ($dia !== 'sin_fecha'): ?>
+                          <a href="ban.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
+                            PDF Acciones del Día
+                          </a>
+                          <a href="ban.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-size:11px; padding:3px 9px; font-weight:600; text-decoration:none; border-radius:4px;">
+                            PDF Completo
+                          </a>
+                        <?php endif; ?>
+                        <span style="font-size:11px; font-weight:700; color:#475569; background:#ffffff; padding:2px 8px; border-radius:4px; border:1px solid #cbd5e1;">
+                          <?= $dia !== 'sin_fecha' ? date('d/m/Y', strtotime($dia)) : 'Sin fecha' ?>
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              <?php endif; ?>
+                <?php
+                  $tipoEv = $ra['tipo_evento'] ?? 'accion_admin';
+                  $badgeClase = 'badge-evento-accion';
+                  if ($tipoEv === 'baneo') $badgeClase = 'badge-evento-baneo';
+                  elseif ($tipoEv === 'desbaneo') $badgeClase = 'badge-evento-desbaneo';
+                  elseif ($tipoEv === 'bloqueo_correo') $badgeClase = 'badge-evento-bloqueo';
+                  elseif ($tipoEv === 'desbloqueo_correo') $badgeClase = 'badge-evento-desbloqueo';
+                  elseif ($tipoEv === 'nuevo_usuario') $badgeClase = 'badge-evento-nuevo';
+                  elseif ($tipoEv === 'verificacion') $badgeClase = 'badge-evento-verificacion';
+                ?>
+                <tr class="fila-dato-fecha" data-fecha="<?= e($dia) ?>">
+                  <td>#<?= (int) $ra['id'] ?></td>
+                  <td>
+                    <strong><?= e($ra['admin_nombre'] ?? (!empty($ra['admin_id']) ? "Admin #{$ra['admin_id']}" : 'Sistema Vantia')) ?></strong>
+                  </td>
+                  <td>
+                    <span class="badge-evento <?= $badgeClase ?>">
+                      <?= e(str_replace('_', ' ', $tipoEv)) ?>
+                    </span>
+                  </td>
+                  <td>
+                    <strong><?= e($ra['titulo']) ?></strong>
+                  </td>
+                  <td style="font-size:13px; color:#334155;">
+                    <?= e($ra['descripcion']) ?>
+                  </td>
+                  <td>
+                    <?= !empty($ra['usuario_afectado']) ? '<code>' . e($ra['usuario_afectado']) . '</code>' : '<span class="texto-suave">-</span>' ?>
+                  </td>
+                  <td style="font-size:12px; color:#64748b;">
+                    <?= e($ra['ip_origen'] ?? '127.0.0.1') ?>
+                  </td>
+                  <td style="font-size:12px; color:#64748b; white-space:nowrap;">
+                    <?= date('H:i:s · d/m/Y', strtotime($ra['fecha_registro'])) ?>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            <?php endif; ?>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SUB-APARTADO 7: ATENCIÓN AL CLIENTE        -->
+    <!-- ========================================== -->
+    <div id="reg-soporte" class="tab-panel-reg">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.4rem; flex-wrap:wrap; gap:0.5rem;">
+        <div>
+          <h3 style="margin:0; font-size:1.35rem; color:#0f172a; display:flex; align-items:center; gap:8px;">
+            Registros de Atención al Cliente (Gmails Recibidos)
+          </h3>
+          <p class="texto-suave" style="font-size:13.5px; margin:3px 0 0 0;">Bandeja de auditoría y seguimiento de los correos Gmail enviados por usuarios a través de Atención al Cliente.</p>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <div style="display:flex; gap:6px; align-items:center;">
+            <label style="font-size:12px; font-weight:700; color:#475569;">Fecha:</label>
+            <input type="date" onchange="filtrarPorFecha(this.value, 'tablaAtencionClienteAdmin')" style="padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:12.5px;">
+            <button type="button" onclick="limpiarFiltroFecha('tablaAtencionClienteAdmin', this)" class="boton-sm" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; font-size:11.5px; padding:5px 9px;">Todas</button>
+          </div>
+          <input type="text" id="filtroAtencionClienteAdmin" placeholder="Buscar por nombre, correo, asunto..." onkeyup="filtrarTablaGenerica('filtroAtencionClienteAdmin', 'tablaAtencionClienteAdmin')" style="padding:7px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; width:240px;">
+          <span class="total-badge" style="background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0;"><?= count($mensajesSoporte ?? []) ?> consultas</span>
+          <?php if (!empty($totalSoportePendientes) && $totalSoportePendientes > 0): ?>
+            <span class="total-badge" style="background:#fef3c7; color:#92400e; border:1px solid #fde68a; font-weight:800;"><?= (int) $totalSoportePendientes ?> pendiente(s)</span>
+          <?php endif; ?>
+        </div>
+      </div>
+
+      <div class="tabla-contenedor">
+        <table class="tabla-panel" id="tablaAtencionClienteAdmin">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Remitente</th>
+              <th>Correo Gmail</th>
+              <th>Tipo de Usuario</th>
+              <th>Asunto</th>
+              <th>Detalle del Mensaje</th>
+              <th>Estado</th>
+              <th>Hora y Fecha</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php if (empty($mensajesSoporte)): ?>
+              <tr>
+                <td colspan="9" style="text-align:center; padding:2.5rem; color:#64748b;">No hay mensajes o correos de Atención al Cliente registrados todavía.</td>
+              </tr>
+            <?php else: ?>
+              <?php 
+                $fechaGrupoSoporteAdmin = null;
+                foreach ($mensajesSoporte as $ms): 
+                  $dia = !empty($ms['creado_en']) ? date('Y-m-d', strtotime($ms['creado_en'])) : 'sin_fecha';
+                  if ($dia !== $fechaGrupoSoporteAdmin):
+                    $fechaGrupoSoporteAdmin = $dia;
+              ?>
+                <tr class="fila-separador-fecha" data-fecha="<?= e($dia) ?>">
+                  <td colspan="9" style="background:#f1f5f9; border-top:2px solid #cbd5e1; border-bottom:1px solid #cbd5e1; padding:9px 16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                      <span style="font-weight:800; font-size:13px; color:#1e40af;">
+                        <?= formatoFechaGrupo($dia) ?>
+                      </span>
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <?php if ($dia !== 'sin_fecha'): ?>
+                          <a href="ban.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
+                            PDF del Día
+                          </a>
+                        <?php endif; ?>
+                        <span style="font-size:11px; font-weight:700; color:#475569; background:#ffffff; padding:2px 8px; border-radius:4px; border:1px solid #cbd5e1;">
+                          <?= $dia !== 'sin_fecha' ? date('d/m/Y', strtotime($dia)) : 'Sin fecha' ?>
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              <?php endif; ?>
+                <tr class="fila-dato-fecha" data-fecha="<?= e($dia) ?>">
+                  <td>#<?= (int) $ms['id'] ?></td>
+                  <td>
+                    <strong><?= e($ms['nombre']) ?></strong>
+                  </td>
+                  <td>
+                    <a href="mailto:<?= e($ms['email']) ?>?subject=<?= urlencode('[Vantia Atención al Cliente] RE: ' . $ms['asunto']) ?>" style="color:#1d4ed8; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:4px;" title="Clic para responder">
+                      <svg style="width:13px; height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                      <?= e($ms['email']) ?>
+                    </a>
+                  </td>
+                  <td>
+                    <span class="etiqueta" style="font-size:11px; background:#f1f5f9; color:#475569;"><?= e($ms['rol']) ?></span>
+                  </td>
+                  <td>
+                    <strong><?= e($ms['asunto']) ?></strong>
+                  </td>
+                  <td>
+                    <div style="font-size:12.5px; color:#334155; line-height:1.45; max-width:320px; word-break:break-word; background:#f8fafc; padding:6px 10px; border-radius:4px; border:1px solid #e2e8f0;">
+                      <?= nl2br(e($ms['mensaje'])) ?>
+                    </div>
+                  </td>
+                  <td>
+                    <?php if (($ms['estado'] ?? 'pendiente') === 'respondido'): ?>
+                      <span style="display:inline-flex; align-items:center; gap:4px; background:#dcfce7; color:#166534; font-weight:700; font-size:11px; padding:3px 8px; border-radius:4px; border:1px solid #bbf7d0;">
+                        Respondido
+                      </span>
+                    <?php else: ?>
+                      <span style="display:inline-flex; align-items:center; gap:4px; background:#fef3c7; color:#92400e; font-weight:700; font-size:11px; padding:3px 8px; border-radius:4px; border:1px solid #fde68a;">
+                        Pendiente
+                      </span>
+                    <?php endif; ?>
+                  </td>
+                  <td style="font-size:12px; color:#64748b; white-space:nowrap;">
+                    <?= date('H:i:s · d/m/Y', strtotime($ms['creado_en'])) ?>
+                  </td>
+                  <td>
+                    <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
+                      <a href="mailto:<?= e($ms['email']) ?>?subject=<?= urlencode('[Vantia Atención al Cliente] RE: ' . $ms['asunto']) ?>" class="boton-sm" style="background:#1e40af; color:#ffffff; font-weight:700; text-decoration:none; padding:4px 9px; border-radius:4px; font-size:11px; display:inline-flex; align-items:center; gap:4px;" title="Redactar correo de respuesta">
+                        Responder Gmail
+                      </a>
+                      <?php if (($ms['estado'] ?? 'pendiente') === 'pendiente'): ?>
+                        <form action="ban.php?pagina=cambiar_estado_soporte" method="post" style="display:inline;">
+                          <input type="hidden" name="id" value="<?= (int) $ms['id'] ?>">
+                          <input type="hidden" name="estado" value="respondido">
+                          <input type="hidden" name="origen" value="panel_admin">
+                          <button type="submit" class="boton-sm" style="background:#059669; color:#ffffff; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:600; cursor:pointer;" title="Marcar como respondido">
+                            Listo
+                          </button>
+                        </form>
+                      <?php else: ?>
+                        <form action="ban.php?pagina=cambiar_estado_soporte" method="post" style="display:inline;">
+                          <input type="hidden" name="id" value="<?= (int) $ms['id'] ?>">
+                          <input type="hidden" name="estado" value="pendiente">
+                          <input type="hidden" name="origen" value="panel_admin">
+                          <button type="submit" class="boton-sm" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:600; cursor:pointer;" title="Reabrir a pendiente">
+                            Reabrir
+                          </button>
+                        </form>
+                      <?php endif; ?>
+                    </div>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            <?php endif; ?>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
 </section>
 
 <!-- Modal Reutilizable de Baneo Temporal o Permanente -->
@@ -962,6 +2054,95 @@ window.addEventListener('click', function(e) {
   const modal = document.getElementById('modalBaneo');
   if (e.target === modal) {
     cerrarModalBaneo();
+  }
+});
+
+// Control de Pestañas de la Sección de Registros
+function cambiarTabRegistros(tabId, btnElement) {
+  // Ocultar todos los paneles de registros
+  const paneles = document.querySelectorAll('.tab-panel-reg');
+  paneles.forEach(p => p.classList.remove('activo'));
+
+  // Desactivar todos los botones de pestañas
+  const botones = document.querySelectorAll('.btn-tab-reg');
+  botones.forEach(b => b.classList.remove('activo'));
+
+  // Activar el panel y el botón correspondiente
+  const panelObjetivo = document.getElementById(tabId);
+  if (panelObjetivo) {
+    panelObjetivo.classList.add('activo');
+  }
+  if (btnElement) {
+    btnElement.classList.add('activo');
+  }
+}
+
+// Filtro rápido de tablas por texto
+function filtrarTablaGenerica(inputId, tableId) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const filtro = input.value.toLowerCase().trim();
+  const tabla = document.getElementById(tableId);
+  if (!tabla) return;
+  const filas = tabla.getElementsByTagName('tr');
+
+  for (let i = 1; i < filas.length; i++) {
+    const fila = filas[i];
+    if (fila.classList.contains('fila-separador-fecha')) {
+      fila.style.display = (filtro === '') ? '' : 'none';
+      continue;
+    }
+    const textoFila = fila.textContent || fila.innerText;
+    if (textoFila.toLowerCase().indexOf(filtro) > -1) {
+      fila.style.display = '';
+    } else {
+      fila.style.display = 'none';
+    }
+  }
+}
+
+// Filtro interactivo por fecha específica
+function filtrarPorFecha(fecha, tableId) {
+  const tabla = document.getElementById(tableId);
+  if (!tabla) return;
+  const filas = tabla.querySelectorAll('tr[data-fecha]');
+  filas.forEach(f => {
+    if (!fecha || f.getAttribute('data-fecha') === fecha) {
+      f.style.display = '';
+    } else {
+      f.style.display = 'none';
+    }
+  });
+}
+
+// Limpiar filtro de fecha y mostrar todos los grupos
+function limpiarFiltroFecha(tableId, btn) {
+  const contenedor = btn.parentElement;
+  const input = contenedor.querySelector('input[type="date"]');
+  if (input) input.value = '';
+  filtrarPorFecha('', tableId);
+}
+
+// Detección automática de pestaña por hash de URL al cargar la página
+window.addEventListener('DOMContentLoaded', function() {
+  const hash = window.location.hash;
+  if (hash) {
+    const mapaHash = {
+      '#reg-reportes': 'reg-reportes',
+      '#reg-baneos': 'reg-baneos',
+      '#reg-desbaneos': 'reg-desbaneos',
+      '#reg-nuevos': 'reg-nuevos',
+      '#reg-bloqueos3': 'reg-bloqueos3',
+      '#reg-adminlogs': 'reg-adminlogs'
+    };
+
+    if (mapaHash[hash]) {
+      const tabId = mapaHash[hash];
+      const boton = document.querySelector(`button[onclick*="'${tabId}'"]`);
+      if (boton) {
+        cambiarTabRegistros(tabId, boton);
+      }
+    }
   }
 });
 </script>
