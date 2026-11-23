@@ -2,8 +2,8 @@
 
 <section class="pagina-cabecera">
   <div class="contenedor">
-    <span class="etiqueta">PANEL DE REPORTES Y REGISTROS</span>
-    <h1>Centro de Registros y Reportes</h1>
+    <span class="etiqueta">PANEL DE REGISTROS</span>
+    <h1>Panel de Registros</h1>
     <p>Supervisión ejecutiva, bitácora de eventos, reportes globales, cuentas suspendidas, historial de desbaneos, registro de nuevos usuarios, bloqueos por 3 contraseñas fallidas y auditoría de administradores.</p>
     
     <div style="margin-top:1rem; display:flex; gap:0.6rem; flex-wrap:wrap; align-items:center;">
@@ -19,19 +19,6 @@
 <section class="contenedor seccion">
   <?php if (!empty($exito)): ?><div class="mensaje-exito" style="margin-bottom:1.5rem;"><?= e($exito) ?></div><?php endif; ?>
   <?php if (!empty($error)): ?><div class="mensaje-error" style="margin-bottom:1.5rem;"><?= e($error) ?></div><?php endif; ?>
-
-  <!-- Barra de Navegación Rápida entre Secciones (Mismo formato que Panel Admin) -->
-  <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:2rem; padding:0.85rem 1.2rem; background:#ffffff; border-radius:10px; border:1px solid #e2e8f0; box-shadow:0 1px 3px rgba(0,0,0,0.04); align-items:center;">
-    <span style="font-size:12px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.04em; margin-right:4px;">Navegación Rápida:</span>
-    <a href="#seccionReportes" class="boton-sm" style="background:#f8fafc; color:#334155; border:1px solid #cbd5e1;">Reportes y Métricas</a>
-    <a href="#seccionBaneos" class="boton-sm" style="background:#f8fafc; color:#334155; border:1px solid #cbd5e1;">Baneos Activos</a>
-    <a href="#seccionDesbaneos" class="boton-sm" style="background:#f8fafc; color:#334155; border:1px solid #cbd5e1;">Desbaneos</a>
-    <a href="#seccionNuevos" class="boton-sm" style="background:#f8fafc; color:#334155; border:1px solid #cbd5e1;">Nuevos Usuarios</a>
-    <a href="#seccionBloqueos3" class="boton-sm" style="background:#f8fafc; color:#334155; border:1px solid #cbd5e1;">Bloqueo 3 Contraseñas</a>
-    <a href="#seccionAdminLogs" class="boton-sm" style="background:#f8fafc; color:#334155; border:1px solid #cbd5e1;">Registros del Administrador</a>
-    <a href="#seccionAtencionCliente" class="boton-sm" style="background:#f8fafc; color:#334155; border:1px solid #cbd5e1;">Atención al Cliente (<?= count($mensajesSoporte ?? []) ?>)</a>
-    <a href="ban.php?pagina=panel_admin" class="boton-sm" style="background:#1d4ed8; color:#ffffff; font-weight:700; border:1px solid #1e40af;">PANEL ADMIN</a>
-  </div>
 
   <!-- Generador Oficial de Reportes en PDF por Día -->
   <div class="bloque-panel" style="margin-bottom:2.2rem; background:#ffffff; border:1px solid #cbd5e1; border-left:4px solid #1e40af; border-radius:10px; padding:20px 24px; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
@@ -85,15 +72,11 @@
       <h2><?= count($registrosDesbaneos ?? []) ?></h2>
     </div>
     <div class="tarjeta">
-      <span class="numero">05 · BLOQUEO 3 FALLOS</span>
-      <h2><?= count($correosBloqueadosFallos ?? []) ?></h2>
-    </div>
-    <div class="tarjeta">
-      <span class="numero">06 · ACCIONES ADMIN</span>
+      <span class="numero">05 · ACCIONES ADMIN</span>
       <h2><?= count($registrosAdmin ?? []) ?></h2>
     </div>
     <div class="tarjeta">
-      <span class="numero">07 · ATENCIÓN CLIENTE</span>
+      <span class="numero">06 · ATENCIÓN CLIENTE</span>
       <h2><?= count($mensajesSoporte ?? []) ?></h2>
       <span style="font-size:11.5px; font-weight:700; color:<?= (!empty($totalSoportePendientes) && $totalSoportePendientes > 0) ? '#b45309' : '#059669' ?>;">
         <?= (int) ($totalSoportePendientes ?? 0) ?> pendiente(s)
@@ -115,8 +98,6 @@
     }
     .badge-evento-baneo { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
     .badge-evento-desbaneo { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
-    .badge-evento-bloqueo { background: #ffedd5; color: #9a3412; border: 1px solid #fed7aa; }
-    .badge-evento-desbloqueo { background: #e0f2fe; color: #075985; border: 1px solid #bae6fd; }
     .badge-evento-nuevo { background: #ede9fe; color: #5b21b6; border: 1px solid #ddd6fe; }
     .badge-evento-verificacion { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
     .badge-evento-accion { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
@@ -170,15 +151,11 @@
       </div>
     </div>
 
-    <!-- Alerta de Diagnóstico de Seguridad -->
-    <div style="background:#fffbeb; border:1px solid #fef3c7; border-left:4px solid #f59e0b; border-radius:8px; padding:16px 20px;">
-      <h4 style="margin:0 0 6px 0; color:#92400e; font-size:14px;">Diagnóstico Activo de Seguridad</h4>
-      <p style="margin:0; font-size:13px; color:#78350f; line-height:1.5;">
-        <?php if (!empty($correosBloqueadosFallos)): ?>
-          Se detectaron <strong><?= count($correosBloqueadosFallos) ?> cuenta(s) con bloqueo preventivo</strong> debido a que superaron los 3 intentos fallidos de contraseña. Puedes revisarlas y desbloquearlas en la sección <em>"Bloqueo de Correos tras fallar 3 veces la Contraseña"</em> más abajo.
-        <?php else: ?>
-          El sistema se encuentra seguro y estable. No existen bloqueos automáticos pendientes por contraseñas fallidas en este momento.
-        <?php endif; ?>
+    <!-- Alerta de Diagnóstico del Sistema -->
+    <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-left:4px solid #10b981; border-radius:8px; padding:16px 20px;">
+      <h4 style="margin:0 0 6px 0; color:#166534; font-size:14px;">Diagnóstico Activo del Sistema</h4>
+      <p style="margin:0; font-size:13px; color:#14532d; line-height:1.5;">
+        La plataforma se encuentra operando de manera segura y estable. Todas las verificaciones, auditorías y acciones administrativas están sincronizadas en tiempo real.
       </p>
     </div>
   </div>
@@ -300,7 +277,7 @@
                   <form action="ban.php?pagina=desbanear_cuenta" method="post" onsubmit="return confirm('¿Deseas levantar inmediatamente la suspensión para <?= e(addslashes($cb['nombre'])) ?>?');">
                     <input type="hidden" name="id" value="<?= (int) $cb['id'] ?>">
                     <input type="hidden" name="tabla" value="<?= e($cb['tabla']) ?>">
-                    <input type="hidden" name="origen" value="panel_reportes">
+                    <input type="hidden" name="origen" value="panel_registros">
                     <button type="submit" class="boton-sm" style="background:#10b981; color:white; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
                       <svg style="width:13px; height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                       Levantar Baneo
@@ -597,124 +574,7 @@
 
 
   <!-- ========================================== -->
-  <!-- SECCION 5: BLOQUEO TRAS 3 CONTRASEÑAS      -->
-  <!-- ========================================== -->
-  <div id="seccionBloqueos3" class="bloque-panel" style="margin-bottom:3rem;">
-    <div class="titulo-seccion">
-      <div>
-        <span class="etiqueta">PROTECCION ANTI-FUERZA BRUTA</span>
-        <h2>Bloqueo de Correos tras fallar 3 veces la Contraseña</h2>
-        <p class="texto-suave">Protección automática anti-fuerza bruta separada por fechas: Cuentas bloqueadas al ingresar 3 contraseñas erróneas consecutivas.</p>
-      </div>
-      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-        <label style="font-size:12px; font-weight:700; color:#475569;">Fecha:</label>
-        <input type="date" onchange="filtrarPorFecha(this.value, 'tablaBloqueos3')" style="padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:12.5px;">
-        <button type="button" onclick="limpiarFiltroFecha('tablaBloqueos3', this)" class="boton-sm" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; font-size:11.5px; padding:5px 9px;">Todas</button>
-        <span class="total-badge"><?= count($correosBloqueadosFallos ?? []) ?> bloqueados</span>
-      </div>
-    </div>
-
-    <!-- Tarjeta explicativa de la Política -->
-    <div style="background:#fff7ed; border:1px solid #ffedd5; border-radius:8px; padding:16px 20px; margin-bottom:1.8rem; font-size:13.5px; color:#9a3412;">
-      <strong>Regla de Seguridad Activa:</strong> Al alcanzar 3 intentos fallidos de contraseña en el inicio de sesión, el acceso queda clausurado con registro de fecha y hora exacta. El administrador puede revisar el origen y desbloquear la cuenta con un solo clic para restablecer los intentos a cero.
-    </div>
-
-    <div class="tabla-contenedor">
-      <table class="tabla-panel" id="tablaBloqueos3">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Correo Electrónico Bloqueado</th>
-            <th>Intentos Fallidos</th>
-            <th>Fecha y Hora de Bloqueo</th>
-            <th>Último Intento Registrado</th>
-            <th>Estado de Seguridad</th>
-            <th>Acción de Desbloqueo</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php if (empty($correosBloqueadosFallos)): ?>
-            <tr>
-              <td colspan="7" style="text-align:center; padding:2.5rem; color:#059669; background:#f0fdf4;">
-                <strong style="font-size:15px;">No hay correos bloqueados por intentos fallidos de contraseña en este momento.</strong>
-                <div style="font-size:12.5px; color:#166534; margin-top:6px;">No se registran ataques de fuerza bruta o bloqueos automáticos pendientes de atención.</div>
-              </td>
-            </tr>
-          <?php else: ?>
-            <?php 
-              $fechaGrupoBloq = null;
-              foreach ($correosBloqueadosFallos as $bf): 
-                $fechaRef = !empty($bf['bloqueado_en']) ? $bf['bloqueado_en'] : $bf['ultimo_intento'];
-                $dia = !empty($fechaRef) ? date('Y-m-d', strtotime($fechaRef)) : 'sin_fecha';
-                if ($dia !== $fechaGrupoBloq):
-                  $fechaGrupoBloq = $dia;
-            ?>
-              <tr class="fila-separador-fecha" data-fecha="<?= e($dia) ?>">
-                <td colspan="7" style="background:#f1f5f9; border-top:2px solid #cbd5e1; border-bottom:1px solid #cbd5e1; padding:9px 16px;">
-                  <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-weight:800; font-size:13px; color:#1e40af;">
-                      <?= formatoFechaGrupo($dia) ?>
-                    </span>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                      <?php if ($dia !== 'sin_fecha'): ?>
-                        <a href="ban.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
-                          PDF Acciones del Día
-                        </a>
-                        <a href="ban.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-size:11px; padding:3px 9px; font-weight:600; text-decoration:none; border-radius:4px;">
-                          PDF Completo
-                        </a>
-                      <?php endif; ?>
-                      <span style="font-size:11px; font-weight:700; color:#475569; background:#ffffff; padding:2px 8px; border-radius:4px; border:1px solid #cbd5e1;">
-                        <?= $dia !== 'sin_fecha' ? date('d/m/Y', strtotime($dia)) : 'Sin fecha' ?>
-                      </span>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            <?php endif; ?>
-              <tr class="fila-dato-fecha" data-fecha="<?= e($dia) ?>">
-                <td>#<?= (int) $bf['id'] ?></td>
-                <td>
-                  <strong><?= e($bf['correo']) ?></strong>
-                </td>
-                <td>
-                  <span class="badge" style="background:#fee2e2; color:#991b1b; font-weight:800; font-size:12.5px;">
-                    <?= (int) $bf['intentos'] ?> / 3 Intentos Fallidos
-                  </span>
-                </td>
-                <td style="font-size:12px; color:#64748b; white-space:nowrap;">
-                  <?= !empty($bf['bloqueado_en']) ? date('H:i:s · d/m/Y', strtotime($bf['bloqueado_en'])) : '<span class="texto-suave">Automático</span>' ?>
-                </td>
-                <td style="font-size:12px; color:#64748b; white-space:nowrap;">
-                  <?= !empty($bf['ultimo_intento']) ? date('H:i:s · d/m/Y', strtotime($bf['ultimo_intento'])) : '-' ?>
-                </td>
-                <td>
-                  <span class="badge badge-suspendida" style="background:#fee2e2; color:#991b1b; font-weight:700;">
-                    Bloqueado por Seguridad
-                  </span>
-                </td>
-                <td>
-                  <form action="ban.php?pagina=desbloquear_correo" method="post" onsubmit="return confirm('¿Desbloquear el correo <?= e(addslashes($bf['correo'])) ?> y reiniciar sus intentos fallidos a 0?');">
-                    <input type="hidden" name="correo" value="<?= e($bf['correo']) ?>">
-                    <input type="hidden" name="origen" value="panel_reportes">
-                    <button type="submit" class="boton-sm" style="background:#059669; color:white; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
-                      <svg style="width:13px; height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
-                      Desbloquear y Reiniciar
-                    </button>
-                  </form>
-                </td>
-              </tr>
-            <?php endforeach; ?>
-          <?php endif; ?>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-
-
-  <!-- ========================================== -->
-  <!-- SECCION 6: REGISTROS DEL ADMINISTRADOR     -->
+  <!-- SECCION 5: REGISTROS DEL ADMINISTRADOR     -->
   <!-- ========================================== -->
   <div id="seccionAdminLogs" class="bloque-panel" style="margin-bottom:3rem;">
     <div class="titulo-seccion">
@@ -832,7 +692,7 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- SECCION 7: GMAIL ATENCION AL CLIENTE       -->
+  <!-- SECCION 6: GMAIL ATENCION AL CLIENTE       -->
   <!-- ========================================== -->
   <div id="seccionAtencionCliente" class="bloque-panel" style="margin-bottom:3rem;">
     <div class="titulo-seccion">
@@ -948,7 +808,7 @@
                       <form action="ban.php?pagina=cambiar_estado_soporte" method="post" style="display:inline;">
                         <input type="hidden" name="id" value="<?= (int) $ms['id'] ?>">
                         <input type="hidden" name="estado" value="respondido">
-                        <input type="hidden" name="origen" value="panel_reportes">
+                        <input type="hidden" name="origen" value="panel_registros">
                         <button type="submit" class="boton-sm" style="background:#059669; color:#ffffff; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:600; cursor:pointer;" title="Marcar como atendido y respondido">
                           Listo
                         </button>
@@ -957,7 +817,7 @@
                       <form action="ban.php?pagina=cambiar_estado_soporte" method="post" style="display:inline;">
                         <input type="hidden" name="id" value="<?= (int) $ms['id'] ?>">
                         <input type="hidden" name="estado" value="pendiente">
-                        <input type="hidden" name="origen" value="panel_reportes">
+                        <input type="hidden" name="origen" value="panel_registros">
                         <button type="submit" class="boton-sm" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:600; cursor:pointer;" title="Reabrir a estado pendiente">
                           Reabrir
                         </button>
@@ -988,7 +848,7 @@
     <form action="ban.php?pagina=banear_cuenta" method="post" id="formBaneo">
       <input type="hidden" name="id" id="baneoId" value="">
       <input type="hidden" name="tabla" id="baneoTabla" value="">
-      <input type="hidden" name="origen" value="panel_reportes">
+      <input type="hidden" name="origen" value="panel_registros">
 
       <div style="margin-bottom:14px;">
         <label style="font-size:12px; font-weight:bold; color:#475569; display:block; margin-bottom:4px;">Cuenta seleccionada:</label>

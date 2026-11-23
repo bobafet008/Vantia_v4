@@ -26,7 +26,7 @@
           <a href="ban.php?pagina=mis_postulaciones#calificaciones"><strong>Calificaciones</strong></a>
         <?php elseif ($_SESSION['tipo'] === 'admin'): ?>
           <a href="ban.php?pagina=panel_admin"><strong>Panel Admin</strong></a>
-          <a href="ban.php?pagina=panel_reportes"><strong>Panel Reportes</strong></a>
+          <a href="ban.php?pagina=panel_registros"><strong>Panel de Registros</strong></a>
         <?php endif; ?>
       <?php else: ?>
         <a href="ban.php?pagina=empleado">Jóvenes</a>

@@ -28,10 +28,10 @@ class Empresa
 
         $sql = 'INSERT INTO empresas (
                     nombre, tipo_cuenta, representante, nit, roe, correo, contrasena, telefono,
-                    descripcion, documento_legal_path, verificada
+                    descripcion, verificada
                 ) VALUES (
                     :nombre, :tipo_cuenta, :representante, :nit, :roe, :correo, :contrasena, :telefono,
-                    :descripcion, :documento_legal_path, :verificada
+                    :descripcion, :verificada
                 )';
         $consulta = $this->conexion->prepare($sql);
         return $consulta->execute([
@@ -44,7 +44,6 @@ class Empresa
             'contrasena'           => $datos['contrasena'],
             'telefono'             => $datos['telefono'],
             'descripcion'          => $datos['descripcion'] ?? null,
-            'documento_legal_path' => $datos['documento_legal_path'] ?? null,
             'verificada'           => $datos['verificada'] ?? 1,
         ]);
     }
@@ -56,10 +55,10 @@ class Empresa
 
         $sql = 'INSERT INTO empresas (
                     id, nombre, tipo_cuenta, representante, nit, roe, correo, contrasena, telefono,
-                    descripcion, documento_legal_path, verificada
+                    descripcion, verificada
                 ) VALUES (
                     :id, :nombre, :tipo_cuenta, :representante, :nit, :roe, :correo, :contrasena, :telefono,
-                    :descripcion, :documento_legal_path, :verificada
+                    :descripcion, :verificada
                 ) ON DUPLICATE KEY UPDATE 
                     nombre = VALUES(nombre),
                     representante = VALUES(representante),
@@ -80,14 +79,13 @@ class Empresa
             'contrasena'           => $datos['contrasena'],
             'telefono'             => $datos['telefono'],
             'descripcion'          => $datos['descripcion'] ?? null,
-            'documento_legal_path' => $datos['documento_legal_path'] ?? null,
             'verificada'           => $datos['verificada'] ?? 1,
         ]);
     }
 
     public function buscarPorCorreo($correo)
     {
-        $sql = 'SELECT * FROM empresas WHERE correo = :correo OR email = :correo LIMIT 1';
+        $sql = 'SELECT * FROM empresas WHERE correo = :correo LIMIT 1';
         $consulta = $this->conexion->prepare($sql);
         $consulta->execute(['correo' => $correo]);
         return $consulta->fetch(PDO::FETCH_ASSOC);

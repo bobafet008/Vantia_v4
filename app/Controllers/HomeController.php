@@ -386,7 +386,6 @@ class HomeController
         require_once __DIR__ . '/../Models/Emprendimiento.php';
         require_once __DIR__ . '/../Models/Tutor.php';
         require_once __DIR__ . '/../Models/UsuarioAdmin.php';
-        require_once __DIR__ . '/../Models/BloqueoCorreo.php';
         require_once __DIR__ . '/../Models/RegistroAdmin.php';
 
         $modeloMay = new UsuarioMay($conexion);
@@ -395,7 +394,6 @@ class HomeController
         $modeloEmprendimiento = new Emprendimiento($conexion);
         $modeloTutor = new Tutor($conexion);
         $modeloAdmin = new UsuarioAdmin($conexion);
-        $modeloBloqueo = new BloqueoCorreo($conexion);
         $modeloRegistro = new RegistroAdmin($conexion);
 
         $usuariosMay = $modeloMay->obtenerTodos();
@@ -404,9 +402,6 @@ class HomeController
         $empresas = $modeloEmpresa->obtenerTodas();
         $emprendimientos = $modeloEmprendimiento->obtenerTodos();
         $administradores = $modeloAdmin->obtenerTodos();
-        $bloqueosCorreo = $modeloBloqueo->obtenerTodos();
-        $totalCorreosBloqueados = $modeloBloqueo->contarBloqueados();
-        $mapaBloqueados = $modeloBloqueo->obtenerMapaBloqueados();
 
         $totalEmpleos = (int) $conexion->query('SELECT COUNT(*) FROM empleos')->fetchColumn();
         $totalPostulaciones = (int) $conexion->query('SELECT COUNT(*) FROM postulaciones')->fetchColumn();
@@ -454,18 +449,13 @@ class HomeController
         ";
         $nuevosUsuarios = $conexion->query($sqlNuevos)->fetchAll(PDO::FETCH_ASSOC);
 
-        // 3. Bloqueos de correo específicamente tras fallar 3 veces la contraseña
-        $correosBloqueadosFallos = $conexion->query(
-            "SELECT * FROM bloqueos_correo WHERE intentos >= 3 OR (bloqueado = 1 AND intentos > 0) ORDER BY bloqueado_en DESC, ultimo_intento DESC"
-        )->fetchAll(PDO::FETCH_ASSOC);
-
-        // 4. Registros y bitácora del sistema y administradores
+        // 3. Registros y bitácora del sistema y administradores
         $registrosAdmin = $modeloRegistro->obtenerUltimos(100);
         $registrosBaneos = $modeloRegistro->obtenerUltimos(50, 'baneo');
         $registrosDesbaneos = $modeloRegistro->obtenerUltimos(50, 'desbaneo');
         $totalRegistrosEventos = (int) $conexion->query('SELECT COUNT(*) FROM registros_admin')->fetchColumn();
 
-        // 5. Métricas de Reportes
+        // 4. Métricas de Reportes
         $nuevosUltimos7Dias = (int) $conexion->query("
             SELECT (
                 (SELECT COUNT(*) FROM usuarios_men WHERE fecha_registro >= DATE_SUB(NOW(), INTERVAL 7 DAY)) +
@@ -490,9 +480,6 @@ class HomeController
             'empresas' => $empresas,
             'emprendimientos' => $emprendimientos,
             'administradores' => $administradores,
-            'bloqueosCorreo' => $bloqueosCorreo,
-            'totalCorreosBloqueados' => $totalCorreosBloqueados,
-            'mapaBloqueados' => $mapaBloqueados,
             'totalAdmins' => $totalAdmins,
             'totalEmpleos' => $totalEmpleos,
             'totalPostulaciones' => $totalPostulaciones,
@@ -505,7 +492,6 @@ class HomeController
             'totalUsuariosGlobal' => $totalUsuariosGlobal,
             'cuentasBaneadas' => $cuentasBaneadas,
             'nuevosUsuarios' => $nuevosUsuarios,
-            'correosBloqueadosFallos' => $correosBloqueadosFallos,
             'registrosAdmin' => $registrosAdmin,
             'registrosBaneos' => $registrosBaneos,
             'registrosDesbaneos' => $registrosDesbaneos,
@@ -533,7 +519,6 @@ class HomeController
         require_once __DIR__ . '/../Models/Empresa.php';
         require_once __DIR__ . '/../Models/Emprendimiento.php';
         require_once __DIR__ . '/../Models/Tutor.php';
-        require_once __DIR__ . '/../Models/BloqueoCorreo.php';
         require_once __DIR__ . '/../Models/RegistroAdmin.php';
 
         $modeloMay = new UsuarioMay($conexion);
@@ -541,7 +526,6 @@ class HomeController
         $modeloEmpresa = new Empresa($conexion);
         $modeloEmprendimiento = new Emprendimiento($conexion);
         $modeloTutor = new Tutor($conexion);
-        $modeloBloqueo = new BloqueoCorreo($conexion);
         $modeloRegistro = new RegistroAdmin($conexion);
 
         $totalEmpresas = $modeloEmpresa->contar();
@@ -589,18 +573,13 @@ class HomeController
         ";
         $nuevosUsuarios = $conexion->query($sqlNuevos)->fetchAll(PDO::FETCH_ASSOC);
 
-        // 3. Bloqueos de correo específicamente tras fallar 3 veces la contraseña
-        $correosBloqueadosFallos = $conexion->query(
-            "SELECT * FROM bloqueos_correo WHERE intentos >= 3 OR (bloqueado = 1 AND intentos > 0) ORDER BY bloqueado_en DESC, ultimo_intento DESC"
-        )->fetchAll(PDO::FETCH_ASSOC);
-
-        // 4. Registros y bitácora del administrador
+        // 3. Registros y bitácora del administrador
         $registrosAdmin = $modeloRegistro->obtenerUltimos(150);
         $registrosBaneos = $modeloRegistro->obtenerUltimos(60, 'baneo');
         $registrosDesbaneos = $modeloRegistro->obtenerUltimos(60, 'desbaneo');
         $totalRegistrosEventos = (int) $conexion->query('SELECT COUNT(*) FROM registros_admin')->fetchColumn();
 
-        // 5. Métricas de Reportes
+        // 4. Métricas de Reportes
         $nuevosUltimos7Dias = (int) $conexion->query("
             SELECT (
                 (SELECT COUNT(*) FROM usuarios_men WHERE fecha_registro >= DATE_SUB(NOW(), INTERVAL 7 DAY)) +
@@ -622,7 +601,6 @@ class HomeController
             'totalUsuariosGlobal' => $totalUsuariosGlobal,
             'cuentasBaneadas' => $cuentasBaneadas,
             'nuevosUsuarios' => $nuevosUsuarios,
-            'correosBloqueadosFallos' => $correosBloqueadosFallos,
             'registrosAdmin' => $registrosAdmin,
             'registrosBaneos' => $registrosBaneos,
             'registrosDesbaneos' => $registrosDesbaneos,
@@ -719,42 +697,7 @@ class HomeController
             $desbaneos = $stmtDesbaneos->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {}
 
-        // 4. Bloqueos de correo tras 3 contrasenas en la fecha
-        $bloqueos3 = [];
-        try {
-            $sqlBloq = "SELECT * FROM bloqueos_correo WHERE (DATE(bloqueado_en) = ? OR DATE(ultimo_intento) = ?) AND (bloqueado = 1 OR intentos >= 3) ORDER BY id DESC";
-            $stmtBloq = $conexion->prepare($sqlBloq);
-            $stmtBloq->execute([$fecha, $fecha]);
-            $bloqueos3 = $stmtBloq->fetchAll(PDO::FETCH_ASSOC);
-
-            $sqlBloqAdmin = "SELECT r.*, a.nombre AS admin_nombre 
-                             FROM registros_admin r
-                             LEFT JOIN usuarios_admin a ON a.id = r.admin_id
-                             WHERE r.tipo_evento = 'bloqueo_correo' AND DATE(r.fecha_registro) = ? 
-                             ORDER BY r.fecha_registro DESC";
-            $stmtBloqAdmin = $conexion->prepare($sqlBloqAdmin);
-            $stmtBloqAdmin->execute([$fecha]);
-            $bloqAdmin = $stmtBloqAdmin->fetchAll(PDO::FETCH_ASSOC);
-            foreach ($bloqAdmin as $ba) {
-                $existe = false;
-                foreach ($bloqueos3 as $b3) {
-                    if (strtolower(trim($b3['correo'] ?? '')) === strtolower(trim($ba['usuario_afectado'] ?? ''))) {
-                        $existe = true;
-                        break;
-                    }
-                }
-                if (!$existe) {
-                    $bloqueos3[] = [
-                        'bloqueado_en' => $ba['fecha_registro'],
-                        'correo' => $ba['usuario_afectado'],
-                        'intentos' => 3,
-                        'bloqueado' => 1
-                    ];
-                }
-            }
-        } catch (Exception $e) {}
-
-        // 5. Registros y auditoria completa de acciones del administrador en la fecha
+        // 4. Registros y auditoria completa de acciones del administrador en la fecha
         $registrosAdmin = [];
         try {
             $sqlAdmin = "SELECT r.*, a.nombre AS admin_nombre, a.correo AS admin_correo 
@@ -767,7 +710,7 @@ class HomeController
             $registrosAdmin = $stmtAdmin->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {}
 
-        // 6. Consultas y correos recibidos en Atención al Cliente en la fecha
+        // 5. Consultas y correos recibidos en Atención al Cliente en la fecha
         $mensajesSoporte = [];
         try {
             $sqlSoporte = "SELECT * FROM mensajes_soporte WHERE DATE(creado_en) = ? ORDER BY creado_en DESC";
@@ -782,7 +725,6 @@ class HomeController
             'nuevosUsuarios' => $nuevosUsuarios,
             'baneos' => $baneos,
             'desbaneos' => $desbaneos,
-            'bloqueos3' => $bloqueos3,
             'registrosAdmin' => $registrosAdmin,
             'mensajesSoporte' => $mensajesSoporte,
         ], $adminNombre, $esSoloAdmin ? 'admin' : 'diario');
@@ -814,7 +756,7 @@ class HomeController
             $modeloSoporte->cambiarEstado($id, $nuevoEstado);
 
             try {
-                $item = $conexion->query("SELECT email, asunto FROM mensajes_soporte WHERE id = $id LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+                $item = $conexion->query("SELECT email, asunto, usuario_may_id, usuario_men_id, empresa_id, emprendimiento_id FROM mensajes_soporte WHERE id = $id LIMIT 1")->fetch(PDO::FETCH_ASSOC);
                 $correo = $item['email'] ?? "ID $id";
                 $modeloRegistro = new RegistroAdmin($conexion);
                 $modeloRegistro->registrar(
@@ -822,14 +764,22 @@ class HomeController
                     'soporte',
                     'Estado Atención al Cliente',
                     "Consulta #$id marcada como " . ucfirst($nuevoEstado),
-                    $correo
+                    $correo,
+                    null,
+                    [
+                        'mensaje_soporte_id' => $id,
+                        'usuario_may_id'     => $item['usuario_may_id'] ?? null,
+                        'usuario_men_id'     => $item['usuario_men_id'] ?? null,
+                        'empresa_id'         => $item['empresa_id'] ?? null,
+                        'emprendimiento_id'  => $item['emprendimiento_id'] ?? null,
+                    ]
                 );
             } catch (Exception $e) {}
 
             $_SESSION['admin_exito'] = "El mensaje de Atención al Cliente #$id fue marcado como '$nuevoEstado'.";
         }
 
-        $origen = $_POST['origen'] ?? 'panel_reportes';
+        $origen = $_POST['origen'] ?? 'panel_registros';
         header("Location: ban.php?pagina=" . urlencode($origen) . "#seccionAtencionCliente");
         exit;
     }
@@ -859,7 +809,9 @@ class HomeController
                     'verificacion',
                     'Actualización de Verificación',
                     "Empresa {$empInfo['nombre']}: estado $estadoTxt",
-                    $empInfo['correo'] ?? ($empInfo['nombre'] ?? "ID $empresaId")
+                    $empInfo['correo'] ?? ($empInfo['nombre'] ?? "ID $empresaId"),
+                    null,
+                    ['empresa_id' => $empresaId]
                 );
             } catch (Exception $e) {}
 
@@ -898,7 +850,9 @@ class HomeController
                     'verificacion',
                     'Actualización de Verificación',
                     "Emprendimiento {$empInfo['nombre']}: estado $estadoTxt",
-                    $empInfo['correo'] ?? ($empInfo['nombre'] ?? "ID $id")
+                    $empInfo['correo'] ?? ($empInfo['nombre'] ?? "ID $id"),
+                    null,
+                    ['emprendimiento_id' => $id]
                 );
             } catch (Exception $e) {}
 
@@ -1096,6 +1050,12 @@ class HomeController
 
         $tipoTexto = $baneadoHasta ? "temporalmente por $duracion día(s) (hasta el " . date('d/m/Y H:i', strtotime($baneadoHasta)) . ")" : "permanentemente";
 
+        $relacionesBaneo = [];
+        if ($tabla === 'usuarios_may') $relacionesBaneo['usuario_may_id'] = $id;
+        elseif ($tabla === 'usuarios_men') $relacionesBaneo['usuario_men_id'] = $id;
+        elseif ($tabla === 'empresas') $relacionesBaneo['empresa_id'] = $id;
+        elseif ($tabla === 'emprendimientos') $relacionesBaneo['emprendimiento_id'] = $id;
+
         try {
             $modeloRegistro = new RegistroAdmin($conexion);
             $modeloRegistro->registrar(
@@ -1103,7 +1063,9 @@ class HomeController
                 'baneo',
                 'Suspensión de Cuenta (' . ucfirst(str_replace('usuarios_', '', $tabla)) . ')',
                 "Cuenta suspendida $tipoTexto. Motivo: $motivo",
-                $entCorreo ?: $entNombre
+                $entCorreo ?: $entNombre,
+                null,
+                $relacionesBaneo
             );
         } catch (Exception $e) {}
 
@@ -1111,7 +1073,7 @@ class HomeController
 
         $origen = $_POST['origen'] ?? '';
         if ($origen === 'panel_registros' || $origen === 'panel_reportes') {
-            header('Location: ban.php?pagina=panel_reportes#seccionBaneos');
+            header('Location: ban.php?pagina=panel_registros#seccionBaneos');
         } else {
             header('Location: ban.php?pagina=panel_admin');
         }
@@ -1137,17 +1099,23 @@ class HomeController
             $entNombre = $entidad['nombre'] ?? ("ID: " . $id);
             $entCorreo = $entidad['correo'] ?? null;
 
-            $sql = "UPDATE $tabla SET baneado = 0, baneado_hasta = NULL, motivo_baneo = NULL WHERE id = ?";
+            $sql = "UPDATE $tabla SET baneado = 0, baneado_hasta = NULL, motivo_baneo = NULL, intentos_fallidos = 0 WHERE id = ?";
             $stmt = $conexion->prepare($sql);
             $stmt->execute([$id]);
 
             if ($tabla === 'emprendimientos') {
-                $sync = $conexion->prepare("UPDATE empresas SET baneado = 0, baneado_hasta = NULL, motivo_baneo = NULL WHERE id = ?");
+                $sync = $conexion->prepare("UPDATE empresas SET baneado = 0, baneado_hasta = NULL, motivo_baneo = NULL, intentos_fallidos = 0 WHERE id = ?");
                 $sync->execute([$id]);
             } elseif ($tabla === 'empresas') {
-                $sync = $conexion->prepare("UPDATE emprendimientos SET baneado = 0, baneado_hasta = NULL, motivo_baneo = NULL WHERE id = ?");
+                $sync = $conexion->prepare("UPDATE emprendimientos SET baneado = 0, baneado_hasta = NULL, motivo_baneo = NULL, intentos_fallidos = 0 WHERE id = ?");
                 $sync->execute([$id]);
             }
+
+            $relacionesDesbaneo = [];
+            if ($tabla === 'usuarios_may') $relacionesDesbaneo['usuario_may_id'] = $id;
+            elseif ($tabla === 'usuarios_men') $relacionesDesbaneo['usuario_men_id'] = $id;
+            elseif ($tabla === 'empresas') $relacionesDesbaneo['empresa_id'] = $id;
+            elseif ($tabla === 'emprendimientos') $relacionesDesbaneo['emprendimiento_id'] = $id;
 
             try {
                 $modeloRegistro = new RegistroAdmin($conexion);
@@ -1156,7 +1124,9 @@ class HomeController
                     'desbaneo',
                     'Suspensión Revocada / Desbaneo',
                     "Se levantó la suspensión para: $entNombre ($tabla)",
-                    $entCorreo ?: $entNombre
+                    $entCorreo ?: $entNombre,
+                    null,
+                    $relacionesDesbaneo
                 );
             } catch (Exception $e) {}
 
@@ -1165,90 +1135,10 @@ class HomeController
 
         $origen = $_POST['origen'] ?? '';
         if ($origen === 'panel_registros' || $origen === 'panel_reportes') {
-            header('Location: ban.php?pagina=panel_reportes#seccionDesbaneos');
+            header('Location: ban.php?pagina=panel_registros#seccionDesbaneos');
         } else {
             header('Location: ban.php?pagina=panel_admin');
         }
-        exit;
-    }
-
-    public function bloquearCorreo()
-    {
-        if (empty($_SESSION['usuario_id']) || ($_SESSION['tipo'] ?? '') !== 'admin') {
-            accesoDenegado('Acción reservada exclusivamente para el Administrador del sistema.', 'Panel de Administración');
-        }
-
-        $correo = trim($_POST['correo'] ?? '');
-        $origen = $_POST['origen'] ?? '';
-
-        if ($correo === '' || !filter_var($correo, FILTER_VALIDATE_EMAIL)) {
-            $_SESSION['admin_error'] = 'Debes ingresar un correo electrónico válido para bloquear.';
-            $dest = ($origen === 'panel_registros' || $origen === 'panel_reportes') ? 'ban.php?pagina=panel_reportes#seccionBloqueos3' : 'ban.php?pagina=panel_admin#seccionBloqueos';
-            header("Location: $dest");
-            exit;
-        }
-
-        require __DIR__ . '/../../config/database.php';
-        require_once __DIR__ . '/../Models/BloqueoCorreo.php';
-        require_once __DIR__ . '/../Models/RegistroAdmin.php';
-
-        $modeloBloqueo = new BloqueoCorreo($conexion);
-        $modeloBloqueo->bloquear($correo);
-
-        try {
-            $modeloRegistro = new RegistroAdmin($conexion);
-            $modeloRegistro->registrar(
-                (int) $_SESSION['usuario_id'],
-                'bloqueo_correo',
-                'Bloqueo Manual de Correo',
-                'Correo bloqueado preventivamente por el administrador',
-                $correo
-            );
-        } catch (Exception $e) {}
-
-        $_SESSION['admin_exito'] = 'El correo ' . htmlspecialchars($correo) . ' ha sido bloqueado exitosamente.';
-        $dest = ($origen === 'panel_registros' || $origen === 'panel_reportes') ? 'ban.php?pagina=panel_reportes#seccionBloqueos3' : 'ban.php?pagina=panel_admin#seccionBloqueos';
-        header("Location: $dest");
-        exit;
-    }
-
-    public function desbloquearCorreo()
-    {
-        if (empty($_SESSION['usuario_id']) || ($_SESSION['tipo'] ?? '') !== 'admin') {
-            accesoDenegado('Acción reservada exclusivamente para el Administrador del sistema.', 'Panel de Administración');
-        }
-
-        $correo = trim($_POST['correo'] ?? '');
-        $origen = $_POST['origen'] ?? '';
-
-        if ($correo === '' || !filter_var($correo, FILTER_VALIDATE_EMAIL)) {
-            $_SESSION['admin_error'] = 'Debes especificar un correo válido para desbloquear.';
-            $dest = ($origen === 'panel_registros' || $origen === 'panel_reportes') ? 'ban.php?pagina=panel_reportes#seccionBloqueos3' : 'ban.php?pagina=panel_admin#seccionBloqueos';
-            header("Location: $dest");
-            exit;
-        }
-
-        require __DIR__ . '/../../config/database.php';
-        require_once __DIR__ . '/../Models/BloqueoCorreo.php';
-        require_once __DIR__ . '/../Models/RegistroAdmin.php';
-
-        $modeloBloqueo = new BloqueoCorreo($conexion);
-        $modeloBloqueo->desbloquear($correo);
-
-        try {
-            $modeloRegistro = new RegistroAdmin($conexion);
-            $modeloRegistro->registrar(
-                (int) $_SESSION['usuario_id'],
-                'desbloqueo_correo',
-                'Desbloqueo de Correo',
-                'Correo desbloqueado y restablecido a 0 intentos fallidos',
-                $correo
-            );
-        } catch (Exception $e) {}
-
-        $_SESSION['admin_exito'] = 'El correo ' . htmlspecialchars($correo) . ' ha sido desbloqueado y sus intentos han sido restablecidos a 0.';
-        $dest = ($origen === 'panel_registros' || $origen === 'panel_reportes') ? 'ban.php?pagina=panel_reportes#seccionBloqueos3' : 'ban.php?pagina=panel_admin#seccionBloqueos';
-        header("Location: $dest");
         exit;
     }
 

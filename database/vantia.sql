@@ -1,7 +1,7 @@
 -- Base de datos Vantia (Empleo Juvenil Verificado)
 CREATE DATABASE IF NOT EXISTS BS_VANTIA
   CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
+  COLLATE utf8mb4_general_ci;
 
 USE BS_VANTIA;
 
@@ -18,10 +18,13 @@ CREATE TABLE IF NOT EXISTS usuarios_men (
     baneado TINYINT(1) NOT NULL DEFAULT 0,
     baneado_hasta DATETIME DEFAULT NULL,
     motivo_baneo VARCHAR(60) DEFAULT NULL,
+    intentos_fallidos INT NOT NULL DEFAULT 0,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- 2. Tabla de Tutores (Padre, madre o tutor legal a cargo del usuario menor de 18 años)
+-- 2. Datos del tutor y autorización asociados a una cuenta de menor.
+-- Los tutores no tienen cuentas de acceso; los datos personales y documentos del menor
+-- permanecen en usuarios_men.
 CREATE TABLE IF NOT EXISTS tutores (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_men_id INT NOT NULL,
@@ -30,36 +33,13 @@ CREATE TABLE IF NOT EXISTS tutores (
     correo VARCHAR(50) DEFAULT NULL,
     telefono BIGINT NOT NULL,
     relacion VARCHAR(25) NOT NULL DEFAULT 'Tutor legal',
-    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY uk_tutor_usuario_men (usuario_men_id),
-    CONSTRAINT fk_tutores_usuario_men FOREIGN KEY (usuario_men_id) REFERENCES usuarios_men(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- 2.1 Tabla de Usuario Tutor (Control, Autorizaciones y Tutela sobre Usuarios Menores)
-CREATE TABLE IF NOT EXISTS usuario_tutor (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    tutor_id INT DEFAULT NULL,
-    usuario_men_id INT NOT NULL,
-    tutor_nombre VARCHAR(30) NOT NULL,
-    tutor_ci VARCHAR(15) DEFAULT NULL,
-    tutor_correo VARCHAR(50) DEFAULT NULL,
-    tutor_telefono BIGINT NOT NULL,
-    tutor_relacion VARCHAR(25) NOT NULL DEFAULT 'Tutor legal',
-    menor_nombre VARCHAR(30) NOT NULL,
-    menor_correo VARCHAR(50) NOT NULL,
-    menor_telefono BIGINT DEFAULT NULL,
-    menor_fecha_nacimiento DATE NOT NULL,
-    permiso_tutor_path VARCHAR(80) DEFAULT NULL,
-    cv_path VARCHAR(80) DEFAULT NULL,
     tipo_control ENUM('permiso_laboral', 'aprobacion_postulacion', 'consentimiento_general') NOT NULL DEFAULT 'permiso_laboral',
     estado ENUM('aprobado', 'pendiente', 'denegado', 'revocado') NOT NULL DEFAULT 'aprobado',
     observaciones VARCHAR(80) DEFAULT NULL,
-    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_usuario_tutor_tutor (tutor_id),
-    INDEX idx_usuario_tutor_menor (usuario_men_id),
-    CONSTRAINT fk_usuario_tutor_tutor FOREIGN KEY (tutor_id) REFERENCES tutores(id) ON DELETE CASCADE,
-    CONSTRAINT fk_usuario_tutor_menor FOREIGN KEY (usuario_men_id) REFERENCES usuarios_men(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_tutor_usuario_men (usuario_men_id),
+    CONSTRAINT fk_tutores_usuario_men FOREIGN KEY (usuario_men_id) REFERENCES usuarios_men(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 3. Tabla de Usuarios Mayores de 18 años y Administradores
 CREATE TABLE IF NOT EXISTS usuarios_may (
@@ -74,8 +54,9 @@ CREATE TABLE IF NOT EXISTS usuarios_may (
     baneado TINYINT(1) NOT NULL DEFAULT 0,
     baneado_hasta DATETIME DEFAULT NULL,
     motivo_baneo VARCHAR(60) DEFAULT NULL,
+    intentos_fallidos INT NOT NULL DEFAULT 0,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
 -- 4. Tabla de Empresas (Organizaciones formales con NIT y ROE)
@@ -89,40 +70,41 @@ CREATE TABLE IF NOT EXISTS empresas (
     representante VARCHAR(40) NOT NULL,
     telefono BIGINT NOT NULL,
     correo VARCHAR(50) NOT NULL UNIQUE,
-    email VARCHAR(50) GENERATED ALWAYS AS (correo) VIRTUAL,
     contrasena VARCHAR(60) NOT NULL,
-    password VARCHAR(60) GENERATED ALWAYS AS (contrasena) VIRTUAL,
     descripcion TEXT DEFAULT NULL,
-    documento_legal_path VARCHAR(80) DEFAULT NULL,
     verificada TINYINT(1) NOT NULL DEFAULT 1,
     baneado TINYINT(1) NOT NULL DEFAULT 0,
     baneado_hasta DATETIME DEFAULT NULL,
     motivo_baneo VARCHAR(60) DEFAULT NULL,
+    intentos_fallidos INT NOT NULL DEFAULT 0,
     creada_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 4.1 Tabla de Emprendimientos (Negocios e iniciativas emergentes con Titular y CI)
 CREATE TABLE IF NOT EXISTS emprendimientos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(30) NOT NULL,
     nombre_emprendimiento VARCHAR(50) GENERATED ALWAYS AS (nombre) VIRTUAL,
+    representante VARCHAR(40) NOT NULL,
+    titular_nombre VARCHAR(40) GENERATED ALWAYS AS (representante) VIRTUAL,
     rubro VARCHAR(30) NOT NULL,
-    titular_nombre VARCHAR(30) NOT NULL,
-    titular_ci BIGINT NOT NULL,
+    ci BIGINT DEFAULT NULL,
+    titular_ci BIGINT GENERATED ALWAYS AS (ci) VIRTUAL,
     telefono BIGINT NOT NULL,
     correo VARCHAR(50) NOT NULL UNIQUE,
-    email VARCHAR(50) GENERATED ALWAYS AS (correo) VIRTUAL,
     contrasena VARCHAR(60) NOT NULL,
-    password VARCHAR(60) GENERATED ALWAYS AS (contrasena) VIRTUAL,
     descripcion TEXT DEFAULT NULL,
+    foto_puesto VARCHAR(80) NOT NULL DEFAULT 'uploads/roe/roe_default.png',
     logo_path VARCHAR(80) DEFAULT NULL,
-    documento_legal_path VARCHAR(80) DEFAULT NULL,
-    verificada TINYINT(1) NOT NULL DEFAULT 1,
+    verificado TINYINT(1) NOT NULL DEFAULT 1,
+    verificada TINYINT(1) GENERATED ALWAYS AS (verificado) VIRTUAL,
     baneado TINYINT(1) NOT NULL DEFAULT 0,
     baneado_hasta DATETIME DEFAULT NULL,
     motivo_baneo VARCHAR(60) DEFAULT NULL,
+    intentos_fallidos INT NOT NULL DEFAULT 0,
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     creada_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 5. Tabla de Empleos / Vacantes
 CREATE TABLE IF NOT EXISTS empleos (
@@ -142,7 +124,7 @@ CREATE TABLE IF NOT EXISTS empleos (
     INDEX (emprendimiento_id),
     CONSTRAINT fk_empleos_empresa FOREIGN KEY (empresa_id) REFERENCES empresas(id) ON DELETE CASCADE,
     CONSTRAINT fk_empleos_emprendimiento FOREIGN KEY (emprendimiento_id) REFERENCES emprendimientos(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 6. Tabla de Postulaciones (Aplicaciones de candidatos a empleos)
 CREATE TABLE IF NOT EXISTS postulaciones (
@@ -169,7 +151,7 @@ CREATE TABLE IF NOT EXISTS postulaciones (
     CONSTRAINT fk_postulacion_emprendimiento FOREIGN KEY (emprendimiento_id) REFERENCES emprendimientos(id) ON DELETE CASCADE,
     CONSTRAINT fk_postulacion_usuario_may FOREIGN KEY (usuario_may_id) REFERENCES usuarios_may(id) ON DELETE CASCADE,
     CONSTRAINT fk_postulacion_usuario_men FOREIGN KEY (usuario_men_id) REFERENCES usuarios_men(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 7. Tabla de Calificaciones (Evaluaciones de empresas por parte de empleados contratados)
 CREATE TABLE IF NOT EXISTS calificaciones (
@@ -192,7 +174,7 @@ CREATE TABLE IF NOT EXISTS calificaciones (
     CONSTRAINT fk_calif_emprendimiento FOREIGN KEY (emprendimiento_id) REFERENCES emprendimientos(id) ON DELETE CASCADE,
     CONSTRAINT fk_calif_usuario_may FOREIGN KEY (usuario_may_id) REFERENCES usuarios_may(id) ON DELETE CASCADE,
     CONSTRAINT fk_calif_usuario_men FOREIGN KEY (usuario_men_id) REFERENCES usuarios_men(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 8. Tabla de Usuarios Administradores
 CREATE TABLE IF NOT EXISTS usuarios_admin (
@@ -204,7 +186,7 @@ CREATE TABLE IF NOT EXISTS usuarios_admin (
     cargo VARCHAR(35) NOT NULL DEFAULT 'Administrador General',
     activo TINYINT(1) NOT NULL DEFAULT 1,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Administrador Inicial Predeterminado
 -- Acceso: admin@vantia.com / admin123
@@ -219,35 +201,13 @@ VALUES (
 )
 ON DUPLICATE KEY UPDATE activo = 1;
 
--- 9. Tabla de Control de Intentos Fallidos y Bloqueo de Correos / Gmail
-CREATE TABLE IF NOT EXISTS bloqueos_correo (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    correo VARCHAR(50) NOT NULL UNIQUE,
-    intentos INT NOT NULL DEFAULT 0,
-    bloqueado TINYINT(1) NOT NULL DEFAULT 0,
-    bloqueado_en DATETIME DEFAULT NULL,
-    ultimo_intento DATETIME DEFAULT NULL,
-    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- 10. Tabla de Bitácora y Registros del Administrador
-CREATE TABLE IF NOT EXISTS registros_admin (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    admin_id INT DEFAULT NULL,
-    tipo_evento ENUM('reporte', 'baneo', 'desbaneo', 'nuevo_usuario', 'bloqueo_correo', 'desbloqueo_correo', 'verificacion', 'accion_admin', 'soporte') NOT NULL,
-    titulo VARCHAR(50) NOT NULL,
-    descripcion VARCHAR(80) NOT NULL,
-    usuario_afectado VARCHAR(50) DEFAULT NULL,
-    ip_origen VARCHAR(45) DEFAULT NULL,
-    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX (admin_id),
-    INDEX (tipo_evento),
-    INDEX (fecha_registro)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- 11. Tabla de Consultas y Correos Enviados a Atención al Cliente
+-- 9. Tabla de Consultas y Correos Enviados a Atención al Cliente
 CREATE TABLE IF NOT EXISTS mensajes_soporte (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_may_id INT DEFAULT NULL,
+    usuario_men_id INT DEFAULT NULL,
+    empresa_id INT DEFAULT NULL,
+    emprendimiento_id INT DEFAULT NULL,
     nombre VARCHAR(100) NOT NULL,
     email VARCHAR(150) NOT NULL,
     rol VARCHAR(50) DEFAULT 'Usuario',
@@ -258,5 +218,44 @@ CREATE TABLE IF NOT EXISTS mensajes_soporte (
     creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX (email),
     INDEX (creado_en),
-    INDEX (estado)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    INDEX (estado),
+    INDEX (usuario_may_id),
+    INDEX (usuario_men_id),
+    INDEX (empresa_id),
+    INDEX (emprendimiento_id),
+    CONSTRAINT fk_soporte_usuario_may FOREIGN KEY (usuario_may_id) REFERENCES usuarios_may(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_soporte_usuario_men FOREIGN KEY (usuario_men_id) REFERENCES usuarios_men(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_soporte_empresa FOREIGN KEY (empresa_id) REFERENCES empresas(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_soporte_emprendimiento FOREIGN KEY (emprendimiento_id) REFERENCES emprendimientos(id) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- 10. Tabla de Bitácora y Registros del Administrador
+CREATE TABLE IF NOT EXISTS registros_admin (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    admin_id INT DEFAULT NULL,
+    usuario_may_id INT DEFAULT NULL,
+    usuario_men_id INT DEFAULT NULL,
+    empresa_id INT DEFAULT NULL,
+    emprendimiento_id INT DEFAULT NULL,
+    mensaje_soporte_id INT DEFAULT NULL,
+    tipo_evento ENUM('reporte', 'baneo', 'desbaneo', 'nuevo_usuario', 'bloqueo_correo', 'verificacion', 'accion_admin', 'soporte') NOT NULL,
+    titulo VARCHAR(50) NOT NULL,
+    descripcion VARCHAR(80) NOT NULL,
+    usuario_afectado VARCHAR(50) DEFAULT NULL,
+    ip_origen VARCHAR(45) DEFAULT NULL,
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX (admin_id),
+    INDEX (usuario_may_id),
+    INDEX (usuario_men_id),
+    INDEX (empresa_id),
+    INDEX (emprendimiento_id),
+    INDEX (mensaje_soporte_id),
+    INDEX (tipo_evento),
+    INDEX (fecha_registro),
+    CONSTRAINT fk_registros_admin_admin FOREIGN KEY (admin_id) REFERENCES usuarios_admin(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_registros_admin_usuario_may FOREIGN KEY (usuario_may_id) REFERENCES usuarios_may(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_registros_admin_usuario_men FOREIGN KEY (usuario_men_id) REFERENCES usuarios_men(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_registros_admin_empresa FOREIGN KEY (empresa_id) REFERENCES empresas(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_registros_admin_emprendimiento FOREIGN KEY (emprendimiento_id) REFERENCES emprendimientos(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_registros_admin_soporte FOREIGN KEY (mensaje_soporte_id) REFERENCES mensajes_soporte(id) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

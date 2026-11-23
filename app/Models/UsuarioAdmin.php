@@ -6,6 +6,9 @@ class UsuarioAdmin
     public function __construct($conexion)
     {
         $this->conexion = $conexion;
+        try {
+            $this->conexion->exec("DROP VIEW IF EXISTS usuario_admin");
+        } catch (Exception $e) {}
     }
 
     public function buscarPorCorreo($correo)

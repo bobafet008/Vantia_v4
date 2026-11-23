@@ -15,6 +15,10 @@ class MensajeSoporte
         try {
             $sql = "CREATE TABLE IF NOT EXISTS mensajes_soporte (
                 id INT AUTO_INCREMENT PRIMARY KEY,
+                usuario_may_id INT DEFAULT NULL,
+                usuario_men_id INT DEFAULT NULL,
+                empresa_id INT DEFAULT NULL,
+                emprendimiento_id INT DEFAULT NULL,
                 nombre VARCHAR(100) NOT NULL,
                 email VARCHAR(150) NOT NULL,
                 rol VARCHAR(50) DEFAULT 'Usuario',
@@ -25,26 +29,80 @@ class MensajeSoporte
                 creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 INDEX (email),
                 INDEX (creado_en),
-                INDEX (estado)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+                INDEX (estado),
+                INDEX (usuario_may_id),
+                INDEX (usuario_men_id),
+                INDEX (empresa_id),
+                INDEX (emprendimiento_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci";
             $this->conexion->exec($sql);
-        } catch (Exception $e) {}
+
+            // Asegurar columnas de relación foránea con usuarios
+            $cols = [
+                'usuario_may_id'    => "ALTER TABLE mensajes_soporte ADD COLUMN usuario_may_id INT DEFAULT NULL AFTER id",
+                'usuario_men_id'    => "ALTER TABLE mensajes_soporte ADD COLUMN usuario_men_id INT DEFAULT NULL AFTER usuario_may_id",
+                'empresa_id'        => "ALTER TABLE mensajes_soporte ADD COLUMN empresa_id INT DEFAULT NULL AFTER usuario_men_id",
+                'emprendimiento_id' => "ALTER TABLE mensajes_soporte ADD COLUMN emprendimiento_id INT DEFAULT NULL AFTER empresa_id",
+            ];
+
+            foreach ($cols as $col => $sqlAdd) {
+                $existe = $this->conexion->query("SHOW COLUMNS FROM mensajes_soporte LIKE '$col'")->fetch();
+                if (!$existe) {
+                    $this->conexion->exec($sqlAdd);
+                }
+            }
+
+            // Asegurar restricciones de clave foránea
+            $fks = [
+                'fk_soporte_usuario_may'    => "ALTER TABLE mensajes_soporte ADD CONSTRAINT fk_soporte_usuario_may FOREIGN KEY (usuario_may_id) REFERENCES usuarios_may(id) ON DELETE SET NULL ON UPDATE CASCADE",
+                'fk_soporte_usuario_men'    => "ALTER TABLE mensajes_soporte ADD CONSTRAINT fk_soporte_usuario_men FOREIGN KEY (usuario_men_id) REFERENCES usuarios_men(id) ON DELETE SET NULL ON UPDATE CASCADE",
+                'fk_soporte_empresa'        => "ALTER TABLE mensajes_soporte ADD CONSTRAINT fk_soporte_empresa FOREIGN KEY (empresa_id) REFERENCES empresas(id) ON DELETE SET NULL ON UPDATE CASCADE",
+                'fk_soporte_emprendimiento' => "ALTER TABLE mensajes_soporte ADD CONSTRAINT fk_soporte_emprendimiento FOREIGN KEY (emprendimiento_id) REFERENCES emprendimientos(id) ON DELETE SET NULL ON UPDATE CASCADE",
+            ];
+
+            foreach ($fks as $fkName => $sqlFk) {
+                try {
+                    $fkExiste = $this->conexion->query("
+                        SELECT CONSTRAINT_NAME FROM information_schema.TABLE_CONSTRAINTS 
+                        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'mensajes_soporte' AND CONSTRAINT_NAME = '$fkName'
+                    ")->fetch();
+                    if (!$fkExiste) {
+                        $this->conexion->exec($sqlFk);
+                    }
+                } catch (Exception $eFk) {}
+            }
+        } catch (Exception $e) {
+            error_log('Error en asegurarTabla mensajes_soporte: ' . $e->getMessage());
+        }
     }
 
-    public function crear($nombre, $email, $rol, $asunto, $mensaje, $ipOrigen = null)
+    public function crear($nombre, $email, $rol, $asunto, $mensaje, $ipOrigen = null, $usuarioMayId = null, $usuarioMenId = null, $empresaId = null, $emprendimientoId = null)
     {
+        $this->asegurarTabla();
         $ip = $ipOrigen ?: ($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1');
-        $sql = "INSERT INTO mensajes_soporte (nombre, email, rol, asunto, mensaje, estado, ip_origen)
-                VALUES (:nombre, :email, :rol, :asunto, :mensaje, 'pendiente', :ip)";
+
+        $sql = "INSERT INTO mensajes_soporte (
+                    usuario_may_id, usuario_men_id, empresa_id, emprendimiento_id,
+                    nombre, email, rol, asunto, mensaje, estado, ip_origen
+                ) VALUES (
+                    :usuario_may_id, :usuario_men_id, :empresa_id, :emprendimiento_id,
+                    :nombre, :email, :rol, :asunto, :mensaje, 'pendiente', :ip
+                )";
         $stmt = $this->conexion->prepare($sql);
-        return $stmt->execute([
-            'nombre'  => substr(trim($nombre), 0, 100),
-            'email'   => strtolower(substr(trim($email), 0, 150)),
-            'rol'     => substr(trim($rol), 0, 50),
-            'asunto'  => substr(trim($asunto), 0, 150),
-            'mensaje' => trim($mensaje),
-            'ip'      => substr($ip, 0, 45)
+        $ok = $stmt->execute([
+            'usuario_may_id'    => $usuarioMayId ? (int) $usuarioMayId : null,
+            'usuario_men_id'    => $usuarioMenId ? (int) $usuarioMenId : null,
+            'empresa_id'        => $empresaId ? (int) $empresaId : null,
+            'emprendimiento_id' => $emprendimientoId ? (int) $emprendimientoId : null,
+            'nombre'            => substr(trim($nombre), 0, 100),
+            'email'             => strtolower(substr(trim($email), 0, 150)),
+            'rol'               => substr(trim($rol), 0, 50),
+            'asunto'            => substr(trim($asunto), 0, 150),
+            'mensaje'           => trim($mensaje),
+            'ip'                => substr($ip, 0, 45)
         ]);
+
+        return $ok ? (int) $this->conexion->lastInsertId() : false;
     }
 
     public function obtenerTodos($limite = 150)

@@ -40,7 +40,5 @@ return [
     'eliminar_cv_empleado'       => ['HomeController', 'eliminarCvEmpleado'],
     'banear_cuenta'            => ['HomeController', 'banearCuenta'],
     'desbanear_cuenta'         => ['HomeController', 'desbanearCuenta'],
-    'bloquear_correo'          => ['HomeController', 'bloquearCorreo'],
-    'desbloquear_correo'       => ['HomeController', 'desbloquearCorreo'],
     'cambiar_estado_soporte'   => ['HomeController', 'cambiarEstadoSoporte'],
 ];

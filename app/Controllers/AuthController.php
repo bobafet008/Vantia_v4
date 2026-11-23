@@ -7,6 +7,70 @@ class AuthController
         vista('login', ['tipo' => $tipo]);
     }
 
+    private function asegurarColumnaIntentos($conexion)
+    {
+        $tablas = ['usuarios_men', 'usuarios_may', 'empresas', 'emprendimientos'];
+        foreach ($tablas as $t) {
+            try {
+                $col = $conexion->query("SHOW COLUMNS FROM $t LIKE 'intentos_fallidos'")->fetch();
+                if (!$col) {
+                    $conexion->exec("ALTER TABLE $t ADD COLUMN intentos_fallidos INT NOT NULL DEFAULT 0");
+                }
+            } catch (Exception $e) {}
+        }
+    }
+
+    private function buscarCuentaPorCorreo($conexion, $correo)
+    {
+        // 1. Emprendimientos
+        try {
+            $stmt = $conexion->prepare("SELECT id, nombre, correo, contrasena, baneado, baneado_hasta, motivo_baneo, intentos_fallidos, verificado FROM emprendimientos WHERE correo = ? LIMIT 1");
+            $stmt->execute([$correo]);
+            $cuenta = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($cuenta) {
+                $cuenta['tabla'] = 'emprendimientos';
+                return $cuenta;
+            }
+        } catch (Exception $e) {}
+
+        // 2. Empresas
+        try {
+            $stmt = $conexion->prepare("SELECT id, nombre, correo, contrasena, baneado, baneado_hasta, motivo_baneo, intentos_fallidos, verificada, tipo_cuenta, representante FROM empresas WHERE correo = ? LIMIT 1");
+            $stmt->execute([$correo]);
+            $cuenta = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($cuenta) {
+                $cuenta['tabla'] = 'empresas';
+                return $cuenta;
+            }
+        } catch (Exception $e) {}
+
+        // 3. Usuarios Mayores
+        try {
+            $stmt = $conexion->prepare("SELECT id, nombre, correo, contrasena, tipo, baneado, baneado_hasta, motivo_baneo, intentos_fallidos FROM usuarios_may WHERE correo = ? LIMIT 1");
+            $stmt->execute([$correo]);
+            $cuenta = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($cuenta) {
+                $cuenta['tabla'] = 'usuarios_may';
+                $cuenta['es_menor'] = 0;
+                return $cuenta;
+            }
+        } catch (Exception $e) {}
+
+        // 4. Usuarios Menores
+        try {
+            $stmt = $conexion->prepare("SELECT id, nombre, correo, contrasena, 'empleado' AS tipo, baneado, baneado_hasta, motivo_baneo, intentos_fallidos FROM usuarios_men WHERE correo = ? LIMIT 1");
+            $stmt->execute([$correo]);
+            $cuenta = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($cuenta) {
+                $cuenta['tabla'] = 'usuarios_men';
+                $cuenta['es_menor'] = 1;
+                return $cuenta;
+            }
+        } catch (Exception $e) {}
+
+        return null;
+    }
+
     public function validar()
     {
         require __DIR__ . '/../../config/database.php';
@@ -14,13 +78,11 @@ class AuthController
         require_once __DIR__ . '/../Models/Empresa.php';
         require_once __DIR__ . '/../Models/Emprendimiento.php';
         require_once __DIR__ . '/../Models/UsuarioAdmin.php';
-        require_once __DIR__ . '/../Models/BloqueoCorreo.php';
+        require_once __DIR__ . '/../Models/RegistroAdmin.php';
 
-        $modeloUsuario        = new Usuario($conexion);
-        $modeloEmpresa        = new Empresa($conexion);
-        $modeloEmprendimiento = new Emprendimiento($conexion);
-        $modeloAdmin          = new UsuarioAdmin($conexion);
-        $modeloBloqueo        = new BloqueoCorreo($conexion);
+        $this->asegurarColumnaIntentos($conexion);
+
+        $modeloAdmin = new UsuarioAdmin($conexion);
 
         $correo = trim($_POST['correo'] ?? '');
         $contrasena = $_POST['contrasena'] ?? '';
@@ -35,20 +97,9 @@ class AuthController
             return;
         }
 
-        // Verificar si el correo está bloqueado por superar el límite de intentos fallidos
-        if ($modeloBloqueo->estaBloqueado($correo)) {
-            vista('login', [
-                'tipo' => $tipoRequerido,
-                'error' => 'Esta cuenta de correo ha sido bloqueada por superar el límite de 3 intentos fallidos de inicio de sesión. Por favor, contacta al administrador para que desbloquee tu acceso.',
-                'correo' => $correo,
-            ]);
-            return;
-        }
-
         // 1. Verificar si las credenciales corresponden a un Administrador en usuarios_admin
         $admin = $modeloAdmin->buscarPorCorreo($correo);
         if ($admin && password_verify($contrasena, $admin['contrasena'])) {
-            $modeloBloqueo->resetear($correo);
             session_regenerate_id(true);
             $_SESSION['usuario_id'] = (int) $admin['id'];
             $_SESSION['usuario'] = $admin['nombre'];
@@ -62,57 +113,47 @@ class AuthController
             exit;
         }
 
-        // 2. Si las credenciales corresponden a un Emprendimiento en la tabla emprendimientos
-        $emprendimiento = $modeloEmprendimiento->buscarPorCorreo($correo);
-        if ($emprendimiento && password_verify($contrasena, $emprendimiento['contrasena'])) {
-            if (estaBaneado($emprendimiento)) {
+        // 2. Buscar cuenta de usuario en las tablas del sistema
+        $cuenta = $this->buscarCuentaPorCorreo($conexion, $correo);
+
+        if ($cuenta) {
+            $tabla = $cuenta['tabla'];
+            $id = (int) $cuenta['id'];
+
+            // Si la cuenta ya se encuentra suspendida o bloqueada
+            if (estaBaneado($cuenta)) {
                 vista('login', [
                     'tipo' => $tipoRequerido,
-                    'error' => mensajeBaneo($emprendimiento),
+                    'error' => mensajeBaneo($cuenta),
                     'correo' => $correo,
                 ]);
                 return;
             }
 
-            if (isset($emprendimiento['verificado']) && (int) $emprendimiento['verificado'] === 0) {
-                vista('login', [
-                    'tipo' => $tipoRequerido,
-                    'error' => 'Tu emprendimiento aún está pendiente de revisión por el administrador.',
-                    'correo' => $correo,
-                ]);
-                return;
-            }
+            // Validar contraseña
+            if (password_verify($contrasena, $cuenta['contrasena'])) {
+                // Restablecer contador de intentos fallidos al iniciar sesión con éxito
+                try {
+                    $conexion->exec("UPDATE $tabla SET intentos_fallidos = 0 WHERE id = $id");
+                    if ($tabla === 'emprendimientos') {
+                        $conexion->exec("UPDATE empresas SET intentos_fallidos = 0 WHERE id = $id");
+                    } elseif ($tabla === 'empresas') {
+                        $conexion->exec("UPDATE emprendimientos SET intentos_fallidos = 0 WHERE id = $id");
+                    }
+                } catch (Exception $e) {}
 
-            $modeloBloqueo->resetear($correo);
-            session_regenerate_id(true);
-            $_SESSION['usuario_id'] = (int) $emprendimiento['id'];
-            $_SESSION['usuario'] = $emprendimiento['nombre'];
-            $_SESSION['representante'] = $emprendimiento['representante'] ?? null;
-            $_SESSION['correo'] = $emprendimiento['correo'];
-            $_SESSION['tipo'] = 'empresa';
-            $_SESSION['subtipo'] = 'emprendimiento';
-            $_SESSION['es_menor'] = 0;
-            $_SESSION['tabla_usuario'] = 'emprendimientos';
-
-            header('Location: ban.php?pagina=panel_empresa');
-            exit;
-        }
-
-        // 3. Si se especificó tipo empresa o emprendimiento, intentar validar contra la tabla empresas
-        if ($tipoRequerido === 'empresa' || $tipoRequerido === 'emprendimiento') {
-            $empresa = $modeloEmpresa->buscarPorCorreo($correo);
-            if ($empresa && password_verify($contrasena, $empresa['contrasena'])) {
-                if (estaBaneado($empresa)) {
+                // Validar si requiere verificación previa por el administrador
+                if ($tabla === 'emprendimientos' && isset($cuenta['verificado']) && (int) $cuenta['verificado'] === 0) {
                     vista('login', [
                         'tipo' => $tipoRequerido,
-                        'error' => mensajeBaneo($empresa),
+                        'error' => 'Tu emprendimiento aún está pendiente de revisión por el administrador.',
                         'correo' => $correo,
                     ]);
                     return;
                 }
 
-                if (isset($empresa['verificada']) && (int) $empresa['verificada'] === 0) {
-                    $msgPendiente = (($empresa['tipo_cuenta'] ?? '') === 'emprendimiento')
+                if ($tabla === 'empresas' && isset($cuenta['verificada']) && (int) $cuenta['verificada'] === 0) {
+                    $msgPendiente = (($cuenta['tipo_cuenta'] ?? '') === 'emprendimiento')
                         ? 'Tu emprendimiento aún está pendiente de revisión por el administrador.'
                         : 'Tu empresa aún está pendiente de revisión por el administrador.';
                     vista('login', [
@@ -123,104 +164,115 @@ class AuthController
                     return;
                 }
 
-                $modeloBloqueo->resetear($correo);
                 session_regenerate_id(true);
-                $_SESSION['usuario_id'] = (int) $empresa['id'];
-                $_SESSION['usuario'] = $empresa['nombre'];
-                $_SESSION['representante'] = $empresa['representante'] ?? null;
-                $_SESSION['correo'] = $empresa['correo'];
-                $_SESSION['tipo'] = 'empresa';
-                $_SESSION['subtipo'] = $empresa['tipo_cuenta'] ?? 'empresa';
-                $_SESSION['es_menor'] = 0;
-                $_SESSION['tabla_usuario'] = 'empresas';
+                $_SESSION['usuario_id'] = $id;
+                $_SESSION['usuario'] = $cuenta['nombre'];
+                $_SESSION['correo'] = $cuenta['correo'];
+                $_SESSION['tabla_usuario'] = $tabla;
 
-                header('Location: ban.php?pagina=panel_empresa');
+                if ($tabla === 'emprendimientos') {
+                    $_SESSION['tipo'] = 'empresa';
+                    $_SESSION['subtipo'] = 'emprendimiento';
+                    $_SESSION['es_menor'] = 0;
+                    $_SESSION['representante'] = $cuenta['representante'] ?? null;
+                    header('Location: ban.php?pagina=panel_empresa');
+                    exit;
+                }
+
+                if ($tabla === 'empresas') {
+                    $_SESSION['tipo'] = 'empresa';
+                    $_SESSION['subtipo'] = $cuenta['tipo_cuenta'] ?? 'empresa';
+                    $_SESSION['es_menor'] = 0;
+                    $_SESSION['representante'] = $cuenta['representante'] ?? null;
+                    header('Location: ban.php?pagina=panel_empresa');
+                    exit;
+                }
+
+                // usuarios_may y usuarios_men
+                $_SESSION['tipo'] = $cuenta['tipo'] ?? 'empleado';
+                $_SESSION['es_menor'] = (int) ($cuenta['es_menor'] ?? 0);
+
+                if (($cuenta['tipo'] ?? '') === 'admin') {
+                    header('Location: ban.php?pagina=panel_admin');
+                } else {
+                    header('Location: ban.php?pagina=trabajos');
+                }
                 exit;
-            }
-        }
-
-        // 4. Buscar en usuarios mayores (usuarios_may) o menores (usuarios_men)
-        $usuario = $modeloUsuario->buscarPorCorreo($correo);
-        if ($usuario && password_verify($contrasena, $usuario['contrasena'])) {
-            if (estaBaneado($usuario)) {
-                vista('login', [
-                    'tipo' => $tipoRequerido,
-                    'error' => mensajeBaneo($usuario),
-                    'correo' => $correo,
-                ]);
-                return;
-            }
-
-            $modeloBloqueo->resetear($correo);
-            session_regenerate_id(true);
-            $_SESSION['usuario_id'] = (int) $usuario['id'];
-            $_SESSION['usuario'] = $usuario['nombre'];
-            $_SESSION['correo'] = $usuario['correo'];
-            $_SESSION['tipo'] = $usuario['tipo'];
-            $_SESSION['es_menor'] = (int) ($usuario['es_menor'] ?? 0);
-            $_SESSION['tabla_usuario'] = $usuario['tabla_origen'] ?? ($usuario['es_menor'] ? 'usuarios_men' : 'usuarios_may');
-
-            if ($usuario['tipo'] === 'admin') {
-                header('Location: ban.php?pagina=panel_admin');
             } else {
-                header('Location: ban.php?pagina=trabajos');
-            }
-            exit;
-        }
+                // Contraseña incorrecta: incrementar intentos fallidos
+                $nuevosIntentos = ((int) ($cuenta['intentos_fallidos'] ?? 0)) + 1;
 
-        // 5. Si no se especificó tipo empresa/emprendimiento pero las credenciales corresponden a una empresa/emprendimiento
-        if ($tipoRequerido !== 'empresa' && $tipoRequerido !== 'emprendimiento') {
-            $empresa = $modeloEmpresa->buscarPorCorreo($correo);
-            if ($empresa && password_verify($contrasena, $empresa['contrasena'])) {
-                if (estaBaneado($empresa)) {
+                if ($nuevosIntentos >= 3) {
+                    // Bloqueo tras fallar 3 veces la contraseña
+                    $motivoBloqueo = 'Bloqueo automático por 3 intentos fallidos de contraseña';
+                    try {
+                        $stmtBan = $conexion->prepare("UPDATE $tabla SET baneado = 1, motivo_baneo = ?, intentos_fallidos = ? WHERE id = ?");
+                        $stmtBan->execute([$motivoBloqueo, $nuevosIntentos, $id]);
+
+                        if ($tabla === 'emprendimientos') {
+                            $stmtSync = $conexion->prepare("UPDATE empresas SET baneado = 1, motivo_baneo = ?, intentos_fallidos = ? WHERE id = ?");
+                            $stmtSync->execute([$motivoBloqueo, $nuevosIntentos, $id]);
+                        } elseif ($tabla === 'empresas') {
+                            $stmtSync = $conexion->prepare("UPDATE emprendimientos SET baneado = 1, motivo_baneo = ?, intentos_fallidos = ? WHERE id = ?");
+                            $stmtSync->execute([$motivoBloqueo, $nuevosIntentos, $id]);
+                        }
+                    } catch (Exception $eBloqueo) {}
+
+                    // Registrar evento en registros_admin con llaves foráneas conectadas
+                    try {
+                        $regAdmin = new RegistroAdmin($conexion);
+                        $relaciones = [];
+                        if ($tabla === 'usuarios_may') $relaciones['usuario_may_id'] = $id;
+                        elseif ($tabla === 'usuarios_men') $relaciones['usuario_men_id'] = $id;
+                        elseif ($tabla === 'empresas') $relaciones['empresa_id'] = $id;
+                        elseif ($tabla === 'emprendimientos') $relaciones['emprendimiento_id'] = $id;
+
+                        $regAdmin->registrar(
+                            null,
+                            'bloqueo_correo',
+                            'Bloqueo por Intentos Fallidos',
+                            'Cuenta suspendida tras fallar 3 veces la contraseña',
+                            $cuenta['correo'],
+                            null,
+                            $relaciones
+                        );
+                    } catch (Exception $eReg) {}
+
                     vista('login', [
                         'tipo' => $tipoRequerido,
-                        'error' => mensajeBaneo($empresa),
+                        'error' => 'Tu cuenta ha sido bloqueada tras fallar 3 veces la contraseña. Por favor, contacta a Atención al Cliente para reactivarla.',
+                        'correo' => $correo,
+                    ]);
+                    return;
+                } else {
+                    // Actualizar contador y notificar intentos restantes
+                    try {
+                        $stmtInc = $conexion->prepare("UPDATE $tabla SET intentos_fallidos = ? WHERE id = ?");
+                        $stmtInc->execute([$nuevosIntentos, $id]);
+
+                        if ($tabla === 'emprendimientos') {
+                            $stmtSync = $conexion->prepare("UPDATE empresas SET intentos_fallidos = ? WHERE id = ?");
+                            $stmtSync->execute([$nuevosIntentos, $id]);
+                        } elseif ($tabla === 'empresas') {
+                            $stmtSync = $conexion->prepare("UPDATE emprendimientos SET intentos_fallidos = ? WHERE id = ?");
+                            $stmtSync->execute([$nuevosIntentos, $id]);
+                        }
+                    } catch (Exception $eInc) {}
+
+                    $restantes = 3 - $nuevosIntentos;
+                    vista('login', [
+                        'tipo' => $tipoRequerido,
+                        'error' => 'Contraseña incorrecta. Te quedan ' . $restantes . ' intento(s) antes de que la cuenta sea bloqueada.',
                         'correo' => $correo,
                     ]);
                     return;
                 }
-
-                if (isset($empresa['verificada']) && (int) $empresa['verificada'] === 0) {
-                    $msgPendiente = (($empresa['tipo_cuenta'] ?? '') === 'emprendimiento')
-                        ? 'Tu emprendimiento aún está pendiente de revisión por el administrador.'
-                        : 'Tu empresa aún está pendiente de revisión por el administrador.';
-                    vista('login', [
-                        'tipo' => $tipoRequerido,
-                        'error' => $msgPendiente,
-                        'correo' => $correo,
-                    ]);
-                    return;
-                }
-
-                $modeloBloqueo->resetear($correo);
-                session_regenerate_id(true);
-                $_SESSION['usuario_id'] = (int) $empresa['id'];
-                $_SESSION['usuario'] = $empresa['nombre'];
-                $_SESSION['representante'] = $empresa['representante'] ?? null;
-                $_SESSION['correo'] = $empresa['correo'];
-                $_SESSION['tipo'] = 'empresa';
-                $_SESSION['subtipo'] = $empresa['tipo_cuenta'] ?? 'empresa';
-                $_SESSION['es_menor'] = 0;
-                $_SESSION['tabla_usuario'] = 'empresas';
-
-                header('Location: ban.php?pagina=panel_empresa');
-                exit;
             }
-        }
-
-        // Registrar intento fallido para el correo ingresado (máximo 3 intentos)
-        $fallo = $modeloBloqueo->registrarFallo($correo);
-        if ($fallo['bloqueado']) {
-            $errorLogin = 'Has superado el límite de 3 intentos fallidos. Tu cuenta ha sido bloqueada por seguridad. Contacta al administrador para su desbloqueo.';
-        } else {
-            $restantes = $fallo['restantes'];
-            $errorLogin = 'Correo o contraseña incorrectos. Te quedan ' . $restantes . ' intento(s) antes de que la cuenta sea bloqueada.';
         }
 
         vista('login', [
             'tipo' => $tipoRequerido,
-            'error' => $errorLogin,
+            'error' => 'Correo o contraseña incorrectos.',
             'correo' => $correo,
         ]);
     }

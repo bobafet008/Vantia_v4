@@ -183,23 +183,20 @@ class PdfReporteDiario
         $nuevos = count($this->datos['nuevosUsuarios'] ?? []);
         $baneos = count($this->datos['baneos'] ?? []);
         $desbaneos = count($this->datos['desbaneos'] ?? []);
-        $bloqueos3 = count($this->datos['bloqueos3'] ?? []);
         $adminLogs = count($this->datos['registrosAdmin'] ?? []);
         $soporteCount = count($this->datos['mensajesSoporte'] ?? []);
-        $totalEventos = $nuevos + $baneos + $desbaneos + $bloqueos3 + $adminLogs + $soporteCount;
+        $totalEventos = $nuevos + $baneos + $desbaneos + $adminLogs + $soporteCount;
 
         if ($esAdmin) {
             $cntVerif = 0;
             $cntBaneos = 0;
             $cntDesbaneos = 0;
-            $cntBloqueos = 0;
             $cntOtros = 0;
             foreach ($this->datos['registrosAdmin'] ?? [] as $ra) {
                 $te = $ra['tipo_evento'] ?? '';
                 if ($te === 'verificacion') $cntVerif++;
                 elseif ($te === 'baneo') $cntBaneos++;
                 elseif ($te === 'desbaneo') $cntDesbaneos++;
-                elseif ($te === 'bloqueo_correo' || $te === 'desbloqueo_correo') $cntBloqueos++;
                 else $cntOtros++;
             }
 
@@ -209,7 +206,6 @@ class PdfReporteDiario
                 ['Verificaciones', "$cntVerif", [0.15, 0.35, 0.85]],
                 ['Baneos / Sanciones', "$cntBaneos", [0.85, 0.15, 0.15]],
                 ['Desbaneos', "$cntDesbaneos", [0.02, 0.58, 0.41]],
-                ['Bloqueos Correo', "$cntBloqueos", [0.88, 0.42, 0.05]],
             ];
         } else {
             $kpis = [
@@ -217,15 +213,14 @@ class PdfReporteDiario
                 ['Atencion Cliente', "$soporteCount", [0.05, 0.55, 0.70]],
                 ['Baneos / Sanciones', "$baneos", [0.85, 0.15, 0.15]],
                 ['Desbaneos', "$desbaneos", [0.02, 0.58, 0.41]],
-                ['Bloqueos Contrasena', "$bloqueos3", [0.88, 0.42, 0.05]],
                 ['Nuevos Usuarios', "+$nuevos", [0.06, 0.55, 0.35]],
             ];
         }
 
-        $boxW = ($this->contentWidth - (5 * 8)) / 6;
+        $boxW = ($this->contentWidth - (4 * 10)) / 5;
         $boxH = 40;
         foreach ($kpis as $idx => $kpi) {
-            $bx = $this->marginLeft + ($idx * ($boxW + 8));
+            $bx = $this->marginLeft + ($idx * ($boxW + 10));
             $this->drawRect($bx, $this->curY - $boxH, $boxW, $boxH, 'FD', [1, 1, 1], [0.85, 0.88, 0.92], 0.8);
             $this->drawRect($bx, $this->curY - 2.5, $boxW, 2.5, 'F', $kpi[2]);
 
@@ -241,8 +236,7 @@ class PdfReporteDiario
         $this->renderSeccionSoporte($this->datos['mensajesSoporte'] ?? [], "2");
         $this->renderSeccionBaneos($this->datos['baneos'] ?? [], "3");
         $this->renderSeccionDesbaneos($this->datos['desbaneos'] ?? [], "4");
-        $this->renderSeccionBloqueos3($this->datos['bloqueos3'] ?? [], "5");
-        $this->renderSeccionNuevosUsuarios($this->datos['nuevosUsuarios'] ?? [], "6");
+        $this->renderSeccionNuevosUsuarios($this->datos['nuevosUsuarios'] ?? [], "5");
     }
 
     private function renderTituloSeccion(string $numero, string $titulo, int $cantidad): void
@@ -334,8 +328,6 @@ class PdfReporteDiario
             $colorBorde = [0.35, 0.40, 0.50];
             if ($tipo === 'baneo') $colorBorde = [0.85, 0.15, 0.15];
             elseif ($tipo === 'desbaneo') $colorBorde = [0.05, 0.60, 0.40];
-            elseif ($tipo === 'bloqueo_correo') $colorBorde = [0.88, 0.45, 0.05];
-            elseif ($tipo === 'desbloqueo_correo') $colorBorde = [0.05, 0.55, 0.70];
             elseif ($tipo === 'verificacion') $colorBorde = [0.15, 0.35, 0.85];
 
             $this->drawRect($this->marginLeft, $this->curY - $h, 3.5, $h, 'F', $colorBorde);
@@ -498,34 +490,8 @@ class PdfReporteDiario
         $this->curY -= 12;
     }
 
-    // Seccion 5: Bloqueos 3 Contrasenas
-    private function renderSeccionBloqueos3(array $items, string $numero = "5"): void
-    {
-        $this->renderTituloSeccion($numero, "Bloqueos de Correo tras 3 Contrasenas Fallidas", count($items));
-        if (empty($items)) {
-            $this->renderTablaVacia("No se registraron bloqueos por intentos fallidos de contrasena en esta fecha.");
-            return;
-        }
-
-        $cols = ['Hora', 'Correo Electronico Bloqueado', 'Intentos Fallidos', 'Estado de Seguridad', 'Origen'];
-        $widths = [45, 190, 90, 110, 80.28];
-        $this->renderHeaderTabla($cols, $widths);
-
-        foreach ($items as $idx => $item) {
-            $ref = !empty($item['bloqueado_en']) ? $item['bloqueado_en'] : ($item['ultimo_intento'] ?? ($item['fecha_registro'] ?? ''));
-            $hora = !empty($ref) ? date('H:i:s', strtotime($ref)) : '-';
-            $correo = $item['correo'] ?? ($item['usuario_afectado'] ?? '-');
-            $intentos = ($item['intentos'] ?? 3) . " / 3 fallos";
-            $estado = "Bloqueado por seguridad";
-            $origen = "Aut. Fuerza bruta";
-
-            $this->renderFilaTabla([$hora, $correo, $intentos, $estado, $origen], $widths, $idx % 2 === 1);
-        }
-        $this->curY -= 12;
-    }
-
-    // Seccion 6: Nuevos Usuarios
-    private function renderSeccionNuevosUsuarios(array $items, string $numero = "6"): void
+    // Seccion 5: Nuevos Usuarios
+    private function renderSeccionNuevosUsuarios(array $items, string $numero = "5"): void
     {
         $this->renderTituloSeccion($numero, "Nuevos Usuarios Registrados", count($items));
         if (empty($items)) {

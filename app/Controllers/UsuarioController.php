@@ -128,7 +128,6 @@ class UsuarioController
                         'contrasena' => $hashContrasena,
                         'telefono' => $telefono,
                         'descripcion' => $descripcion ?: null,
-                        'documento_legal_path' => null,
                         'verificada' => 1,
                     ];
                 }
@@ -185,7 +184,6 @@ class UsuarioController
                         'contrasena'    => $hashContrasena,
                         'telefono'      => $telefono,
                         'descripcion'   => trim($descFinal) ?: null,
-                        'documento_legal_path' => null,
                         'verificada'    => 1,
                     ];
                 }
@@ -301,7 +299,9 @@ class UsuarioController
                         'nuevo_usuario',
                         'Nuevo Emprendimiento Registrado',
                         'Emprendimiento registrado: ' . $nombre . ' (' . ($rubro ?: 'General') . ')',
-                        $correo
+                        $correo,
+                        null,
+                        ['emprendimiento_id' => $nuevoId]
                     );
                 } catch (Exception $e) {}
 
@@ -339,7 +339,9 @@ class UsuarioController
                         'nuevo_usuario',
                         'Nueva Empresa Registrada',
                         'Empresa registrada: ' . $nombre . ' (NIT: ' . $nit . ')',
-                        $correo
+                        $correo,
+                        null,
+                        ['empresa_id' => $nuevoId]
                     );
                 } catch (Exception $e) {}
 
@@ -381,7 +383,9 @@ class UsuarioController
                             'nuevo_usuario',
                             'Nuevo Joven Menor Registrado',
                             'Joven menor (16-17) registrado: ' . $nombre . ' con tutor ' . $tutorNombre,
-                            $correo
+                            $correo,
+                            null,
+                            ['usuario_men_id' => $nuevoId]
                         );
                     } catch (Exception $e) {}
 
@@ -420,7 +424,9 @@ class UsuarioController
                             'nuevo_usuario',
                             'Nuevo Candidato Mayor Registrado',
                             'Candidato mayor de edad registrado: ' . $nombre,
-                            $correo
+                            $correo,
+                            null,
+                            ['usuario_may_id' => $nuevoId]
                         );
                     } catch (Exception $e) {}
 

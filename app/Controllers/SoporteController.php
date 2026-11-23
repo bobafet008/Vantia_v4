@@ -38,10 +38,64 @@ class SoporteController {
 
             $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
             try {
-                $modeloSoporte = new MensajeSoporte($conexion);
-                $modeloSoporte->crear($nombre, $email, $rol, $asunto, $mensaje, $ip);
+                $usuarioMayId = null;
+                $usuarioMenId = null;
+                $empresaId = null;
+                $emprendimientoId = null;
 
-                // Registrar en bitácora de auditoría general
+                // 1. Identificar por sesion activa
+                if (!empty($_SESSION['usuario_id']) && !empty($_SESSION['tabla_usuario'])) {
+                    $tablaSesion = $_SESSION['tabla_usuario'];
+                    $idSesion = (int) $_SESSION['usuario_id'];
+                    if ($tablaSesion === 'usuarios_may') {
+                        $usuarioMayId = $idSesion;
+                    } elseif ($tablaSesion === 'usuarios_men') {
+                        $usuarioMenId = $idSesion;
+                    } elseif ($tablaSesion === 'empresas') {
+                        $empresaId = $idSesion;
+                    } elseif ($tablaSesion === 'emprendimientos') {
+                        $emprendimientoId = $idSesion;
+                    }
+                }
+
+                // 2. Si no se obtuvo por sesion, buscar cuenta por correo electronico
+                if (!$usuarioMayId && !$usuarioMenId && !$empresaId && !$emprendimientoId) {
+                    $stmtMay = $conexion->prepare("SELECT id FROM usuarios_may WHERE correo = ? LIMIT 1");
+                    $stmtMay->execute([$email]);
+                    $rowMay = $stmtMay->fetch(PDO::FETCH_ASSOC);
+                    if ($rowMay) {
+                        $usuarioMayId = (int) $rowMay['id'];
+                    } else {
+                        $stmtMen = $conexion->prepare("SELECT id FROM usuarios_men WHERE correo = ? LIMIT 1");
+                        $stmtMen->execute([$email]);
+                        $rowMen = $stmtMen->fetch(PDO::FETCH_ASSOC);
+                        if ($rowMen) {
+                            $usuarioMenId = (int) $rowMen['id'];
+                        } else {
+                            $stmtEmpr = $conexion->prepare("SELECT id FROM emprendimientos WHERE correo = ? LIMIT 1");
+                            $stmtEmpr->execute([$email]);
+                            $rowEmpr = $stmtEmpr->fetch(PDO::FETCH_ASSOC);
+                            if ($rowEmpr) {
+                                $emprendimientoId = (int) $rowEmpr['id'];
+                            } else {
+                                $stmtEmp = $conexion->prepare("SELECT id FROM empresas WHERE correo = ? LIMIT 1");
+                                $stmtEmp->execute([$email]);
+                                $rowEmp = $stmtEmp->fetch(PDO::FETCH_ASSOC);
+                                if ($rowEmp) {
+                                    $empresaId = (int) $rowEmp['id'];
+                                }
+                            }
+                        }
+                    }
+                }
+
+                $modeloSoporte = new MensajeSoporte($conexion);
+                $mensajeSoporteId = $modeloSoporte->crear(
+                    $nombre, $email, $rol, $asunto, $mensaje, $ip,
+                    $usuarioMayId, $usuarioMenId, $empresaId, $emprendimientoId
+                );
+
+                // Registrar en bitacora de auditoria general vinculando soporte y usuario
                 $regAdmin = new RegistroAdmin($conexion);
                 $regAdmin->registrar(
                     null,
@@ -49,7 +103,14 @@ class SoporteController {
                     'Consulta Atención al Cliente (' . substr($asunto, 0, 18) . ')',
                     substr("Gmail de $nombre ($email): $asunto", 0, 80),
                     $email,
-                    $ip
+                    $ip,
+                    [
+                        'mensaje_soporte_id' => $mensajeSoporteId ?: null,
+                        'usuario_may_id'     => $usuarioMayId,
+                        'usuario_men_id'     => $usuarioMenId,
+                        'empresa_id'         => $empresaId,
+                        'emprendimiento_id'  => $emprendimientoId,
+                    ]
                 );
             } catch (Exception $e) {
                 error_log("Error al registrar consulta de soporte: " . $e->getMessage());
