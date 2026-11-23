@@ -1,5 +1,4 @@
 <?php
-// Funciones auxiliares globales del sistema Vantia
 
 function e($texto)
 {
@@ -50,7 +49,6 @@ function etiquetaEstado($estado)
     return $estados[$estado] ?? ucfirst((string) $estado);
 }
 
-// Sube un archivo validado (CV, permiso de tutor o documento legal de empresa)
 function subirArchivo($campoArchivo, $carpetaDestino, $prefijo = 'doc')
 {
     if (!isset($_FILES[$campoArchivo]) || $_FILES[$campoArchivo]['error'] !== UPLOAD_ERR_OK) {
@@ -64,7 +62,6 @@ function subirArchivo($campoArchivo, $carpetaDestino, $prefijo = 'doc')
         return false;
     }
 
-    // Tamaño máximo 5MB
     if ($_FILES[$campoArchivo]['size'] > 5 * 1024 * 1024) {
         return false;
     }
@@ -85,7 +82,6 @@ function subirArchivo($campoArchivo, $carpetaDestino, $prefijo = 'doc')
     return false;
 }
 
-// Retorna la URL relativa para visualizar un archivo subido desde las vistas
 function rutaArchivo($ruta)
 {
     if (empty($ruta)) {
@@ -101,7 +97,6 @@ function rutaArchivo($ruta)
     return 'uploads/' . $archivo;
 }
 
-// Elimina físicamente un archivo de la carpeta uploads si existe
 function eliminarArchivo($ruta)
 {
     if (empty($ruta)) {
@@ -115,7 +110,6 @@ function eliminarArchivo($ruta)
     return false;
 }
 
-// Muestra la vista de Acceso Denegado (403 Forbidden) cuando un usuario intenta entrar a un panel no permitido
 function accesoDenegado($mensaje = 'No tienes los permisos necesarios para acceder a esta sección.', $panelRequerido = 'Panel restringido')
 {
     http_response_code(403);
@@ -126,7 +120,6 @@ function accesoDenegado($mensaje = 'No tienes los permisos necesarios para acced
     exit;
 }
 
-// Determina si una cuenta (usuario o empresa) tiene un baneo activo
 function estaBaneado($cuenta)
 {
     if (empty($cuenta) || empty($cuenta['baneado'])) {
@@ -144,7 +137,6 @@ function estaBaneado($cuenta)
     return true;
 }
 
-// Devuelve el mensaje explicativo de la suspensión temporal o permanente
 function mensajeBaneo($cuenta)
 {
     $motivo = !empty($cuenta['motivo_baneo']) ? ' Motivo: "' . $cuenta['motivo_baneo'] . '".' : '';
@@ -156,7 +148,6 @@ function mensajeBaneo($cuenta)
     return 'Tu cuenta se encuentra suspendida temporalmente hasta el ' . $hasta . '.' . $motivo;
 }
 
-// Formatea fechas para agrupar visualmente bitácoras y registros del sistema
 function formatoFechaGrupo($fecha)
 {
     if (empty($fecha)) {

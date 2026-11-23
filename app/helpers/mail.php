@@ -1,9 +1,7 @@
 <?php
 
-
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
-
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 
@@ -13,8 +11,8 @@ function enviarCorreo(string $destinatario, string $nombreDestinatario, string $
     $mail = new PHPMailer(true);
 
     try {
-        
-        $mail->SMTPDebug = 0; // Desactivado para no romper las redirecciones HTTP
+
+        $mail->SMTPDebug = 0;
         $mail->isSMTP();
         $mail->Host       = 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
@@ -24,19 +22,15 @@ function enviarCorreo(string $destinatario, string $nombreDestinatario, string $
         $mail->Port       = 587;
         $mail->CharSet    = 'UTF-8';
         $mail->Timeout    = 15;
-        
-        
+
         $mail->setFrom($config['usuario'], $config['nombre']);
 
-        
         $mail->addAddress($destinatario, $nombreDestinatario);
 
-        
         if (!empty($replyToEmail)) {
             $mail->addReplyTo($replyToEmail, $replyToName);
         }
 
-        
         $mail->isHTML(true);
         $mail->Subject = $asunto;
         $mail->Body    = $mensajeHTML;

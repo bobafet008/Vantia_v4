@@ -7,8 +7,8 @@
     <p>Administra tu Curriculum Vitae, credenciales de acceso y datos de tu cuenta en Vantia.</p>
 
     <div style="display:flex; gap:10px; margin-top:1.25rem; flex-wrap:wrap;">
-      <a href="ban.php?pagina=mis_postulaciones" class="boton boton-sm">Mis Postulaciones</a>
-      <a href="ban.php?pagina=trabajos" class="boton boton-sm boton-oscuro">Explorar Oportunidades Laborales</a>
+      <a href="index.php?pagina=mis_postulaciones" class="boton boton-sm">Mis Postulaciones</a>
+      <a href="index.php?pagina=trabajos" class="boton boton-sm boton-oscuro">Explorar Oportunidades Laborales</a>
     </div>
   </div>
 </section>
@@ -28,7 +28,7 @@
 
   <div style="display:grid; grid-template-columns:320px 1fr; gap:28px; align-items:start;">
     
-    <!-- BARRA LATERAL: Resumen de Usuario -->
+    
     <div style="background:white; border:1px solid var(--linea); border-radius:8px; padding:24px; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
       <div style="display:flex; align-items:center; gap:12px; margin-bottom:1rem;">
         <div style="width:48px; height:48px; border-radius:50%; background:#14233d; color:#d5a347; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.2rem;">
@@ -58,7 +58,7 @@
       </div>
 
       <?php if ($candidatoTipo === 'menor' && !empty($usuario['tutor_nombre'])): ?>
-        <!-- Datos de Protección / Tutor Legal para menores -->
+        
         <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:12px; margin-bottom:1rem;">
           <div style="font-size:0.75rem; font-weight:bold; color:#1d4ed8; text-transform:uppercase; margin-bottom:6px;">
             Tutor Legal Autorizado
@@ -90,10 +90,10 @@
       </div>
     </div>
 
-    <!-- CONTENIDO PRINCIPAL: FORMULARIOS -->
+    
     <div style="display:flex; flex-direction:column; gap:28px;">
 
-      <!-- SECCIÓN 1: Curriculum Vitae (Subir y Eliminar el anterior) -->
+      
       <div id="seccionCv" class="bloque-panel" style="background:white; border:1px solid var(--linea); border-radius:8px; padding:28px; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
         <div class="titulo-seccion" style="margin-bottom:1rem;">
           <div>
@@ -103,7 +103,7 @@
           </div>
         </div>
 
-        <!-- Estado actual del CV -->
+        
         <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
           <div>
             <div style="font-size:0.8rem; font-weight:bold; color:var(--gris); margin-bottom:4px;">ESTADO DEL CURRICULUM:</div>
@@ -122,7 +122,7 @@
               <a href="<?= e(rutaArchivo($usuario['cv_path'])) ?>" target="_blank" class="boton boton-sm" style="background:#e0e7ff; color:#3730a3; padding:8px 14px; text-decoration:none; border:1px solid #c7d2fe;">
                 Ver CV actual (PDF)
               </a>
-              <form action="ban.php?pagina=eliminar_cv_empleado" method="post" onsubmit="return confirm('¿Seguro que deseas eliminar tu Curriculum Vitae del servidor?');" style="display:inline; margin:0;">
+              <form action="index.php?pagina=eliminar_cv_empleado" method="post" onsubmit="return confirm('¿Seguro que deseas eliminar tu Curriculum Vitae del servidor?');" style="display:inline; margin:0;">
                 <button type="submit" class="boton-sm boton-peligro" style="padding:8px 12px; cursor:pointer;">
                   Eliminar CV
                 </button>
@@ -131,8 +131,8 @@
           </div>
         </div>
 
-        <!-- Formulario para subir nuevo CV y reemplazar el anterior -->
-        <form action="ban.php?pagina=actualizar_cv_empleado" method="post" enctype="multipart/form-data" style="gap:10px;">
+        
+        <form action="index.php?pagina=actualizar_cv_empleado" method="post" enctype="multipart/form-data" style="gap:10px;">
           <label for="cv_archivo" style="font-weight:bold; font-size:0.9rem;">
             <?= !empty($usuario['cv_path']) ? 'Subir nuevo CV (reemplaza y elimina el anterior) *' : 'Subir tu Curriculum Vitae (PDF) *' ?>
           </label>
@@ -150,7 +150,7 @@
         </form>
       </div>
 
-      <!-- SECCIÓN 2: Cambio de Correo Electrónico -->
+      
       <div id="seccionCorreo" class="bloque-panel" style="background:white; border:1px solid var(--linea); border-radius:8px; padding:28px; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
         <div class="titulo-seccion" style="margin-bottom:1rem;">
           <div>
@@ -164,7 +164,7 @@
           <strong>Correo actual:</strong> <code><?= e($usuario['correo']) ?></code>
         </div>
 
-        <form action="ban.php?pagina=cambiar_correo_empleado" method="post" style="gap:12px; max-width:540px;">
+        <form action="index.php?pagina=cambiar_correo_empleado" method="post" style="gap:12px; max-width:540px;">
           <div>
             <label for="nuevo_correo" style="font-weight:bold; font-size:0.85rem;">Nuevo correo electrónico *</label>
             <input type="email" id="nuevo_correo" name="nuevo_correo" required maxlength="150" placeholder="nuevo.correo@ejemplo.com" style="margin-top:4px;">
@@ -184,7 +184,7 @@
         </form>
       </div>
 
-      <!-- SECCIÓN 3: Cambio de Contraseña -->
+      
       <div id="seccionContrasena" class="bloque-panel" style="background:white; border:1px solid var(--linea); border-radius:8px; padding:28px; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
         <div class="titulo-seccion" style="margin-bottom:1rem;">
           <div>
@@ -194,7 +194,7 @@
           </div>
         </div>
 
-        <form action="ban.php?pagina=cambiar_contrasena_empleado" method="post" id="formCambioPassword" style="gap:12px; max-width:540px;">
+        <form action="index.php?pagina=cambiar_contrasena_empleado" method="post" id="formCambioPassword" style="gap:12px; max-width:540px;">
           <div>
             <label for="pass_actual" style="font-weight:bold; font-size:0.85rem;">Contraseña actual *</label>
             <input type="password" id="pass_actual" name="contrasena_actual" required placeholder="Tu contraseña actual" style="margin-top:4px;">

@@ -36,9 +36,9 @@ class Postulacion
 
     public function yaPostulado($empleoId, $candidatoId, $candidatoTipo = 'mayor')
     {
-        $sql = 'SELECT COUNT(*) FROM postulaciones 
-                WHERE empleo_id = :empleo_id 
-                  AND candidato_id = :candidato_id 
+        $sql = 'SELECT COUNT(*) FROM postulaciones
+                WHERE empleo_id = :empleo_id
+                  AND candidato_id = :candidato_id
                   AND candidato_tipo = :candidato_tipo';
         $consulta = $this->conexion->prepare($sql);
         $consulta->execute([
@@ -51,8 +51,8 @@ class Postulacion
 
     public function obtenerIdsPostuladosPorCandidato($candidatoId, $candidatoTipo = 'mayor')
     {
-        $sql = 'SELECT empleo_id FROM postulaciones 
-                WHERE candidato_id = :candidato_id 
+        $sql = 'SELECT empleo_id FROM postulaciones
+                WHERE candidato_id = :candidato_id
                   AND candidato_tipo = :candidato_tipo';
         $consulta = $this->conexion->prepare($sql);
         $consulta->execute([
@@ -93,7 +93,7 @@ class Postulacion
                 FROM postulaciones p
                 INNER JOIN empleos e ON e.id = p.empleo_id
                 INNER JOIN empresas emp ON emp.id = e.empresa_id
-                WHERE p.candidato_id = :candidato_id 
+                WHERE p.candidato_id = :candidato_id
                   AND p.candidato_tipo = :candidato_tipo
                 ORDER BY p.fecha_postulacion DESC';
         $consulta = $this->conexion->prepare($sql);

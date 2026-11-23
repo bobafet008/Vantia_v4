@@ -37,7 +37,6 @@ class MensajeSoporte
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci";
             $this->conexion->exec($sql);
 
-            // Asegurar columnas de relación foránea con usuarios
             $cols = [
                 'usuario_may_id'    => "ALTER TABLE mensajes_soporte ADD COLUMN usuario_may_id INT DEFAULT NULL AFTER id",
                 'usuario_men_id'    => "ALTER TABLE mensajes_soporte ADD COLUMN usuario_men_id INT DEFAULT NULL AFTER usuario_may_id",
@@ -52,7 +51,6 @@ class MensajeSoporte
                 }
             }
 
-            // Asegurar restricciones de clave foránea
             $fks = [
                 'fk_soporte_usuario_may'    => "ALTER TABLE mensajes_soporte ADD CONSTRAINT fk_soporte_usuario_may FOREIGN KEY (usuario_may_id) REFERENCES usuarios_may(id) ON DELETE SET NULL ON UPDATE CASCADE",
                 'fk_soporte_usuario_men'    => "ALTER TABLE mensajes_soporte ADD CONSTRAINT fk_soporte_usuario_men FOREIGN KEY (usuario_men_id) REFERENCES usuarios_men(id) ON DELETE SET NULL ON UPDATE CASCADE",
@@ -63,7 +61,7 @@ class MensajeSoporte
             foreach ($fks as $fkName => $sqlFk) {
                 try {
                     $fkExiste = $this->conexion->query("
-                        SELECT CONSTRAINT_NAME FROM information_schema.TABLE_CONSTRAINTS 
+                        SELECT CONSTRAINT_NAME FROM information_schema.TABLE_CONSTRAINTS
                         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'mensajes_soporte' AND CONSTRAINT_NAME = '$fkName'
                     ")->fetch();
                     if (!$fkExiste) {

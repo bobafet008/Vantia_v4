@@ -17,7 +17,7 @@
     <div class="mensaje-error" style="margin-bottom:2rem;"><?= e($mensajeError) ?></div>
   <?php endif; ?>
 
-  <!-- Buscador y filtro interactivo -->
+  
   <div class="barra-filtro" style="margin-bottom: 2rem;">
     <input type="text" id="buscadorEmpleos" placeholder="Buscar por título, categoría o ciudad (ej. Sopocachi, Ventas, Jr.)..." class="input-filtro">
     <button type="button" id="btnLimpiarFiltro" class="boton-sm boton-outline-oscuro" onclick="limpiarFiltro()">Limpiar</button>
@@ -83,18 +83,18 @@
               <?php if ($yaPostulado): ?>
                 <span class="badge-postulado">Ya te has postulado</span>
               <?php else: ?>
-                <form action="ban.php?pagina=postular" method="post" class="form-postular">
+                <form action="index.php?pagina=postular" method="post" class="form-postular">
                   <input type="hidden" name="empleo_id" value="<?= (int) $empleo['id'] ?>">
                   <input type="text" name="mensaje" class="input-mensaje-postular" placeholder="Mensaje breve de presentación (opcional)">
                   <button type="submit" class="boton boton-sm">Postularme ahora</button>
                 </form>
               <?php endif; ?>
             <?php elseif (empty($_SESSION['usuario_id'])): ?>
-              <a href="ban.php?pagina=login&tipo=empleado" class="boton boton-sm boton-oscuro">Inicia sesión para postularte</a>
+              <a href="index.php?pagina=login&tipo=empleado" class="boton boton-sm boton-oscuro">Inicia sesión para postularte</a>
             <?php elseif (($_SESSION['tipo'] ?? '') === 'empresa'): ?>
-              <a href="ban.php?pagina=panel_empresa" class="boton boton-sm boton-oscuro">Ir a mi Panel de Gestion</a>
+              <a href="index.php?pagina=panel_empresa" class="boton boton-sm boton-oscuro">Ir a mi Panel de Gestion</a>
             <?php elseif (($_SESSION['tipo'] ?? '') === 'admin'): ?>
-              <a href="ban.php?pagina=panel_admin" class="boton boton-sm boton-oscuro">Ir al Panel de Administración</a>
+              <a href="index.php?pagina=panel_admin" class="boton boton-sm boton-oscuro">Ir al Panel de Administración</a>
             <?php endif; ?>
           </div>
         </article>

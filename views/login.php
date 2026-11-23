@@ -20,7 +20,7 @@
       <div class="mensaje-error"><?= e($error) ?></div>
     <?php endif; ?>
 
-    <form action="ban.php?pagina=validar_login" method="post" id="formLogin">
+    <form action="index.php?pagina=validar_login" method="post" id="formLogin">
       <input type="hidden" name="tipo" value="<?= e($tipo ?? '') ?>">
 
       <label for="correo">Correo electrónico</label>
@@ -35,11 +35,11 @@
     <div class="auth-footer-links">
       <p>¿Aún no tienes cuenta?</p>
       <div class="enlaces-registro">
-        <a href="ban.php?pagina=registro_empleado">Registrarme como joven / empleado</a>
+        <a href="index.php?pagina=registro_empleado">Registrarme como joven / empleado</a>
         <span>·</span>
-        <a href="ban.php?pagina=registro_empresa">Registrar mi empresa</a>
+        <a href="index.php?pagina=registro_empresa">Registrar mi empresa</a>
         <span>·</span>
-        <a href="ban.php?pagina=registro_emprendimiento">Registrar emprendimiento</a>
+        <a href="index.php?pagina=registro_emprendimiento">Registrar emprendimiento</a>
       </div>
     </div>
   </div>

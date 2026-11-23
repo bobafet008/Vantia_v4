@@ -1,11 +1,9 @@
--- Base de datos Vantia (Empleo Juvenil Verificado)
 CREATE DATABASE IF NOT EXISTS BS_VANTIA
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_general_ci;
 
 USE BS_VANTIA;
 
--- 1. Tabla de Usuarios Menores de 18 años (16 y 17 años)
 CREATE TABLE IF NOT EXISTS usuarios_men (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(30) NOT NULL,
@@ -22,9 +20,6 @@ CREATE TABLE IF NOT EXISTS usuarios_men (
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- 2. Datos del tutor y autorización asociados a una cuenta de menor.
--- Los tutores no tienen cuentas de acceso; los datos personales y documentos del menor
--- permanecen en usuarios_men.
 CREATE TABLE IF NOT EXISTS tutores (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_men_id INT NOT NULL,
@@ -41,7 +36,6 @@ CREATE TABLE IF NOT EXISTS tutores (
     CONSTRAINT fk_tutores_usuario_men FOREIGN KEY (usuario_men_id) REFERENCES usuarios_men(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- 3. Tabla de Usuarios Mayores de 18 años y Administradores
 CREATE TABLE IF NOT EXISTS usuarios_may (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(30) NOT NULL,
@@ -58,8 +52,6 @@ CREATE TABLE IF NOT EXISTS usuarios_may (
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-
--- 4. Tabla de Empresas (Organizaciones formales con NIT y ROE)
 CREATE TABLE IF NOT EXISTS empresas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(30) NOT NULL,
@@ -80,7 +72,6 @@ CREATE TABLE IF NOT EXISTS empresas (
     creada_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- 4.1 Tabla de Emprendimientos (Negocios e iniciativas emergentes con Titular y CI)
 CREATE TABLE IF NOT EXISTS emprendimientos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(30) NOT NULL,
@@ -106,7 +97,6 @@ CREATE TABLE IF NOT EXISTS emprendimientos (
     creada_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- 5. Tabla de Empleos / Vacantes
 CREATE TABLE IF NOT EXISTS empleos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     empresa_id INT NOT NULL,
@@ -126,7 +116,6 @@ CREATE TABLE IF NOT EXISTS empleos (
     CONSTRAINT fk_empleos_emprendimiento FOREIGN KEY (emprendimiento_id) REFERENCES emprendimientos(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- 6. Tabla de Postulaciones (Aplicaciones de candidatos a empleos)
 CREATE TABLE IF NOT EXISTS postulaciones (
     id INT AUTO_INCREMENT PRIMARY KEY,
     empleo_id INT NOT NULL,
@@ -153,7 +142,6 @@ CREATE TABLE IF NOT EXISTS postulaciones (
     CONSTRAINT fk_postulacion_usuario_men FOREIGN KEY (usuario_men_id) REFERENCES usuarios_men(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- 7. Tabla de Calificaciones (Evaluaciones de empresas por parte de empleados contratados)
 CREATE TABLE IF NOT EXISTS calificaciones (
     id INT AUTO_INCREMENT PRIMARY KEY,
     empresa_id INT NOT NULL,
@@ -176,7 +164,6 @@ CREATE TABLE IF NOT EXISTS calificaciones (
     CONSTRAINT fk_calif_usuario_men FOREIGN KEY (usuario_men_id) REFERENCES usuarios_men(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- 8. Tabla de Usuarios Administradores
 CREATE TABLE IF NOT EXISTS usuarios_admin (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(30) NOT NULL,
@@ -188,8 +175,6 @@ CREATE TABLE IF NOT EXISTS usuarios_admin (
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Administrador Inicial Predeterminado
--- Acceso: admin@vantia.com / admin123
 INSERT INTO usuarios_admin (nombre, correo, contrasena, telefono, cargo, activo)
 VALUES (
     'Administrador General',
@@ -201,7 +186,6 @@ VALUES (
 )
 ON DUPLICATE KEY UPDATE activo = 1;
 
--- 9. Tabla de Consultas y Correos Enviados a Atención al Cliente
 CREATE TABLE IF NOT EXISTS mensajes_soporte (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_may_id INT DEFAULT NULL,
@@ -229,7 +213,6 @@ CREATE TABLE IF NOT EXISTS mensajes_soporte (
     CONSTRAINT fk_soporte_emprendimiento FOREIGN KEY (emprendimiento_id) REFERENCES emprendimientos(id) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- 10. Tabla de Bitácora y Registros del Administrador
 CREATE TABLE IF NOT EXISTS registros_admin (
     id INT AUTO_INCREMENT PRIMARY KEY,
     admin_id INT DEFAULT NULL,

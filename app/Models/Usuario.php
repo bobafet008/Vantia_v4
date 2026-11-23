@@ -17,7 +17,7 @@ class Usuario
 
     public function buscarPorCorreo($correo)
     {
-        // Primero buscar en usuarios mayores / admin
+
         $usuario = $this->modeloMay->buscarPorCorreo($correo);
         if ($usuario) {
             $usuario['es_menor'] = 0;
@@ -26,7 +26,6 @@ class Usuario
             return $usuario;
         }
 
-        // Si no está, buscar en usuarios menores
         $usuario = $this->modeloMen->buscarPorCorreo($correo);
         if ($usuario) {
             $usuario['tipo'] = 'empleado';
@@ -60,7 +59,6 @@ class Usuario
             return $res;
         }
 
-        // Si no se especifica el tipo, buscar primero en mayores y luego en menores
         $res = $this->modeloMay->obtenerPorId($id);
         if ($res) {
             $res['es_menor'] = 0;

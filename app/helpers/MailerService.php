@@ -9,12 +9,11 @@ function enviarCorreoRegistro(array $datos): bool
 {
     $mail = new PHPMailer(true);
 
-    // Reemplaza con tu correo Gmail y tu contraseña de aplicación de 16 caracteres
     $gmailRemitente = 'jaimecosmeajpi@gmail.com';
     $appPassword    = 'rvuv rtpp votz qwod';
 
     try {
-        // Configuración SMTP de Gmail
+
         $mail->isSMTP();
         $mail->Host       = 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
@@ -24,7 +23,6 @@ function enviarCorreoRegistro(array $datos): bool
         $mail->Port       = 587;
         $mail->CharSet    = 'UTF-8';
 
-        // Remitente y destinatarios
         $mail->setFrom($gmailRemitente, 'Portal Vantia');
 
         if (!empty($datos['correo'])) {
@@ -32,7 +30,6 @@ function enviarCorreoRegistro(array $datos): bool
         }
         $mail->addCC($gmailRemitente, 'Administración Vantia');
 
-        // Preparación de datos
         $tipoCuenta = strtoupper(htmlspecialchars($datos['rol'] ?? 'usuario'));
         $nombre     = htmlspecialchars($datos['nombre'] ?? '');
         $correo     = htmlspecialchars($datos['correo'] ?? '');
@@ -47,7 +44,6 @@ function enviarCorreoRegistro(array $datos): bool
             $filaExtra = "<tr><td style='padding:8px; border:1px solid #ddd;'><strong>Teléfono:</strong></td><td style='padding:8px; border:1px solid #ddd;'>{$telefono}</td></tr>";
         }
 
-        // Contenido HTML del correo
         $mail->isHTML(true);
         $mail->Subject = "Nuevo registro en Vantia ({$tipoCuenta}): {$nombre}";
         $mail->Body    = "

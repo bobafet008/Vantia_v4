@@ -13,7 +13,7 @@
       <div style="display:flex; gap:10px; margin-top:1rem; flex-wrap:wrap;">
         <a href="#nueva-vacante" class="boton boton-sm">+ Publicar nueva vacante</a>
         <a href="#postulantes" class="boton boton-sm boton-oscuro">Gestionar postulantes (<?= count($postulaciones ?? []) ?>)</a>
-        <a href="ban.php?pagina=trabajos" class="boton boton-sm" style="background:#e2f5e8; color:#1f7a46;">Ver bolsa pública de empleos</a>
+        <a href="index.php?pagina=trabajos" class="boton boton-sm" style="background:#e2f5e8; color:#1f7a46;">Ver bolsa pública de empleos</a>
       </div>
     </div>
 
@@ -33,7 +33,7 @@
   <?php if (!empty($error)): ?><div class="mensaje-error" style="margin-bottom:1.5rem;"><?= e($error) ?></div><?php endif; ?>
   <?php if (!empty($exito)): ?><div class="mensaje-exito" style="margin-bottom:1.5rem;"><?= e($exito) ?></div><?php endif; ?>
 
-  <!-- Resumen superior -->
+  
   <div class="tarjetas tres" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:1rem; margin-bottom:2.5rem;">
     <div class="tarjeta">
       <span class="numero">01 · VACANTES</span>
@@ -52,7 +52,7 @@
     </div>
   </div>
 
-  <!-- Sección de Calificaciones Recibidas de Empleados Contratados -->
+  
   <?php if (!empty($calificacionesRecibidas)): ?>
   <div id="calificaciones-empresa" class="bloque-panel" style="margin-bottom:3rem;">
     <div class="titulo-seccion">
@@ -81,7 +81,7 @@
   </div>
   <?php endif; ?>
 
-  <!-- Sección de Postulantes Recibidos -->
+  
   <div id="postulantes" class="bloque-panel" style="margin-bottom:3rem;">
     <div class="titulo-seccion">
       <div>
@@ -171,7 +171,7 @@
                   </span>
                 </td>
                 <td>
-                  <form action="ban.php?pagina=cambiar_estado_postulacion" method="post" class="form-cambiar-estado">
+                  <form action="index.php?pagina=cambiar_estado_postulacion" method="post" class="form-cambiar-estado">
                     <input type="hidden" name="postulacion_id" value="<?= (int) $post['id'] ?>">
                     <select name="estado" class="select-sm">
                       <option value="pendiente" <?= $post['estado'] === 'pendiente' ? 'selected' : '' ?>>Pendiente</option>
@@ -191,13 +191,13 @@
     <?php endif; ?>
   </div>
 
-  <!-- Formulario para publicar vacante y lista de vacantes -->
+  
   <div class="panel-vacantes" id="nueva-vacante">
     <div class="form-card">
       <h2>Publicar una nueva vacante</h2>
       <p class="texto-suave">Completa los datos del empleo a publicar en Vantia.</p>
 
-      <form action="ban.php?pagina=guardar_empleo" method="post">
+      <form action="index.php?pagina=guardar_empleo" method="post">
         <label for="titulo">Nombre del puesto *</label>
         <input id="titulo" name="titulo" type="text" maxlength="150" required placeholder="Ej. Desarrollador Web Jr.">
 
@@ -257,7 +257,7 @@
             <?php if (!empty($empleo['ubicacion'])): ?><p><strong>Ubicación:</strong> <?= e($empleo['ubicacion']) ?></p><?php endif; ?>
             <?php if (!empty($empleo['salario'])): ?><p><strong>Salario:</strong> <?= e($empleo['salario']) ?></p><?php endif; ?>
 
-            <!-- Botones de gestión de vacante -->
+            
             <div style="display:flex; gap:8px; margin-top:14px; padding-top:10px; border-top:1px dashed var(--linea); flex-wrap:wrap;">
               <button type="button" class="boton-sm btn-editar-vacante" style="background:#2563eb; color:white;" data-empleo="<?= htmlspecialchars(json_encode([
                   'id' => (int) $empleo['id'],
@@ -272,14 +272,14 @@
                 Editar
               </button>
 
-              <form action="ban.php?pagina=alternar_empleo" method="post" style="display:inline;">
+              <form action="index.php?pagina=alternar_empleo" method="post" style="display:inline;">
                 <input type="hidden" name="empleo_id" value="<?= (int) $empleo['id'] ?>">
                 <button type="submit" class="boton-sm <?= !empty($empleo['activo']) ? 'boton-outline-oscuro' : 'boton-exito' ?>">
                   <?= !empty($empleo['activo']) ? 'Pausar vacante' : 'Reactivar vacante' ?>
                 </button>
               </form>
 
-              <form action="ban.php?pagina=eliminar_empleo" method="post" style="display:inline;" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta vacante y sus postulaciones?');">
+              <form action="index.php?pagina=eliminar_empleo" method="post" style="display:inline;" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta vacante y sus postulaciones?');">
                 <input type="hidden" name="empleo_id" value="<?= (int) $empleo['id'] ?>">
                 <button type="submit" class="boton-sm boton-peligro">Eliminar</button>
               </form>
@@ -291,7 +291,6 @@
   </div>
 </section>
 
-<!-- Modal de Edición de Vacante -->
 <div id="modalEditarVacante" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.65); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(2px); padding:16px;">
   <div style="background:white; border-radius:8px; width:100%; max-width:580px; max-height:92vh; overflow-y:auto; padding:24px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.25); border:1px solid #cbd5e1;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid #e2e8f0; padding-bottom:10px;">
@@ -301,7 +300,7 @@
       <button type="button" onclick="cerrarModalEditar()" style="background:none; border:none; font-size:24px; cursor:pointer; color:#64748b; line-height:1;">&times;</button>
     </div>
 
-    <form action="ban.php?pagina=actualizar_empleo" method="post" id="formEditarVacante" class="formulario" style="gap:10px;">
+    <form action="index.php?pagina=actualizar_empleo" method="post" id="formEditarVacante" class="formulario" style="gap:10px;">
       <input type="hidden" name="empleo_id" id="edit_empleo_id" value="">
 
       <div>

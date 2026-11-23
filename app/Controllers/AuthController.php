@@ -22,7 +22,7 @@ class AuthController
 
     private function buscarCuentaPorCorreo($conexion, $correo)
     {
-        // 1. Emprendimientos
+        
         try {
             $stmt = $conexion->prepare("SELECT id, nombre, correo, contrasena, baneado, baneado_hasta, motivo_baneo, intentos_fallidos, verificado FROM emprendimientos WHERE correo = ? LIMIT 1");
             $stmt->execute([$correo]);
@@ -33,7 +33,7 @@ class AuthController
             }
         } catch (Exception $e) {}
 
-        // 2. Empresas
+        
         try {
             $stmt = $conexion->prepare("SELECT id, nombre, correo, contrasena, baneado, baneado_hasta, motivo_baneo, intentos_fallidos, verificada, tipo_cuenta, representante FROM empresas WHERE correo = ? LIMIT 1");
             $stmt->execute([$correo]);
@@ -44,7 +44,7 @@ class AuthController
             }
         } catch (Exception $e) {}
 
-        // 3. Usuarios Mayores
+        
         try {
             $stmt = $conexion->prepare("SELECT id, nombre, correo, contrasena, tipo, baneado, baneado_hasta, motivo_baneo, intentos_fallidos FROM usuarios_may WHERE correo = ? LIMIT 1");
             $stmt->execute([$correo]);
@@ -56,7 +56,7 @@ class AuthController
             }
         } catch (Exception $e) {}
 
-        // 4. Usuarios Menores
+        
         try {
             $stmt = $conexion->prepare("SELECT id, nombre, correo, contrasena, 'empleado' AS tipo, baneado, baneado_hasta, motivo_baneo, intentos_fallidos FROM usuarios_men WHERE correo = ? LIMIT 1");
             $stmt->execute([$correo]);
@@ -97,7 +97,7 @@ class AuthController
             return;
         }
 
-        // 1. Verificar si las credenciales corresponden a un Administrador en usuarios_admin
+        
         $admin = $modeloAdmin->buscarPorCorreo($correo);
         if ($admin && password_verify($contrasena, $admin['contrasena'])) {
             session_regenerate_id(true);
@@ -109,18 +109,18 @@ class AuthController
             $_SESSION['es_menor'] = 0;
             $_SESSION['tabla_usuario'] = 'usuarios_admin';
 
-            header('Location: ban.php?pagina=panel_admin');
+            header('Location: index.php?pagina=panel_admin');
             exit;
         }
 
-        // 2. Buscar cuenta de usuario en las tablas del sistema
+        
         $cuenta = $this->buscarCuentaPorCorreo($conexion, $correo);
 
         if ($cuenta) {
             $tabla = $cuenta['tabla'];
             $id = (int) $cuenta['id'];
 
-            // Si la cuenta ya se encuentra suspendida o bloqueada
+            
             if (estaBaneado($cuenta)) {
                 vista('login', [
                     'tipo' => $tipoRequerido,
@@ -130,9 +130,9 @@ class AuthController
                 return;
             }
 
-            // Validar contraseña
+            
             if (password_verify($contrasena, $cuenta['contrasena'])) {
-                // Restablecer contador de intentos fallidos al iniciar sesión con éxito
+                
                 try {
                     $conexion->exec("UPDATE $tabla SET intentos_fallidos = 0 WHERE id = $id");
                     if ($tabla === 'emprendimientos') {
@@ -142,7 +142,7 @@ class AuthController
                     }
                 } catch (Exception $e) {}
 
-                // Validar si requiere verificación previa por el administrador
+                
                 if ($tabla === 'emprendimientos' && isset($cuenta['verificado']) && (int) $cuenta['verificado'] === 0) {
                     vista('login', [
                         'tipo' => $tipoRequerido,
@@ -175,7 +175,7 @@ class AuthController
                     $_SESSION['subtipo'] = 'emprendimiento';
                     $_SESSION['es_menor'] = 0;
                     $_SESSION['representante'] = $cuenta['representante'] ?? null;
-                    header('Location: ban.php?pagina=panel_empresa');
+                    header('Location: index.php?pagina=panel_empresa');
                     exit;
                 }
 
@@ -184,26 +184,26 @@ class AuthController
                     $_SESSION['subtipo'] = $cuenta['tipo_cuenta'] ?? 'empresa';
                     $_SESSION['es_menor'] = 0;
                     $_SESSION['representante'] = $cuenta['representante'] ?? null;
-                    header('Location: ban.php?pagina=panel_empresa');
+                    header('Location: index.php?pagina=panel_empresa');
                     exit;
                 }
 
-                // usuarios_may y usuarios_men
+                
                 $_SESSION['tipo'] = $cuenta['tipo'] ?? 'empleado';
                 $_SESSION['es_menor'] = (int) ($cuenta['es_menor'] ?? 0);
 
                 if (($cuenta['tipo'] ?? '') === 'admin') {
-                    header('Location: ban.php?pagina=panel_admin');
+                    header('Location: index.php?pagina=panel_admin');
                 } else {
-                    header('Location: ban.php?pagina=trabajos');
+                    header('Location: index.php?pagina=trabajos');
                 }
                 exit;
             } else {
-                // Contraseña incorrecta: incrementar intentos fallidos
+                
                 $nuevosIntentos = ((int) ($cuenta['intentos_fallidos'] ?? 0)) + 1;
 
                 if ($nuevosIntentos >= 3) {
-                    // Bloqueo tras fallar 3 veces la contraseña
+                    
                     $motivoBloqueo = 'Bloqueo automático por 3 intentos fallidos de contraseña';
                     try {
                         $stmtBan = $conexion->prepare("UPDATE $tabla SET baneado = 1, motivo_baneo = ?, intentos_fallidos = ? WHERE id = ?");
@@ -218,7 +218,7 @@ class AuthController
                         }
                     } catch (Exception $eBloqueo) {}
 
-                    // Registrar evento en registros_admin con llaves foráneas conectadas
+                    
                     try {
                         $regAdmin = new RegistroAdmin($conexion);
                         $relaciones = [];
@@ -245,7 +245,7 @@ class AuthController
                     ]);
                     return;
                 } else {
-                    // Actualizar contador y notificar intentos restantes
+                    
                     try {
                         $stmtInc = $conexion->prepare("UPDATE $tabla SET intentos_fallidos = ? WHERE id = ?");
                         $stmtInc->execute([$nuevosIntentos, $id]);
@@ -283,7 +283,7 @@ class AuthController
         if (session_id() != '' || headers_sent()) {
             session_destroy();
         }
-        header('Location: ban.php?pagina=inicio');
+        header('Location: index.php?pagina=inicio');
         exit;
     }
 }

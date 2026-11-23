@@ -49,7 +49,7 @@ class HomeController
     {
         if (empty($_SESSION['usuario_id']) || ($_SESSION['tipo'] ?? '') !== 'empleado') {
             $_SESSION['flash_error'] = 'Debes iniciar sesión como empleado para poder postularte a las vacantes.';
-            header('Location: ban.php?pagina=login&tipo=empleado');
+            header('Location: index.php?pagina=login&tipo=empleado');
             exit;
         }
 
@@ -60,7 +60,7 @@ class HomeController
 
         if ($empleoId <= 0) {
             $_SESSION['flash_error'] = 'Vacante no válida.';
-            header('Location: ban.php?pagina=trabajos');
+            header('Location: index.php?pagina=trabajos');
             exit;
         }
 
@@ -75,7 +75,7 @@ class HomeController
             $_SESSION['flash_exito'] = '¡Tu postulación ha sido enviada con éxito! La empresa revisará tu perfil.';
         }
 
-        header('Location: ban.php?pagina=trabajos');
+        header('Location: index.php?pagina=trabajos');
         exit;
     }
 
@@ -121,13 +121,13 @@ class HomeController
 
         if ($empresaId <= 0 || $puntuacion < 0 || $puntuacion > 5) {
             $_SESSION['flash_error'] = 'Por favor selecciona una puntuación válida entre 0 y 5.';
-            header('Location: ban.php?pagina=mis_postulaciones#calificaciones');
+            header('Location: index.php?pagina=mis_postulaciones#calificaciones');
             exit;
         }
 
         require __DIR__ . '/../../config/database.php';
 
-        // Verificar que el empleado realmente trabaja o fue contratado por esta empresa
+        
         $stmt = $conexion->prepare(
             "SELECT COUNT(*) FROM postulaciones p 
              INNER JOIN empleos e ON e.id = p.empleo_id 
@@ -138,7 +138,7 @@ class HomeController
 
         if (!$trabajaAhi) {
             $_SESSION['flash_error'] = 'Solo puedes calificar a empresas donde has sido contratado para trabajar.';
-            header('Location: ban.php?pagina=mis_postulaciones');
+            header('Location: index.php?pagina=mis_postulaciones');
             exit;
         }
 
@@ -147,7 +147,7 @@ class HomeController
         $modeloCalif->guardar($empresaId, $candidatoId, $candidatoTipo, $puntuacion, $comentario ?: null);
 
         $_SESSION['flash_exito'] = '¡Tu calificación de ' . $puntuacion . '/5 para la empresa fue registrada exitosamente!';
-        header('Location: ban.php?pagina=mis_postulaciones#calificaciones');
+        header('Location: index.php?pagina=mis_postulaciones#calificaciones');
         exit;
     }
 
@@ -173,7 +173,7 @@ class HomeController
             }
         }
 
-        header('Location: ban.php?pagina=mis_postulaciones');
+        header('Location: index.php?pagina=mis_postulaciones');
         exit;
     }
 
@@ -188,22 +188,22 @@ class HomeController
 
         $empresaId = (int) $_SESSION['usuario_id'];
 
-        // Obtener vacantes de la empresa
+        
         $consulta = $conexion->prepare('SELECT * FROM empleos WHERE empresa_id = ? ORDER BY creado_en DESC');
         $consulta->execute([$empresaId]);
         $empleos = $consulta->fetchAll();
 
-        // Obtener postulantes a las vacantes de la empresa
+        
         $modeloPostulacion = new Postulacion($conexion);
         $postulaciones = $modeloPostulacion->obtenerPorEmpresa($empresaId);
 
-        // Obtener calificaciones recibidas por la empresa
+        
         require_once __DIR__ . '/../Models/Calificacion.php';
         $modeloCalif = new Calificacion($conexion);
         $calificacionesRecibidas = $modeloCalif->obtenerPorEmpresa($empresaId);
         $resumenCalif = $modeloCalif->obtenerPromedioPorEmpresa($empresaId);
 
-        // Obtener datos de la empresa actual
+        
         $stmtEmp = $conexion->prepare('SELECT * FROM empresas WHERE id = ? LIMIT 1');
         $stmtEmp->execute([$empresaId]);
         $empresa = $stmtEmp->fetch();
@@ -261,7 +261,7 @@ class HomeController
             $_SESSION['empleo_exito'] = 'La vacante se publicó correctamente.';
         }
 
-        header('Location: ban.php?pagina=panel_empresa');
+        header('Location: index.php?pagina=panel_empresa');
         exit;
     }
 
@@ -308,7 +308,7 @@ class HomeController
             $_SESSION['empleo_exito'] = '¡La vacante ha sido actualizada exitosamente!';
         }
 
-        header('Location: ban.php?pagina=panel_empresa#mis-vacantes');
+        header('Location: index.php?pagina=panel_empresa#mis-vacantes');
         exit;
     }
 
@@ -328,7 +328,7 @@ class HomeController
             $_SESSION['empleo_exito'] = 'El estado de la vacante ha sido actualizado.';
         }
 
-        header('Location: ban.php?pagina=panel_empresa');
+        header('Location: index.php?pagina=panel_empresa');
         exit;
     }
 
@@ -348,7 +348,7 @@ class HomeController
             $_SESSION['empleo_exito'] = 'La vacante ha sido eliminada con éxito.';
         }
 
-        header('Location: ban.php?pagina=panel_empresa');
+        header('Location: index.php?pagina=panel_empresa');
         exit;
     }
 
@@ -369,7 +369,7 @@ class HomeController
             $_SESSION['empleo_exito'] = 'El estado del postulante ha sido actualizado.';
         }
 
-        header('Location: ban.php?pagina=panel_empresa#postulantes');
+        header('Location: index.php?pagina=panel_empresa#postulantes');
         exit;
     }
 
@@ -414,7 +414,7 @@ class HomeController
         $totalCandidatos = $totalMenores + $totalMayores;
         $totalUsuariosGlobal = $totalCandidatos + $totalEmpresas + $totalEmprendimientos;
 
-        // 1. Cuentas actualmente suspendidas (Baneos)
+        
         $sqlBaneados = "
             SELECT id, nombre, correo, telefono, 'menor' AS tipo_entidad, 'usuarios_men' AS tabla, baneado_hasta, motivo_baneo, fecha_registro AS fecha
             FROM usuarios_men WHERE baneado = 1
@@ -431,7 +431,7 @@ class HomeController
         ";
         $cuentasBaneadas = $conexion->query($sqlBaneados)->fetchAll(PDO::FETCH_ASSOC);
 
-        // 2. Registro cronológico de nuevos usuarios
+        
         $sqlNuevos = "
             SELECT id, nombre, correo, telefono, 'menor' AS rol, 'usuarios_men' AS tabla, fecha_registro AS fecha, baneado
             FROM usuarios_men
@@ -449,13 +449,13 @@ class HomeController
         ";
         $nuevosUsuarios = $conexion->query($sqlNuevos)->fetchAll(PDO::FETCH_ASSOC);
 
-        // 3. Registros y bitácora del sistema y administradores
+        
         $registrosAdmin = $modeloRegistro->obtenerUltimos(100);
         $registrosBaneos = $modeloRegistro->obtenerUltimos(50, 'baneo');
         $registrosDesbaneos = $modeloRegistro->obtenerUltimos(50, 'desbaneo');
         $totalRegistrosEventos = (int) $conexion->query('SELECT COUNT(*) FROM registros_admin')->fetchColumn();
 
-        // 4. Métricas de Reportes
+        
         $nuevosUltimos7Dias = (int) $conexion->query("
             SELECT (
                 (SELECT COUNT(*) FROM usuarios_men WHERE fecha_registro >= DATE_SUB(NOW(), INTERVAL 7 DAY)) +
@@ -538,7 +538,7 @@ class HomeController
         $totalEmpleos = (int) $conexion->query('SELECT COUNT(*) FROM empleos')->fetchColumn();
         $totalPostulaciones = (int) $conexion->query('SELECT COUNT(*) FROM postulaciones')->fetchColumn();
 
-        // 1. Cuentas actualmente baneadas
+        
         $sqlBaneados = "
             SELECT id, nombre, correo, telefono, 'menor' AS tipo_entidad, 'usuarios_men' AS tabla, baneado_hasta, motivo_baneo, fecha_registro AS fecha
             FROM usuarios_men WHERE baneado = 1
@@ -555,7 +555,7 @@ class HomeController
         ";
         $cuentasBaneadas = $conexion->query($sqlBaneados)->fetchAll(PDO::FETCH_ASSOC);
 
-        // 2. Registro cronológico de nuevos usuarios
+        
         $sqlNuevos = "
             SELECT id, nombre, correo, telefono, 'menor' AS rol, 'usuarios_men' AS tabla, fecha_registro AS fecha, baneado
             FROM usuarios_men
@@ -573,13 +573,13 @@ class HomeController
         ";
         $nuevosUsuarios = $conexion->query($sqlNuevos)->fetchAll(PDO::FETCH_ASSOC);
 
-        // 3. Registros y bitácora del administrador
+        
         $registrosAdmin = $modeloRegistro->obtenerUltimos(150);
         $registrosBaneos = $modeloRegistro->obtenerUltimos(60, 'baneo');
         $registrosDesbaneos = $modeloRegistro->obtenerUltimos(60, 'desbaneo');
         $totalRegistrosEventos = (int) $conexion->query('SELECT COUNT(*) FROM registros_admin')->fetchColumn();
 
-        // 4. Métricas de Reportes
+        
         $nuevosUltimos7Dias = (int) $conexion->query("
             SELECT (
                 (SELECT COUNT(*) FROM usuarios_men WHERE fecha_registro >= DATE_SUB(NOW(), INTERVAL 7 DAY)) +
@@ -642,7 +642,7 @@ class HomeController
         require_once __DIR__ . '/../Models/RegistroAdmin.php';
         require_once __DIR__ . '/../Libraries/PdfReporteDiario.php';
 
-        // 1. Nuevos usuarios registrados en la fecha
+        
         $nuevosUsuarios = [];
         try {
             $sqlMen = "SELECT id, 'menor' AS rol, nombre, correo, telefono, fecha_registro AS fecha, baneado FROM usuarios_men WHERE DATE(fecha_registro) = ? ORDER BY fecha_registro DESC";
@@ -671,7 +671,7 @@ class HomeController
             });
         } catch (Exception $e) {}
 
-        // 2. Baneos registrados en la fecha (con join para obtener nombre del admin responsable)
+        
         $baneos = [];
         try {
             $sqlBaneos = "SELECT r.*, a.nombre AS admin_nombre 
@@ -684,7 +684,7 @@ class HomeController
             $baneos = $stmtBaneos->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {}
 
-        // 3. Desbaneos registrados en la fecha
+        
         $desbaneos = [];
         try {
             $sqlDesbaneos = "SELECT r.*, a.nombre AS admin_nombre 
@@ -697,7 +697,7 @@ class HomeController
             $desbaneos = $stmtDesbaneos->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {}
 
-        // 4. Registros y auditoria completa de acciones del administrador en la fecha
+        
         $registrosAdmin = [];
         try {
             $sqlAdmin = "SELECT r.*, a.nombre AS admin_nombre, a.correo AS admin_correo 
@@ -710,7 +710,7 @@ class HomeController
             $registrosAdmin = $stmtAdmin->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {}
 
-        // 5. Consultas y correos recibidos en Atención al Cliente en la fecha
+        
         $mensajesSoporte = [];
         try {
             $sqlSoporte = "SELECT * FROM mensajes_soporte WHERE DATE(creado_en) = ? ORDER BY creado_en DESC";
@@ -780,7 +780,7 @@ class HomeController
         }
 
         $origen = $_POST['origen'] ?? 'panel_registros';
-        header("Location: ban.php?pagina=" . urlencode($origen) . "#seccionAtencionCliente");
+        header("Location: index.php?pagina=" . urlencode($origen) . "#seccionAtencionCliente");
         exit;
     }
 
@@ -818,7 +818,7 @@ class HomeController
             $_SESSION['admin_exito'] = 'El estado de verificación de la empresa ha sido actualizado.';
         }
 
-        header('Location: ban.php?pagina=panel_admin');
+        header('Location: index.php?pagina=panel_admin');
         exit;
     }
 
@@ -859,7 +859,7 @@ class HomeController
             $_SESSION['admin_exito'] = 'El estado de verificación del emprendimiento ha sido actualizado.';
         }
 
-        header('Location: ban.php?pagina=panel_admin');
+        header('Location: index.php?pagina=panel_admin');
         exit;
     }
 
@@ -896,7 +896,7 @@ class HomeController
             $_SESSION['admin_exito'] = 'El emprendimiento y sus vacantes asociadas han sido eliminados.';
         }
 
-        header('Location: ban.php?pagina=panel_admin');
+        header('Location: index.php?pagina=panel_admin');
         exit;
     }
 
@@ -933,7 +933,7 @@ class HomeController
             $_SESSION['admin_exito'] = 'La empresa o emprendimiento y sus ofertas asociadas han sido eliminadas.';
         }
 
-        header('Location: ban.php?pagina=panel_admin');
+        header('Location: index.php?pagina=panel_admin');
         exit;
     }
 
@@ -992,7 +992,7 @@ class HomeController
             }
         }
 
-        header('Location: ban.php?pagina=panel_admin');
+        header('Location: index.php?pagina=panel_admin');
         exit;
     }
 
@@ -1011,13 +1011,13 @@ class HomeController
         $tablasValidas = ['empresas', 'emprendimientos', 'usuarios_may', 'usuarios_men'];
         if ($id <= 0 || !in_array($tabla, $tablasValidas, true)) {
             $_SESSION['admin_error'] = 'Identificador o tipo de entidad inválido.';
-            header('Location: ban.php?pagina=panel_admin');
+            header('Location: index.php?pagina=panel_admin');
             exit;
         }
 
         if ($tabla === 'usuarios_may' && $id === (int) $_SESSION['usuario_id']) {
             $_SESSION['admin_error'] = 'No puedes suspender tu propia cuenta de administrador.';
-            header('Location: ban.php?pagina=panel_admin');
+            header('Location: index.php?pagina=panel_admin');
             exit;
         }
 
@@ -1031,7 +1031,7 @@ class HomeController
             $baneadoHasta = $fecha->format('Y-m-d H:i:s');
         }
 
-        // Obtener datos previos para el registro de auditoría
+        
         $entidad = $conexion->query("SELECT nombre, correo FROM $tabla WHERE id = $id LIMIT 1")->fetch(PDO::FETCH_ASSOC);
         $entNombre = $entidad['nombre'] ?? ("ID: " . $id);
         $entCorreo = $entidad['correo'] ?? null;
@@ -1073,9 +1073,9 @@ class HomeController
 
         $origen = $_POST['origen'] ?? '';
         if ($origen === 'panel_registros' || $origen === 'panel_reportes') {
-            header('Location: ban.php?pagina=panel_registros#seccionBaneos');
+            header('Location: index.php?pagina=panel_registros#seccionBaneos');
         } else {
-            header('Location: ban.php?pagina=panel_admin');
+            header('Location: index.php?pagina=panel_admin');
         }
         exit;
     }
@@ -1094,7 +1094,7 @@ class HomeController
             require __DIR__ . '/../../config/database.php';
             require_once __DIR__ . '/../Models/RegistroAdmin.php';
 
-            // Obtener información previa de la cuenta
+            
             $entidad = $conexion->query("SELECT nombre, correo FROM $tabla WHERE id = $id LIMIT 1")->fetch(PDO::FETCH_ASSOC);
             $entNombre = $entidad['nombre'] ?? ("ID: " . $id);
             $entCorreo = $entidad['correo'] ?? null;
@@ -1135,9 +1135,9 @@ class HomeController
 
         $origen = $_POST['origen'] ?? '';
         if ($origen === 'panel_registros' || $origen === 'panel_reportes') {
-            header('Location: ban.php?pagina=panel_registros#seccionDesbaneos');
+            header('Location: index.php?pagina=panel_registros#seccionDesbaneos');
         } else {
-            header('Location: ban.php?pagina=panel_admin');
+            header('Location: index.php?pagina=panel_admin');
         }
         exit;
     }
@@ -1159,7 +1159,7 @@ class HomeController
 
         if (!$usuario) {
             $_SESSION['flash_error'] = 'No se encontró la información del usuario.';
-            header('Location: ban.php?pagina=inicio');
+            header('Location: index.php?pagina=inicio');
             exit;
         }
 
@@ -1193,29 +1193,29 @@ class HomeController
 
         if (empty($nuevoCorreo) || empty($contrasenaActual)) {
             $_SESSION['flash_error'] = 'Debes ingresar el nuevo correo y tu contraseña actual para confirmar el cambio.';
-            header('Location: ban.php?pagina=panel_empleado#seccionCorreo');
+            header('Location: index.php?pagina=panel_empleado#seccionCorreo');
             exit;
         }
 
         if (strpos($nuevoCorreo, '@') === false || !filter_var($nuevoCorreo, FILTER_VALIDATE_EMAIL)) {
             $_SESSION['flash_error'] = 'Por favor, introduce una dirección de correo electrónico válida con signo @.';
-            header('Location: ban.php?pagina=panel_empleado#seccionCorreo');
+            header('Location: index.php?pagina=panel_empleado#seccionCorreo');
             exit;
         }
 
         if (strtolower($nuevoCorreo) === strtolower($usuario['correo'])) {
             $_SESSION['flash_error'] = 'El correo electrónico ingresado es idéntico al actual.';
-            header('Location: ban.php?pagina=panel_empleado#seccionCorreo');
+            header('Location: index.php?pagina=panel_empleado#seccionCorreo');
             exit;
         }
 
         if (!password_verify($contrasenaActual, $usuario['contrasena'])) {
             $_SESSION['flash_error'] = 'La contraseña actual ingresada es incorrecta.';
-            header('Location: ban.php?pagina=panel_empleado#seccionCorreo');
+            header('Location: index.php?pagina=panel_empleado#seccionCorreo');
             exit;
         }
 
-        // Validar que el nuevo correo no esté en uso por otra cuenta
+        
         $enUso = false;
         $stmt1 = $conexion->prepare("SELECT id FROM usuarios_may WHERE correo = ? AND NOT (id = ? AND ? = 'mayor') LIMIT 1");
         $stmt1->execute([$nuevoCorreo, $candidatoId, $candidatoTipo]);
@@ -1247,7 +1247,7 @@ class HomeController
 
         if ($enUso) {
             $_SESSION['flash_error'] = 'El correo electrónico ya se encuentra registrado por otra cuenta en el sistema.';
-            header('Location: ban.php?pagina=panel_empleado#seccionCorreo');
+            header('Location: index.php?pagina=panel_empleado#seccionCorreo');
             exit;
         }
 
@@ -1256,7 +1256,7 @@ class HomeController
 
         $_SESSION['correo'] = $nuevoCorreo;
         $_SESSION['flash_exito'] = 'Tu correo electrónico ha sido actualizado exitosamente a: ' . $nuevoCorreo;
-        header('Location: ban.php?pagina=panel_empleado#seccionCorreo');
+        header('Location: index.php?pagina=panel_empleado#seccionCorreo');
         exit;
     }
 
@@ -1282,49 +1282,49 @@ class HomeController
 
         if (empty($contrasenaActual) || empty($nuevaContrasena) || empty($confirmarNuevaContrasena)) {
             $_SESSION['flash_error'] = 'Debes completar todos los campos para cambiar tu contraseña.';
-            header('Location: ban.php?pagina=panel_empleado#seccionContrasena');
+            header('Location: index.php?pagina=panel_empleado#seccionContrasena');
             exit;
         }
 
         if (!password_verify($contrasenaActual, $usuario['contrasena'])) {
             $_SESSION['flash_error'] = 'La contraseña actual ingresada es incorrecta.';
-            header('Location: ban.php?pagina=panel_empleado#seccionContrasena');
+            header('Location: index.php?pagina=panel_empleado#seccionContrasena');
             exit;
         }
 
         if (strlen($nuevaContrasena) < 6) {
             $_SESSION['flash_error'] = 'La nueva contraseña debe tener al menos 6 caracteres.';
-            header('Location: ban.php?pagina=panel_empleado#seccionContrasena');
+            header('Location: index.php?pagina=panel_empleado#seccionContrasena');
             exit;
         }
 
         if (!preg_match('/[A-Z]/', $nuevaContrasena)) {
             $_SESSION['flash_error'] = 'La nueva contraseña debe incluir al menos una letra mayúscula.';
-            header('Location: ban.php?pagina=panel_empleado#seccionContrasena');
+            header('Location: index.php?pagina=panel_empleado#seccionContrasena');
             exit;
         }
 
         if (!preg_match('/[a-z]/', $nuevaContrasena)) {
             $_SESSION['flash_error'] = 'La nueva contraseña debe incluir al menos una letra minúscula.';
-            header('Location: ban.php?pagina=panel_empleado#seccionContrasena');
+            header('Location: index.php?pagina=panel_empleado#seccionContrasena');
             exit;
         }
 
         if (!preg_match('/[0-9]/', $nuevaContrasena)) {
             $_SESSION['flash_error'] = 'La nueva contraseña debe incluir al menos un número.';
-            header('Location: ban.php?pagina=panel_empleado#seccionContrasena');
+            header('Location: index.php?pagina=panel_empleado#seccionContrasena');
             exit;
         }
 
         if (!preg_match('/[^a-zA-Z0-9]/', $nuevaContrasena)) {
             $_SESSION['flash_error'] = 'La nueva contraseña debe incluir al menos un carácter especial (ej. !@#$%&*).';
-            header('Location: ban.php?pagina=panel_empleado#seccionContrasena');
+            header('Location: index.php?pagina=panel_empleado#seccionContrasena');
             exit;
         }
 
         if ($nuevaContrasena !== $confirmarNuevaContrasena) {
             $_SESSION['flash_error'] = 'La nueva contraseña y su confirmación no coinciden.';
-            header('Location: ban.php?pagina=panel_empleado#seccionContrasena');
+            header('Location: index.php?pagina=panel_empleado#seccionContrasena');
             exit;
         }
 
@@ -1333,7 +1333,7 @@ class HomeController
         $stmtUp->execute([$hashNuevo, $candidatoId]);
 
         $_SESSION['flash_exito'] = 'Tu contraseña ha sido actualizada exitosamente.';
-        header('Location: ban.php?pagina=panel_empleado#seccionContrasena');
+        header('Location: index.php?pagina=panel_empleado#seccionContrasena');
         exit;
     }
 
@@ -1355,25 +1355,25 @@ class HomeController
 
         if (!isset($_FILES['cv_archivo']) || $_FILES['cv_archivo']['error'] !== UPLOAD_ERR_OK) {
             $_SESSION['flash_error'] = 'Por favor selecciona un archivo PDF válido de tu Curriculum Vitae.';
-            header('Location: ban.php?pagina=panel_empleado#seccionCv');
+            header('Location: index.php?pagina=panel_empleado#seccionCv');
             exit;
         }
 
         $extension = strtolower(pathinfo($_FILES['cv_archivo']['name'] ?? '', PATHINFO_EXTENSION));
         if ($extension !== 'pdf') {
             $_SESSION['flash_error'] = 'El archivo de Curriculum Vitae debe ser exclusivamente un documento en formato PDF (.pdf).';
-            header('Location: ban.php?pagina=panel_empleado#seccionCv');
+            header('Location: index.php?pagina=panel_empleado#seccionCv');
             exit;
         }
 
         $nuevoCvPath = subirArchivo('cv_archivo', 'cv', 'cv');
         if (!$nuevoCvPath) {
             $_SESSION['flash_error'] = 'No se pudo subir el archivo. Verifica que no sobrepase el tamaño límite de 5MB.';
-            header('Location: ban.php?pagina=panel_empleado#seccionCv');
+            header('Location: index.php?pagina=panel_empleado#seccionCv');
             exit;
         }
 
-        // Eliminar el CV anterior si existía físicamente
+        
         $cvAnterior = $usuario['cv_path'] ?? null;
         if (!empty($cvAnterior)) {
             eliminarArchivo($cvAnterior);
@@ -1383,7 +1383,7 @@ class HomeController
         $stmtUp->execute([$nuevoCvPath, $candidatoId]);
 
         $_SESSION['flash_exito'] = '¡Tu Curriculum Vitae ha sido actualizado con éxito! El archivo anterior fue eliminado del servidor.';
-        header('Location: ban.php?pagina=panel_empleado#seccionCv');
+        header('Location: index.php?pagina=panel_empleado#seccionCv');
         exit;
     }
 
@@ -1412,7 +1412,7 @@ class HomeController
         $stmtUp->execute([$candidatoId]);
 
         $_SESSION['flash_exito'] = 'Tu Curriculum Vitae ha sido eliminado correctamente.';
-        header('Location: ban.php?pagina=panel_empleado#seccionCv');
+        header('Location: index.php?pagina=panel_empleado#seccionCv');
         exit;
     }
 }

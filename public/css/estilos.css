@@ -2,7 +2,6 @@
 
 .panel-vacantes{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:start}.panel-vacantes .form-card{max-width:none}.panel-vacantes form textarea,.panel-vacantes form select{width:100%;padding:10px;border:1px solid #d5d5d0;border-radius:3px;font:13px Arial;color:var(--texto);resize:vertical}.campos-vacante{display:grid;grid-template-columns:1fr 1fr;gap:12px}.mensaje-exito{padding:12px;background:#edf7ee;color:#28643a;font-size:13px;margin:12px 0}.vacantes-publicadas>h2{font:normal 26px Georgia,serif;color:var(--azul);margin:0 0 16px}.vacantes-publicadas .trabajo{margin-bottom:14px}.vacantes-publicadas .trabajo h2{font-size:20px}.vacantes-publicadas .trabajo p{white-space:normal}@media(max-width:760px){.panel-vacantes,.campos-vacante{grid-template-columns:1fr}}
 
-/* Estilos adicionales para la integración de base de datos unificada */
 .auth-bar{display:flex;align-items:center;gap:10px}
 .usuario-tag{font-size:13px;color:white;display:flex;align-items:center;gap:6px}
 .tipo-badge{padding:2px 6px;border-radius:3px;font-size:10px;font-weight:bold;text-transform:uppercase}
@@ -51,8 +50,6 @@
 .enlaces-registro{display:flex;justify-content:center;gap:8px;margin-top:4px}
 .enlaces-registro a{color:var(--dorado);font-weight:bold}
 
-
-/* Estilos para interactividad de botones y demo box */
 .demo-card{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);padding:10px 12px;border-radius:5px;margin-bottom:8px;cursor:pointer;transition:all 0.2s}
 .demo-card:hover{background:rgba(255,255,255,0.12);border-color:var(--dorado)}
 .demo-info{display:flex;flex-direction:column;gap:2px}

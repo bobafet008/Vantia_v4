@@ -5,9 +5,8 @@ class PdfReporteDiario
     private $fecha;
     private $datos;
     private $adminNombre;
-    private $tipoReporte; // 'diario' o 'admin'
+    private $tipoReporte;
 
-    // Dimensiones A4 en puntos (72 puntos por pulgada)
     private $pageWidth = 595.28;
     private $pageHeight = 841.89;
     private $marginLeft = 40.0;
@@ -16,7 +15,6 @@ class PdfReporteDiario
     private $marginBottom = 45.0;
     private $contentWidth;
 
-    // Estado del documento
     private $pages = [];
     private $currentPage = 0;
     private $curY = 0;
@@ -36,10 +34,10 @@ class PdfReporteDiario
             return '';
         }
         $str = (string) $text;
-        // Eliminar emojis o caracteres no compatibles con Windows-1252
+
         $emojiPattern = '/[\x{1F300}-\x{1FAD6}\x{1F600}-\x{1F64F}\x{1F680}-\x{1F6FF}\x{2600}-\x{26FF}\x{2700}-\x{27BF}\x{FE00}-\x{FE0F}\x{1F900}-\x{1F9FF}\x{1FA70}-\x{1FAFF}\x{200D}]/u';
         $str = preg_replace($emojiPattern, '', $str);
-        // Convertir a Windows-1252 / ISO-8859-1 para soporte nativo de tildes y eñes
+
         if (function_exists('mb_convert_encoding')) {
             $converted = @mb_convert_encoding($str, 'Windows-1252', 'UTF-8');
             if ($converted !== false) {
@@ -51,7 +49,7 @@ class PdfReporteDiario
                 $str = $converted;
             }
         }
-        // Escapar caracteres reservados de literales PDF
+
         return str_replace(['\\', '(', ')'], ['\\\\', '\\(', '\\)'], $str);
     }
 
@@ -116,7 +114,7 @@ class PdfReporteDiario
 
     private function drawPageHeader(): void
     {
-        // Barra superior azul corporativo
+
         $this->drawRect($this->marginLeft, $this->curY - 3, $this->contentWidth, 3, 'F', [0.118, 0.251, 0.686]);
 
         $this->drawText("VANTIA", $this->marginLeft, $this->curY - 16, 11, 'F2', [0.118, 0.251, 0.686]);
@@ -152,11 +150,10 @@ class PdfReporteDiario
 
         $esAdmin = ($this->tipoReporte === 'admin');
 
-        // 1. Encabezado principal del reporte
         $this->drawRect($this->marginLeft, $this->curY - 56, $this->contentWidth, 56, 'FD', [0.97, 0.98, 1.0], [0.80, 0.86, 0.96], 1);
 
-        $tituloPrincipal = $esAdmin 
-            ? "INFORME OFICIAL DE AUDITORIA: ACCIONES DEL ADMINISTRADOR" 
+        $tituloPrincipal = $esAdmin
+            ? "INFORME OFICIAL DE AUDITORIA: ACCIONES DEL ADMINISTRADOR"
             : "INFORME OFICIAL DE AUDITORIA Y ACCIONES DEL ADMINISTRADOR";
 
         $this->drawText($tituloPrincipal, $this->marginLeft + 16, $this->curY - 20, 13, 'F2', [0.08, 0.18, 0.45]);
@@ -179,7 +176,6 @@ class PdfReporteDiario
 
         $this->curY -= 70;
 
-        // 2. Resumen ejecutivo del día (Tarjetas de métricas)
         $nuevos = count($this->datos['nuevosUsuarios'] ?? []);
         $baneos = count($this->datos['baneos'] ?? []);
         $desbaneos = count($this->datos['desbaneos'] ?? []);
@@ -230,8 +226,6 @@ class PdfReporteDiario
 
         $this->curY -= ($boxH + 20);
 
-        // 3. Tablas Detalladas por Categoría
-        // Sección 1 SIEMPRE: Acciones y Bitácora del Administrador (Máxima prioridad)
         $this->renderSeccionLogsAdmin($this->datos['registrosAdmin'] ?? [], "1");
         $this->renderSeccionSoporte($this->datos['mensajesSoporte'] ?? [], "2");
         $this->renderSeccionBaneos($this->datos['baneos'] ?? [], "3");
@@ -277,7 +271,7 @@ class PdfReporteDiario
         $curX = $this->marginLeft;
         foreach ($vals as $i => $val) {
             $w = $widths[$i];
-            // Truncar para evitar desborde
+
             $maxChars = (int) ($w / 5.2);
             $texto = (mb_strlen($val) > $maxChars) ? mb_substr($val, 0, $maxChars - 2) . '..' : $val;
             $this->drawText($texto, $curX + 6, $this->curY - 11.5, 7.5, 'F1', [0.15, 0.20, 0.25]);
@@ -295,7 +289,6 @@ class PdfReporteDiario
         $this->curY -= 26;
     }
 
-    // Seccion 1: Acciones y Bitacora del Administrador (Prioritaria)
     private function renderSeccionLogsAdmin(array $items, string $numero = "1"): void
     {
         $this->renderTituloSeccion($numero, "Auditoria y Acciones del Administrador", count($items));
@@ -304,7 +297,6 @@ class PdfReporteDiario
             return;
         }
 
-        // Header de la tabla de acciones
         $this->checkPageBreak(18);
         $this->drawRect($this->marginLeft, $this->curY - 16, $this->contentWidth, 16, 'F', [0.12, 0.20, 0.35]);
         $this->drawText("Hora / Ref", $this->marginLeft + 8, $this->curY - 11, 7.8, 'F2', [1, 1, 1]);
@@ -319,11 +311,9 @@ class PdfReporteDiario
             $alt = ($idx % 2 === 1);
             $bg = $alt ? [0.97, 0.98, 1.0] : [1, 1, 1];
 
-            // Fondo de la fila
             $this->drawRect($this->marginLeft, $this->curY - $h, $this->contentWidth, $h, 'F', $bg);
             $this->drawLine($this->marginLeft, $this->curY - $h, $this->marginLeft + $this->contentWidth, $this->curY - $h, [0.88, 0.90, 0.94], 0.5);
 
-            // Borde lateral con color segun tipo de evento
             $tipo = $item['tipo_evento'] ?? 'accion_admin';
             $colorBorde = [0.35, 0.40, 0.50];
             if ($tipo === 'baneo') $colorBorde = [0.85, 0.15, 0.15];
@@ -341,23 +331,19 @@ class PdfReporteDiario
             $desc = $item['descripcion'] ?? '-';
             $afectado = $item['usuario_afectado'] ?? '-';
 
-            // Columna 1: Hora y Ref (X: +8 a +72)
             $this->drawText($hora, $this->marginLeft + 8, $this->curY - 10, 7.8, 'F2', [0.10, 0.15, 0.25]);
             $this->drawText($idRef . " " . $tipoTexto, $this->marginLeft + 8, $this->curY - 20, 6.5, 'F2', $colorBorde);
 
-            // Columna 2: Responsable e IP (X: +76 a +206)
             $adminShort = (mb_strlen($admin) > 24) ? mb_substr($admin, 0, 22) . '..' : $admin;
             $this->drawText($adminShort, $this->marginLeft + 76, $this->curY - 10, 7.5, 'F2', [0.15, 0.20, 0.30]);
             $this->drawText("IP: " . $ip, $this->marginLeft + 76, $this->curY - 20, 6.8, 'F3', [0.45, 0.50, 0.58]);
 
-            // Columna 3: Titulo y Descripcion (X: +210 a +395)
             $tituloShort = (mb_strlen($titulo) > 38) ? mb_substr($titulo, 0, 36) . '..' : $titulo;
             $this->drawText($tituloShort, $this->marginLeft + 210, $this->curY - 10, 7.8, 'F2', [0.08, 0.15, 0.35]);
 
             $descShort = (mb_strlen($desc) > 50) ? mb_substr($desc, 0, 48) . '..' : $desc;
             $this->drawText($descShort, $this->marginLeft + 210, $this->curY - 20, 7.0, 'F1', [0.30, 0.35, 0.42]);
 
-            // Columna 4: Usuario / Entidad Afectada (X: +400 a +515)
             $afectadoShort = (mb_strlen($afectado) > 25) ? mb_substr($afectado, 0, 23) . '..' : $afectado;
             $this->drawText($afectadoShort, $this->marginLeft + 400, $this->curY - 14, 7.5, 'F1', [0.10, 0.15, 0.25]);
 
@@ -366,7 +352,6 @@ class PdfReporteDiario
         $this->curY -= 12;
     }
 
-    // Seccion 2: Consultas y Gmails de Atencion al Cliente
     private function renderSeccionSoporte(array $items, string $numero = "2"): void
     {
         $this->renderTituloSeccion($numero, "Gmails y Consultas de Atencion al Cliente", count($items));
@@ -375,7 +360,6 @@ class PdfReporteDiario
             return;
         }
 
-        // Header de la tabla de soporte
         $this->checkPageBreak(18);
         $this->drawRect($this->marginLeft, $this->curY - 16, $this->contentWidth, 16, 'F', [0.08, 0.28, 0.42]);
         $this->drawText("Hora / Ref", $this->marginLeft + 8, $this->curY - 11, 7.8, 'F2', [1, 1, 1]);
@@ -391,7 +375,6 @@ class PdfReporteDiario
             $alt = ($idx % 2 === 1);
             $bg = $alt ? [0.97, 0.99, 1.0] : [1, 1, 1];
 
-            // Fondo de la fila
             $this->drawRect($this->marginLeft, $this->curY - $h, $this->contentWidth, $h, 'F', $bg);
             $this->drawLine($this->marginLeft, $this->curY - $h, $this->marginLeft + $this->contentWidth, $this->curY - $h, [0.88, 0.90, 0.94], 0.5);
 
@@ -409,21 +392,17 @@ class PdfReporteDiario
             $mensaje = $item['mensaje'] ?? '';
             $estadoTxt = $esRespondido ? 'Respondido' : 'Pendiente';
 
-            // Columna 1: Hora y Ref (X: +8 a +72)
             $this->drawText($hora, $this->marginLeft + 8, $this->curY - 10, 7.8, 'F2', [0.10, 0.15, 0.25]);
             $this->drawText($idRef . " SOPORTE", $this->marginLeft + 8, $this->curY - 20, 6.5, 'F2', [0.08, 0.28, 0.42]);
 
-            // Columna 2: Remitente y Rol (X: +76 a +185)
             $nombreShort = (mb_strlen($nombre) > 20) ? mb_substr($nombre, 0, 18) . '..' : $nombre;
             $this->drawText($nombreShort, $this->marginLeft + 76, $this->curY - 10, 7.5, 'F2', [0.15, 0.20, 0.30]);
             $rolShort = (mb_strlen($rol) > 22) ? mb_substr($rol, 0, 20) . '..' : $rol;
             $this->drawText($rolShort, $this->marginLeft + 76, $this->curY - 20, 6.8, 'F1', [0.45, 0.50, 0.58]);
 
-            // Columna 3: Correo Gmail (X: +190 a +310)
             $emailShort = (mb_strlen($email) > 22) ? mb_substr($email, 0, 20) . '..' : $email;
             $this->drawText($emailShort, $this->marginLeft + 190, $this->curY - 14, 7.5, 'F1', [0.10, 0.15, 0.25]);
 
-            // Columna 4: Asunto y Mensaje (X: +315 a +470)
             $asuntoShort = (mb_strlen($asunto) > 30) ? mb_substr($asunto, 0, 28) . '..' : $asunto;
             $this->drawText($asuntoShort, $this->marginLeft + 315, $this->curY - 10, 7.8, 'F2', [0.08, 0.15, 0.35]);
 
@@ -431,7 +410,6 @@ class PdfReporteDiario
             $msgShort = (mb_strlen($limpioMsg) > 34) ? mb_substr($limpioMsg, 0, 32) . '..' : $limpioMsg;
             $this->drawText($msgShort, $this->marginLeft + 315, $this->curY - 20, 7.0, 'F1', [0.35, 0.40, 0.45]);
 
-            // Columna 5: Estado (X: +475 a +515)
             $this->drawText($estadoTxt, $this->marginLeft + 475, $this->curY - 14, 7.5, 'F2', $colorBorde);
 
             $this->curY -= $h;
@@ -439,7 +417,6 @@ class PdfReporteDiario
         $this->curY -= 12;
     }
 
-    // Seccion 3: Baneos
     private function renderSeccionBaneos(array $items, string $numero = "3"): void
     {
         $this->renderTituloSeccion($numero, "Cuentas Suspendidas y Sanciones (Baneos)", count($items));
@@ -465,7 +442,6 @@ class PdfReporteDiario
         $this->curY -= 12;
     }
 
-    // Seccion 4: Desbaneos
     private function renderSeccionDesbaneos(array $items, string $numero = "4"): void
     {
         $this->renderTituloSeccion($numero, "Historial de Desbaneos y Cuentas Reactivadas", count($items));
@@ -490,7 +466,6 @@ class PdfReporteDiario
         $this->curY -= 12;
     }
 
-    // Seccion 5: Nuevos Usuarios
     private function renderSeccionNuevosUsuarios(array $items, string $numero = "5"): void
     {
         $this->renderTituloSeccion($numero, "Nuevos Usuarios Registrados", count($items));
@@ -524,11 +499,9 @@ class PdfReporteDiario
         $out = "%PDF-1.4\n%\xe2\xe3\xcf\xd3\n";
         $offsets = [];
 
-        // 1: Catalog
         $offsets[1] = strlen($out);
         $out .= "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n";
 
-        // 2: Pages container
         $kids = [];
         for ($i = 1; $i <= $this->currentPage; $i++) {
             $kids[] = (5 + ($i * 2) - 1) . " 0 R";
@@ -536,19 +509,15 @@ class PdfReporteDiario
         $offsets[2] = strlen($out);
         $out .= "2 0 obj\n<< /Type /Pages /Kids [" . implode(' ', $kids) . "] /Count " . $this->currentPage . " >>\nendobj\n";
 
-        // 3: Font Helvetica (F1)
         $offsets[3] = strlen($out);
         $out .= "3 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>\nendobj\n";
 
-        // 4: Font Helvetica-Bold (F2)
         $offsets[4] = strlen($out);
         $out .= "4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>\nendobj\n";
 
-        // 5: Font Helvetica-Oblique (F3)
         $offsets[5] = strlen($out);
         $out .= "5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique /Encoding /WinAnsiEncoding >>\nendobj\n";
 
-        // Objetos de cada página
         $objId = 6;
         for ($i = 1; $i <= $this->currentPage; $i++) {
             $pageObjId = $objId++;
@@ -557,16 +526,13 @@ class PdfReporteDiario
             $stream = $this->pages[$i];
             $streamLen = strlen($stream);
 
-            // Page Object
             $offsets[$pageObjId] = strlen($out);
             $out .= "$pageObjId 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " . sprintf("%.2f %.2f", $this->pageWidth, $this->pageHeight) . "] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents $contentObjId 0 R >>\nendobj\n";
 
-            // Content Stream Object
             $offsets[$contentObjId] = strlen($out);
             $out .= "$contentObjId 0 obj\n<< /Length $streamLen >>\nstream\n" . $stream . "endstream\nendobj\n";
         }
 
-        // Xref table
         $xrefOffset = strlen($out);
         $totalObjs = $objId;
         $out .= "xref\n0 $totalObjs\n";

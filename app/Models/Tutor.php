@@ -21,7 +21,7 @@ class Tutor
                 $this->conexion->exec("ALTER TABLE tutores ADD COLUMN correo VARCHAR(50) NULL AFTER ci");
             }
         } catch (Exception $e) {
-            // Continuar si no se tienen permisos directos de ALTER
+
         }
     }
 
@@ -31,11 +31,11 @@ class Tutor
         try {
             $sql = 'INSERT INTO tutores (usuario_men_id, nombre, ci, correo, telefono, relacion)
                     VALUES (:usuario_men_id, :nombre, :ci, :correo, :telefono, :relacion)
-                    ON DUPLICATE KEY UPDATE 
-                        nombre = VALUES(nombre), 
+                    ON DUPLICATE KEY UPDATE
+                        nombre = VALUES(nombre),
                         ci = VALUES(ci),
                         correo = VALUES(correo),
-                        telefono = VALUES(telefono), 
+                        telefono = VALUES(telefono),
                         relacion = VALUES(relacion)';
             $consulta = $this->conexion->prepare($sql);
             return $consulta->execute([
@@ -50,10 +50,10 @@ class Tutor
             try {
                 $sql = 'INSERT INTO tutores (usuario_men_id, nombre, ci, telefono, relacion)
                         VALUES (:usuario_men_id, :nombre, :ci, :telefono, :relacion)
-                        ON DUPLICATE KEY UPDATE 
-                            nombre = VALUES(nombre), 
-                            ci = VALUES(ci), 
-                            telefono = VALUES(telefono), 
+                        ON DUPLICATE KEY UPDATE
+                            nombre = VALUES(nombre),
+                            ci = VALUES(ci),
+                            telefono = VALUES(telefono),
                             relacion = VALUES(relacion)';
                 $consulta = $this->conexion->prepare($sql);
                 return $consulta->execute([
@@ -66,9 +66,9 @@ class Tutor
             } catch (PDOException $e2) {
                 $sql = 'INSERT INTO tutores (usuario_men_id, nombre, telefono, relacion)
                         VALUES (:usuario_men_id, :nombre, :telefono, :relacion)
-                        ON DUPLICATE KEY UPDATE 
-                            nombre = VALUES(nombre), 
-                            telefono = VALUES(telefono), 
+                        ON DUPLICATE KEY UPDATE
+                            nombre = VALUES(nombre),
+                            telefono = VALUES(telefono),
                             relacion = VALUES(relacion)';
                 $consulta = $this->conexion->prepare($sql);
                 return $consulta->execute([
@@ -91,10 +91,10 @@ class Tutor
 
     public function obtenerTodos()
     {
-        $sql = 'SELECT t.*, 
-                       un.nombre AS menor_nombre, 
-                       un.correo AS menor_correo, 
-                       un.telefono AS menor_telefono, 
+        $sql = 'SELECT t.*,
+                       un.nombre AS menor_nombre,
+                       un.correo AS menor_correo,
+                       un.telefono AS menor_telefono,
                        un.fecha_nacimiento,
                        un.cv_path,
                        un.permiso_tutor_path

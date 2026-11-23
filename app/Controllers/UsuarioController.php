@@ -29,7 +29,7 @@ class UsuarioController
     public function guardar()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: ban.php?pagina=registro_empleado');
+            header('Location: index.php?pagina=registro_empleado');
             exit;
         }
 
@@ -40,7 +40,7 @@ class UsuarioController
         $confirmarContrasena = $_POST['confirmar_contrasena'] ?? '';
         $telefono = trim($_POST['telefono'] ?? '');
 
-        // Validación inicial común
+        
         if ($tipo !== 'empleado' && $tipo !== 'empresa' && $tipo !== 'emprendimiento') {
             $error = 'Selecciona un tipo de cuenta válido.';
         } elseif ($nombre === '') {
@@ -76,7 +76,7 @@ class UsuarioController
         $modeloEmprendimiento = new Emprendimiento($conexion);
         $modeloAdmin          = new UsuarioAdmin($conexion);
 
-        // Verificar si el correo ya existe en cualquier tipo de cuenta (mayor, menor, empresa, emprendimiento o admin)
+        
         if (!isset($error)) {
             if (!empty($modeloUsuario->buscarPorCorreo($correo)) ||
                 !empty($modeloEmpresa->buscarPorCorreo($correo)) ||
@@ -89,14 +89,14 @@ class UsuarioController
         $hashContrasena = password_hash($contrasena, PASSWORD_DEFAULT);
         $esMenor = false;
 
-        // Validaciones específicas según el tipo de usuario
+        
         if (!isset($error)) {
             if ($tipo === 'empresa') {
                 $representante = trim($_POST['representante'] ?? '');
                 $nit = trim($_POST['nit'] ?? '');
                 $descripcion = trim($_POST['descripcion_empresa'] ?? '');
 
-                // Procesamiento del certificado / código QR ROE en formato de imagen
+                
                 $roePath = 'uploads/roe/roe_default.png';
                 if (isset($_FILES['roe_archivo']) && $_FILES['roe_archivo']['error'] === UPLOAD_ERR_OK) {
                     $subido = subirArchivo('roe_archivo', 'roe', 'roe');
@@ -137,7 +137,7 @@ class UsuarioController
                 $rubro = trim($_POST['rubro_emprendimiento'] ?? '');
                 $descripcion = trim($_POST['descripcion_empresa'] ?? '');
 
-                // Procesamiento de foto del puesto o imagen (opcional con imagen por defecto)
+                
                 $roePath = 'uploads/roe/roe_default.png';
                 if (isset($_FILES['roe_archivo']) && $_FILES['roe_archivo']['error'] === UPLOAD_ERR_OK) {
                     $subido = subirArchivo('roe_archivo', 'roe', 'roe');
@@ -188,7 +188,7 @@ class UsuarioController
                     ];
                 }
             } else {
-                // Empleado / Candidato
+                
                 $fechaNacimiento = $_POST['fecha_nacimiento'] ?? '';
                 if ($fechaNacimiento === '') {
                     $error = 'Ingresa tu fecha de nacimiento.';
@@ -203,7 +203,7 @@ class UsuarioController
                         if ($edad < 16) {
                             $error = 'Debes tener al menos 16 años para crear una cuenta en la plataforma.';
                         } elseif ($edad < 18) {
-                            // Menor de 18 años -> tabla usuarios_men
+                            
                             $esMenor = true;
                             $tutorNombre = trim($_POST['tutor_nombre'] ?? '');
                             $tutorCi = trim($_POST['tutor_ci'] ?? '');
@@ -234,7 +234,7 @@ class UsuarioController
                                 ];
                             }
                         } else {
-                            // Mayor de 18 años -> tabla usuarios_may
+                            
                             $datosMayor = [
                                 'nombre' => $nombre,
                                 'correo' => $correo,
@@ -248,7 +248,7 @@ class UsuarioController
                     }
                 }
 
-                // Subida y validación obligatoria del Curriculum Vitae en PDF
+                
                 if (!isset($error)) {
                     if (!isset($_FILES['cv_archivo']) || $_FILES['cv_archivo']['error'] !== UPLOAD_ERR_OK) {
                         $error = 'Es obligatorio adjuntar tu Curriculum Vitae en formato PDF para completar tu registro.';
@@ -284,10 +284,10 @@ class UsuarioController
 
         if ($tipo === 'emprendimiento') {
             try {
-                // Guardar en la tabla emprendimientos
+                
                 $nuevoId = $modeloEmprendimiento->crear($datosEmprendimiento);
 
-                // Sincronizar en empresas para compatibilidad relacional
+                
                 $datosEmpresa['id'] = $nuevoId;
                 $modeloEmpresa->crearConId($datosEmpresa);
 
@@ -315,7 +315,7 @@ class UsuarioController
                 $_SESSION['representante'] = $representante ?: null;
                 $_SESSION['tabla_usuario'] = 'emprendimientos';
 
-                header('Location: ban.php?pagina=panel_empresa');
+                header('Location: index.php?pagina=panel_empresa');
                 exit;
             } catch (PDOException $errorBase) {
                 error_log('Error registro emprendimiento: ' . $errorBase->getMessage());
@@ -355,7 +355,7 @@ class UsuarioController
                 $_SESSION['representante'] = $representante ?: null;
                 $_SESSION['tabla_usuario'] = 'empresas';
 
-                header('Location: ban.php?pagina=panel_empresa');
+                header('Location: index.php?pagina=panel_empresa');
                 exit;
             } catch (PDOException $errorBase) {
                 error_log('Error registro empresa: ' . $errorBase->getMessage());
@@ -367,7 +367,7 @@ class UsuarioController
                 return;
             }
         } else {
-            // Empleado: menor en usuarios_men o mayor en usuarios_may
+            
             if ($esMenor) {
                 require_once __DIR__ . '/../Models/UsuarioMen.php';
                 $modeloMen = new UsuarioMen($conexion);
@@ -397,7 +397,7 @@ class UsuarioController
                     $_SESSION['es_menor'] = 1;
                     $_SESSION['tabla_usuario'] = 'usuarios_men';
 
-                    header('Location: ban.php?pagina=trabajos');
+                    header('Location: index.php?pagina=trabajos');
                     exit;
                 } catch (PDOException $errorBase) {
                     error_log('Error registro menor: ' . $errorBase->getMessage());
@@ -445,7 +445,7 @@ class UsuarioController
                         'roe'      => $roe ?? '',
                     ]);
 
-                    header('Location: ban.php?pagina=trabajos');
+                    header('Location: index.php?pagina=trabajos');
                     exit;
                 } catch (PDOException $errorBase) {
                     error_log('Error registro mayor: ' . $errorBase->getMessage());

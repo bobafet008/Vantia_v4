@@ -31,7 +31,6 @@ class Emprendimiento
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci";
             $this->conexion->exec($sql);
 
-            // 1. Compatibilidad para creado_en / creada_en
             $colCreadoEn = $this->conexion->query("SHOW COLUMNS FROM emprendimientos LIKE 'creado_en'")->fetch();
             $colCreadaEn = $this->conexion->query("SHOW COLUMNS FROM emprendimientos LIKE 'creada_en'")->fetch();
             if (!$colCreadoEn) {
@@ -43,7 +42,6 @@ class Emprendimiento
                 }
             }
 
-            // 2. Compatibilidad para verificado / verificada
             $colVerificado = $this->conexion->query("SHOW COLUMNS FROM emprendimientos LIKE 'verificado'")->fetch();
             $colVerificada = $this->conexion->query("SHOW COLUMNS FROM emprendimientos LIKE 'verificada'")->fetch();
             if (!$colVerificado) {
@@ -55,7 +53,6 @@ class Emprendimiento
                 }
             }
 
-            // 3. Compatibilidad para representante / titular_nombre
             $colRep = $this->conexion->query("SHOW COLUMNS FROM emprendimientos LIKE 'representante'")->fetch();
             $colTit = $this->conexion->query("SHOW COLUMNS FROM emprendimientos LIKE 'titular_nombre'")->fetch();
             if (!$colRep) {
@@ -65,7 +62,6 @@ class Emprendimiento
                 }
             }
 
-            // 4. Compatibilidad para ci / titular_ci / nit_ci
             $colCi = $this->conexion->query("SHOW COLUMNS FROM emprendimientos LIKE 'ci'")->fetch();
             $colTitCi = $this->conexion->query("SHOW COLUMNS FROM emprendimientos LIKE 'titular_ci'")->fetch();
             $colNitCi = $this->conexion->query("SHOW COLUMNS FROM emprendimientos LIKE 'nit_ci'")->fetch();
@@ -78,7 +74,6 @@ class Emprendimiento
                 }
             }
 
-            // 5. Compatibilidad para foto_puesto
             $colFoto = $this->conexion->query("SHOW COLUMNS FROM emprendimientos LIKE 'foto_puesto'")->fetch();
             if (!$colFoto) {
                 $this->conexion->exec("ALTER TABLE emprendimientos ADD COLUMN foto_puesto VARCHAR(80) NOT NULL DEFAULT 'uploads/roe/roe_default.png'");

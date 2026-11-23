@@ -10,27 +10,27 @@
 <body>
 <header class="site-header">
   <nav class="contenedor menu">
-    <a class="logo" href="ban.php?pagina=inicio">VANTIA<span>.</span></a>
+    <a class="logo" href="index.php?pagina=inicio">VANTIA<span>.</span></a>
     
     <div class="links">
-      <a href="ban.php?pagina=inicio">Inicio</a>
-      <a href="ban.php?pagina=trabajos">Oportunidades</a>
-      <a href="ban.php?pagina=soporte">Atención al Cliente</a>
+      <a href="index.php?pagina=inicio">Inicio</a>
+      <a href="index.php?pagina=trabajos">Oportunidades</a>
+      <a href="index.php?pagina=soporte">Atención al Cliente</a>
       
       <?php if (!empty($_SESSION['usuario_id'])): ?>
         <?php if ($_SESSION['tipo'] === 'empresa'): ?>
-          <a href="ban.php?pagina=panel_empresa"><strong>Panel Empresa</strong></a>
+          <a href="index.php?pagina=panel_empresa"><strong>Panel Empresa</strong></a>
         <?php elseif ($_SESSION['tipo'] === 'empleado'): ?>
-          <a href="ban.php?pagina=panel_empleado"><strong>Mi Perfil</strong></a>
-          <a href="ban.php?pagina=mis_postulaciones"><strong>Mis Postulaciones</strong></a>
-          <a href="ban.php?pagina=mis_postulaciones#calificaciones"><strong>Calificaciones</strong></a>
+          <a href="index.php?pagina=panel_empleado"><strong>Mi Perfil</strong></a>
+          <a href="index.php?pagina=mis_postulaciones"><strong>Mis Postulaciones</strong></a>
+          <a href="index.php?pagina=mis_postulaciones#calificaciones"><strong>Calificaciones</strong></a>
         <?php elseif ($_SESSION['tipo'] === 'admin'): ?>
-          <a href="ban.php?pagina=panel_admin"><strong>Panel Admin</strong></a>
-          <a href="ban.php?pagina=panel_registros"><strong>Panel de Registros</strong></a>
+          <a href="index.php?pagina=panel_admin"><strong>Panel Admin</strong></a>
+          <a href="index.php?pagina=panel_registros"><strong>Panel de Registros</strong></a>
         <?php endif; ?>
       <?php else: ?>
-        <a href="ban.php?pagina=empleado">Jóvenes</a>
-        <a href="ban.php?pagina=empresa">Empresas</a>
+        <a href="index.php?pagina=empleado">Jóvenes</a>
+        <a href="index.php?pagina=empresa">Empresas</a>
       <?php endif; ?>
     </div>
 
@@ -40,10 +40,10 @@
           <?= e($_SESSION['usuario'] ?? '') ?> 
           <small class="tipo-badge <?= e($_SESSION['tipo']) ?>"><?= ucfirst(e($_SESSION['subtipo'] ?? $_SESSION['tipo'])) ?></small>
         </span>
-        <a class="boton-sm boton-outline" href="ban.php?pagina=salir">Cerrar sesión</a>
+        <a class="boton-sm boton-outline" href="index.php?pagina=salir">Cerrar sesión</a>
       <?php else: ?>
-        <a class="boton-sm" href="ban.php?pagina=login">Iniciar sesión</a>
-        <a class="boton-sm boton-destacado" href="ban.php?pagina=registro_empleado">Registrarse</a>
+        <a class="boton-sm" href="index.php?pagina=login">Iniciar sesión</a>
+        <a class="boton-sm boton-destacado" href="index.php?pagina=registro_empleado">Registrarse</a>
       <?php endif; ?>
     </div>
   </nav>

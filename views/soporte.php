@@ -181,9 +181,9 @@
                     <p class="text-muted">Por favor, completa los siguientes datos para procesar tu solicitud.</p>
                 </div>
 
-                <form action="ban.php?pagina=enviar_soporte" method="POST">
+                <form action="index.php?pagina=enviar_soporte" method="POST">
                     <div class="row g-3">
-                        <!-- Nombre Completo -->
+                        
                         <div class="col-md-6 mb-3">
                             <label for="nombre" class="form-label fw-semibold text-secondary small">Nombre Completo <span class="text-danger">*</span></label>
                             <div class="input-group">

@@ -1,12 +1,11 @@
 <?php
 
-
 require_once __DIR__ . '/../helpers/mail.php';
 
 class SoporteController {
 
     public function index() {
-        // Cargar la vista de soporte
+        
         require_once __DIR__ . '/../../views/soporte.php';
     }
 
@@ -21,17 +20,17 @@ class SoporteController {
             
             if (empty($nombre) || empty($email) || empty($mensaje)) {
                 $_SESSION['error_soporte'] = "Por favor completa todos los campos obligatorios.";
-                header("Location: ban.php?pagina=soporte");
+                header("Location: index.php?pagina=soporte");
                 exit;
             }
 
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $_SESSION['error_soporte'] = "Por favor ingresa una dirección de correo válida.";
-                header("Location: ban.php?pagina=soporte");
+                header("Location: index.php?pagina=soporte");
                 exit;
             }
 
-            // Guardar registro de la consulta de atención al cliente en la base de datos
+            
             require __DIR__ . '/../../config/database.php';
             require_once __DIR__ . '/../Models/MensajeSoporte.php';
             require_once __DIR__ . '/../Models/RegistroAdmin.php';
@@ -43,7 +42,7 @@ class SoporteController {
                 $empresaId = null;
                 $emprendimientoId = null;
 
-                // 1. Identificar por sesion activa
+                
                 if (!empty($_SESSION['usuario_id']) && !empty($_SESSION['tabla_usuario'])) {
                     $tablaSesion = $_SESSION['tabla_usuario'];
                     $idSesion = (int) $_SESSION['usuario_id'];
@@ -58,7 +57,7 @@ class SoporteController {
                     }
                 }
 
-                // 2. Si no se obtuvo por sesion, buscar cuenta por correo electronico
+                
                 if (!$usuarioMayId && !$usuarioMenId && !$empresaId && !$emprendimientoId) {
                     $stmtMay = $conexion->prepare("SELECT id FROM usuarios_may WHERE correo = ? LIMIT 1");
                     $stmtMay->execute([$email]);
@@ -95,7 +94,7 @@ class SoporteController {
                     $usuarioMayId, $usuarioMenId, $empresaId, $emprendimientoId
                 );
 
-                // Registrar en bitacora de auditoria general vinculando soporte y usuario
+                
                 $regAdmin = new RegistroAdmin($conexion);
                 $regAdmin->registrar(
                     null,
@@ -145,11 +144,11 @@ class SoporteController {
                 $_SESSION['error_soporte'] = "No se pudo enviar el mensaje. Por favor intenta más tarde o verifica la configuración SMTP.";
             }
 
-            header("Location: ban.php?pagina=soporte");
+            header("Location: index.php?pagina=soporte");
             exit;
         }
 
-        header("Location: ban.php?pagina=soporte");
+        header("Location: index.php?pagina=soporte");
         exit;
     }
 }

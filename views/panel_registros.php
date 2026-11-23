@@ -7,11 +7,11 @@
     <p>Supervisión ejecutiva, bitácora de eventos, reportes globales, cuentas suspendidas, historial de desbaneos, registro de nuevos usuarios, bloqueos por 3 contraseñas fallidas y auditoría de administradores.</p>
     
     <div style="margin-top:1rem; display:flex; gap:0.6rem; flex-wrap:wrap; align-items:center;">
-      <a href="ban.php?pagina=panel_admin" class="boton boton-sm boton-oscuro" style="display:inline-flex; align-items:center; gap:6px;">
+      <a href="index.php?pagina=panel_admin" class="boton boton-sm boton-oscuro" style="display:inline-flex; align-items:center; gap:6px;">
         <svg style="width:14px; height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
         Volver a Panel Admin General
       </a>
-      <a href="ban.php?pagina=trabajos" class="boton boton-sm" style="background:#e2f5e8; color:#1f7a46;">Bolsa pública de empleos</a>
+      <a href="index.php?pagina=trabajos" class="boton boton-sm" style="background:#e2f5e8; color:#1f7a46;">Bolsa pública de empleos</a>
     </div>
   </div>
 </section>
@@ -20,7 +20,7 @@
   <?php if (!empty($exito)): ?><div class="mensaje-exito" style="margin-bottom:1.5rem;"><?= e($exito) ?></div><?php endif; ?>
   <?php if (!empty($error)): ?><div class="mensaje-error" style="margin-bottom:1.5rem;"><?= e($error) ?></div><?php endif; ?>
 
-  <!-- Generador Oficial de Reportes en PDF por Día -->
+  
   <div class="bloque-panel" style="margin-bottom:2.2rem; background:#ffffff; border:1px solid #cbd5e1; border-left:4px solid #1e40af; border-radius:10px; padding:20px 24px; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
       <div>
@@ -31,7 +31,7 @@
         </p>
       </div>
 
-      <form action="ban.php" method="get" target="_blank" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+      <form action="index.php" method="get" target="_blank" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
         <input type="hidden" name="pagina" value="pdf_reporte_diario">
         <div style="display:flex; flex-direction:column; gap:3px;">
           <label style="font-size:11.5px; font-weight:700; color:#475569; text-transform:uppercase;">Fecha del reporte:</label>
@@ -53,7 +53,7 @@
     </div>
   </div>
 
-  <!-- Tarjetas de Estadísticas Globales (Mismo formato que Panel Admin) -->
+  
   <div class="tarjetas" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:1rem; margin-bottom:2.5rem;">
     <div class="tarjeta">
       <span class="numero">01 · TOTAL USUARIOS</span>
@@ -103,9 +103,9 @@
     .badge-evento-accion { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
   </style>
 
-  <!-- ========================================== -->
-  <!-- SECCION 1: REPORTES Y METRICAS             -->
-  <!-- ========================================== -->
+  
+  
+  
   <div id="seccionReportes" class="bloque-panel" style="margin-bottom:3rem;">
     <div class="titulo-seccion">
       <div>
@@ -116,7 +116,7 @@
       <span class="total-badge"><?= (int) ($totalUsuariosGlobal ?? 0) ?> usuarios globales</span>
     </div>
 
-    <!-- Desglose Operativo en Columnas -->
+    
     <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:1.5rem; margin-bottom:1.5rem;">
       <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:20px;">
         <h4 style="margin:0 0 14px 0; font-size:15px; color:#1e293b;">Validación y Verificación Laboral</h4>
@@ -151,7 +151,7 @@
       </div>
     </div>
 
-    <!-- Alerta de Diagnóstico del Sistema -->
+    
     <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-left:4px solid #10b981; border-radius:8px; padding:16px 20px;">
       <h4 style="margin:0 0 6px 0; color:#166534; font-size:14px;">Diagnóstico Activo del Sistema</h4>
       <p style="margin:0; font-size:13px; color:#14532d; line-height:1.5;">
@@ -160,9 +160,9 @@
     </div>
   </div>
 
-  <!-- ========================================== -->
-  <!-- SECCION 2: BANEOS                          -->
-  <!-- ========================================== -->
+  
+  
+  
   <div id="seccionBaneos" class="bloque-panel" style="margin-bottom:3rem;">
     <div class="titulo-seccion">
       <div>
@@ -217,10 +217,10 @@
                     </span>
                     <div style="display:flex; align-items:center; gap:8px;">
                       <?php if ($dia !== 'sin_fecha'): ?>
-                        <a href="ban.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
+                        <a href="index.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
                           PDF Acciones del Día
                         </a>
-                        <a href="ban.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-size:11px; padding:3px 9px; font-weight:600; text-decoration:none; border-radius:4px;">
+                        <a href="index.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-size:11px; padding:3px 9px; font-weight:600; text-decoration:none; border-radius:4px;">
                           PDF Completo
                         </a>
                       <?php endif; ?>
@@ -274,7 +274,7 @@
                   <?= !empty($cb['fecha']) ? date('H:i:s · d/m/Y', strtotime($cb['fecha'])) : '-' ?>
                 </td>
                 <td>
-                  <form action="ban.php?pagina=desbanear_cuenta" method="post" onsubmit="return confirm('¿Deseas levantar inmediatamente la suspensión para <?= e(addslashes($cb['nombre'])) ?>?');">
+                  <form action="index.php?pagina=desbanear_cuenta" method="post" onsubmit="return confirm('¿Deseas levantar inmediatamente la suspensión para <?= e(addslashes($cb['nombre'])) ?>?');">
                     <input type="hidden" name="id" value="<?= (int) $cb['id'] ?>">
                     <input type="hidden" name="tabla" value="<?= e($cb['tabla']) ?>">
                     <input type="hidden" name="origen" value="panel_registros">
@@ -291,7 +291,7 @@
       </table>
     </div>
 
-    <!-- Subtabla: Bitácora de suspensiones aplicadas -->
+    
     <div style="display:flex; justify-content:space-between; align-items:center; margin:2rem 0 1rem 0; flex-wrap:wrap; gap:0.5rem;">
       <h3 style="margin:0; font-size:1.15rem; color:#0f172a;">Bitácora de Suspensiones Aplicadas (Separadas por Fecha)</h3>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -332,7 +332,7 @@
                       <?= formatoFechaGrupo($dia) ?>
                     </span>
                     <?php if ($dia !== 'sin_fecha'): ?>
-                      <a href="ban.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:2px 8px; font-weight:700; text-decoration:none; border-radius:4px;">
+                      <a href="index.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:2px 8px; font-weight:700; text-decoration:none; border-radius:4px;">
                         PDF del Día
                       </a>
                     <?php endif; ?>
@@ -355,11 +355,9 @@
     </div>
   </div>
 
-
-
-  <!-- ========================================== -->
-  <!-- SECCION 3: DESBANEOS                       -->
-  <!-- ========================================== -->
+  
+  
+  
   <div id="seccionDesbaneos" class="bloque-panel" style="margin-bottom:3rem;">
     <div class="titulo-seccion">
       <div>
@@ -411,10 +409,10 @@
                     </span>
                     <div style="display:flex; align-items:center; gap:8px;">
                       <?php if ($dia !== 'sin_fecha'): ?>
-                        <a href="ban.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
+                        <a href="index.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
                           PDF Acciones del Día
                         </a>
-                        <a href="ban.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-size:11px; padding:3px 9px; font-weight:600; text-decoration:none; border-radius:4px;">
+                        <a href="index.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-size:11px; padding:3px 9px; font-weight:600; text-decoration:none; border-radius:4px;">
                           PDF Completo
                         </a>
                       <?php endif; ?>
@@ -457,11 +455,9 @@
     </div>
   </div>
 
-
-
-  <!-- ========================================== -->
-  <!-- SECCION 4: REGISTRO DE NUEVOS USUARIOS     -->
-  <!-- ========================================== -->
+  
+  
+  
   <div id="seccionNuevos" class="bloque-panel" style="margin-bottom:3rem;">
     <div class="titulo-seccion">
       <div>
@@ -514,10 +510,10 @@
                     </span>
                     <div style="display:flex; align-items:center; gap:8px;">
                       <?php if ($dia !== 'sin_fecha'): ?>
-                        <a href="ban.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
+                        <a href="index.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
                           PDF Acciones del Día
                         </a>
-                        <a href="ban.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-size:11px; padding:3px 9px; font-weight:600; text-decoration:none; border-radius:4px;">
+                        <a href="index.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-size:11px; padding:3px 9px; font-weight:600; text-decoration:none; border-radius:4px;">
                           PDF Completo
                         </a>
                       <?php endif; ?>
@@ -571,11 +567,9 @@
     </div>
   </div>
 
-
-
-  <!-- ========================================== -->
-  <!-- SECCION 5: REGISTROS DEL ADMINISTRADOR     -->
-  <!-- ========================================== -->
+  
+  
+  
   <div id="seccionAdminLogs" class="bloque-panel" style="margin-bottom:3rem;">
     <div class="titulo-seccion">
       <div>
@@ -584,7 +578,7 @@
         <p class="texto-suave">Historial cronológico de auditoría con todas las intervenciones separadas por día.</p>
       </div>
       <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-        <a href="ban.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= date('Y-m-d') ?>" target="_blank" class="boton-sm" style="background:#1e40af; color:#ffffff; font-weight:700; border:1px solid #1e3a8a; padding:6px 12px; text-decoration:none; border-radius:6px; display:inline-flex; align-items:center; gap:5px;">
+        <a href="index.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= date('Y-m-d') ?>" target="_blank" class="boton-sm" style="background:#1e40af; color:#ffffff; font-weight:700; border:1px solid #1e3a8a; padding:6px 12px; text-decoration:none; border-radius:6px; display:inline-flex; align-items:center; gap:5px;">
           <svg style="width:13px; height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
           PDF Acciones Admin
         </a>
@@ -633,10 +627,10 @@
                     </span>
                     <div style="display:flex; align-items:center; gap:8px;">
                       <?php if ($dia !== 'sin_fecha'): ?>
-                        <a href="ban.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
+                        <a href="index.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
                           PDF Acciones del Día
                         </a>
-                        <a href="ban.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-size:11px; padding:3px 9px; font-weight:600; text-decoration:none; border-radius:4px;">
+                        <a href="index.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-size:11px; padding:3px 9px; font-weight:600; text-decoration:none; border-radius:4px;">
                           PDF Completo
                         </a>
                       <?php endif; ?>
@@ -691,9 +685,9 @@
     </div>
   </div>
 
-  <!-- ========================================== -->
-  <!-- SECCION 6: GMAIL ATENCION AL CLIENTE       -->
-  <!-- ========================================== -->
+  
+  
+  
   <div id="seccionAtencionCliente" class="bloque-panel" style="margin-bottom:3rem;">
     <div class="titulo-seccion">
       <div>
@@ -751,7 +745,7 @@
                     </span>
                     <div style="display:flex; align-items:center; gap:8px;">
                       <?php if ($dia !== 'sin_fecha'): ?>
-                        <a href="ban.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
+                        <a href="index.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
                           PDF del Día
                         </a>
                       <?php endif; ?>
@@ -805,7 +799,7 @@
                       Responder Gmail
                     </a>
                     <?php if (($ms['estado'] ?? 'pendiente') === 'pendiente'): ?>
-                      <form action="ban.php?pagina=cambiar_estado_soporte" method="post" style="display:inline;">
+                      <form action="index.php?pagina=cambiar_estado_soporte" method="post" style="display:inline;">
                         <input type="hidden" name="id" value="<?= (int) $ms['id'] ?>">
                         <input type="hidden" name="estado" value="respondido">
                         <input type="hidden" name="origen" value="panel_registros">
@@ -814,7 +808,7 @@
                         </button>
                       </form>
                     <?php else: ?>
-                      <form action="ban.php?pagina=cambiar_estado_soporte" method="post" style="display:inline;">
+                      <form action="index.php?pagina=cambiar_estado_soporte" method="post" style="display:inline;">
                         <input type="hidden" name="id" value="<?= (int) $ms['id'] ?>">
                         <input type="hidden" name="estado" value="pendiente">
                         <input type="hidden" name="origen" value="panel_registros">
@@ -835,7 +829,6 @@
 
 </section>
 
-<!-- Modal Reutilizable de Baneo Temporal o Permanente -->
 <div id="modalBaneo" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.6); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
   <div style="background:white; border-radius:8px; width:90%; max-width:440px; padding:24px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2); border:1px solid #e2e8f0;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; border-bottom:1px solid #e2e8f0; padding-bottom:10px;">
@@ -845,7 +838,7 @@
       <button type="button" onclick="cerrarModalBaneo()" style="background:none; border:none; font-size:24px; cursor:pointer; color:#64748b; line-height:1;">&times;</button>
     </div>
 
-    <form action="ban.php?pagina=banear_cuenta" method="post" id="formBaneo">
+    <form action="index.php?pagina=banear_cuenta" method="post" id="formBaneo">
       <input type="hidden" name="id" id="baneoId" value="">
       <input type="hidden" name="tabla" id="baneoTabla" value="">
       <input type="hidden" name="origen" value="panel_registros">
@@ -907,7 +900,6 @@ function alternarDuracionBaneo(tipo) {
   document.getElementById('grupoDuracion').style.display = (tipo === 'temporal') ? 'block' : 'none';
 }
 
-// Cerrar modal al hacer clic en el fondo oscuro
 window.addEventListener('click', function(e) {
   const modal = document.getElementById('modalBaneo');
   if (e.target === modal) {
@@ -915,7 +907,6 @@ window.addEventListener('click', function(e) {
   }
 });
 
-// Filtro rápido de tablas por texto
 function filtrarTablaGenerica(inputId, tableId) {
   const input = document.getElementById(inputId);
   if (!input) return;
@@ -939,7 +930,6 @@ function filtrarTablaGenerica(inputId, tableId) {
   }
 }
 
-// Filtro interactivo por fecha específica
 function filtrarPorFecha(fecha, tableId) {
   const tabla = document.getElementById(tableId);
   if (!tabla) return;
@@ -953,7 +943,6 @@ function filtrarPorFecha(fecha, tableId) {
   });
 }
 
-// Limpiar filtro de fecha y mostrar todos los grupos
 function limpiarFiltroFecha(tableId, btn) {
   const contenedor = btn.parentElement;
   const input = contenedor.querySelector('input[type="date"]');

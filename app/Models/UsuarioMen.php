@@ -42,16 +42,16 @@ class UsuarioMen
 
     public function buscarPorCorreo($correo)
     {
-        $sql = 'SELECT un.*, 
+        $sql = 'SELECT un.*,
                        t.id AS tutor_id,
-                       t.nombre AS tutor_nombre, 
-                       t.ci AS tutor_ci, 
-                       t.correo AS tutor_correo, 
-                       t.telefono AS tutor_telefono, 
+                       t.nombre AS tutor_nombre,
+                       t.ci AS tutor_ci,
+                       t.correo AS tutor_correo,
+                       t.telefono AS tutor_telefono,
                        t.relacion AS tutor_relacion
                 FROM usuarios_men un
                 LEFT JOIN tutores t ON t.usuario_men_id = un.id
-                WHERE un.correo = :correo 
+                WHERE un.correo = :correo
                 LIMIT 1';
         $consulta = $this->conexion->prepare($sql);
         $consulta->execute(['correo' => $correo]);
@@ -60,16 +60,16 @@ class UsuarioMen
 
     public function obtenerPorId($id)
     {
-        $sql = 'SELECT un.*, 
+        $sql = 'SELECT un.*,
                        t.id AS tutor_id,
-                       t.nombre AS tutor_nombre, 
-                       t.ci AS tutor_ci, 
-                       t.correo AS tutor_correo, 
-                       t.telefono AS tutor_telefono, 
+                       t.nombre AS tutor_nombre,
+                       t.ci AS tutor_ci,
+                       t.correo AS tutor_correo,
+                       t.telefono AS tutor_telefono,
                        t.relacion AS tutor_relacion
                 FROM usuarios_men un
                 LEFT JOIN tutores t ON t.usuario_men_id = un.id
-                WHERE un.id = :id 
+                WHERE un.id = :id
                 LIMIT 1';
         $consulta = $this->conexion->prepare($sql);
         $consulta->execute(['id' => (int) $id]);
@@ -78,14 +78,14 @@ class UsuarioMen
 
     public function obtenerTodos()
     {
-        $sql = 'SELECT un.*, 
+        $sql = 'SELECT un.*,
                        t.id AS tutor_id,
-                       t.nombre AS tutor_nombre, 
-                       t.ci AS tutor_ci, 
-                       t.correo AS tutor_correo, 
-                       t.telefono AS tutor_telefono, 
+                       t.nombre AS tutor_nombre,
+                       t.ci AS tutor_ci,
+                       t.correo AS tutor_correo,
+                       t.telefono AS tutor_telefono,
                        t.relacion AS tutor_relacion,
-                       1 AS es_menor, 
+                       1 AS es_menor,
                        "menor" AS candidato_tipo
                 FROM usuarios_men un
                 LEFT JOIN tutores t ON t.usuario_men_id = un.id

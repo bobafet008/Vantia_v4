@@ -23,15 +23,15 @@ $roeActual = $form['roe_actual'] ?? $form['roe'] ?? 'uploads/roe/roe_default.png
   </div>
 
   <div class="form-card">
-    <!-- Pestanas para alternar facilmente entre tipo de cuenta -->
+    
     <div style="display:flex; background:#eef2f6; padding:4px; border-radius:6px; margin-bottom:1.25rem; gap:4px;">
-      <a href="ban.php?pagina=registro_empleado" style="flex:1; text-align:center; padding:9px 8px; font-size:12px; font-weight:bold; border-radius:4px; text-decoration:none; transition:all 0.2s; <?= $tipo === 'empleado' ? 'background:var(--azul); color:white; box-shadow:0 1px 3px rgba(0,0,0,0.1);' : 'color:var(--gris); background:transparent;' ?>">
+      <a href="index.php?pagina=registro_empleado" style="flex:1; text-align:center; padding:9px 8px; font-size:12px; font-weight:bold; border-radius:4px; text-decoration:none; transition:all 0.2s; <?= $tipo === 'empleado' ? 'background:var(--azul); color:white; box-shadow:0 1px 3px rgba(0,0,0,0.1);' : 'color:var(--gris); background:transparent;' ?>">
         Joven / Postulante
       </a>
-      <a href="ban.php?pagina=registro_empresa" style="flex:1; text-align:center; padding:9px 8px; font-size:12px; font-weight:bold; border-radius:4px; text-decoration:none; transition:all 0.2s; <?= $tipo === 'empresa' ? 'background:var(--azul); color:white; box-shadow:0 1px 3px rgba(0,0,0,0.1);' : 'color:var(--gris); background:transparent;' ?>">
+      <a href="index.php?pagina=registro_empresa" style="flex:1; text-align:center; padding:9px 8px; font-size:12px; font-weight:bold; border-radius:4px; text-decoration:none; transition:all 0.2s; <?= $tipo === 'empresa' ? 'background:var(--azul); color:white; box-shadow:0 1px 3px rgba(0,0,0,0.1);' : 'color:var(--gris); background:transparent;' ?>">
         Empresa / Empleador
       </a>
-      <a href="ban.php?pagina=registro_emprendimiento" style="flex:1; text-align:center; padding:9px 8px; font-size:12px; font-weight:bold; border-radius:4px; text-decoration:none; transition:all 0.2s; <?= $tipo === 'emprendimiento' ? 'background:var(--azul); color:white; box-shadow:0 1px 3px rgba(0,0,0,0.1);' : 'color:var(--gris); background:transparent;' ?>">
+      <a href="index.php?pagina=registro_emprendimiento" style="flex:1; text-align:center; padding:9px 8px; font-size:12px; font-weight:bold; border-radius:4px; text-decoration:none; transition:all 0.2s; <?= $tipo === 'emprendimiento' ? 'background:var(--azul); color:white; box-shadow:0 1px 3px rgba(0,0,0,0.1);' : 'color:var(--gris); background:transparent;' ?>">
         Emprendimientos
       </a>
     </div>
@@ -43,7 +43,7 @@ $roeActual = $form['roe_actual'] ?? $form['roe'] ?? 'uploads/roe/roe_default.png
       <div class="mensaje-error"><?= e($error) ?></div>
     <?php endif; ?>
 
-    <form action="ban.php?pagina=guardar_usuario" method="post" id="formRegistro" enctype="multipart/form-data">
+    <form action="index.php?pagina=guardar_usuario" method="post" id="formRegistro" enctype="multipart/form-data">
       <input type="hidden" name="tipo" value="<?= e($tipo) ?>">
 
       <label for="nombre">Nombre <?= $tipo === 'empresa' ? 'de la empresa' : ($tipo === 'emprendimiento' ? 'del emprendimiento' : 'completo') ?> *</label>
@@ -129,12 +129,12 @@ $roeActual = $form['roe_actual'] ?? $form['roe'] ?? 'uploads/roe/roe_default.png
         <label for="fecha_nacimiento">Fecha de nacimiento *</label>
         <input id="fecha_nacimiento" name="fecha_nacimiento" type="date" required max="<?= date('Y-m-d') ?>" min="<?= date('Y-m-d', strtotime('-100 years')) ?>" value="<?= e($form['fecha_nacimiento'] ?? '') ?>">
 
-        <!-- Alerta para menores de 16 años o fechas futuras -->
+        
         <div id="alertaMenor16" class="mensaje-error" style="display: none; margin-top: 10px;">
           <strong>Edad no permitida:</strong> Debes tener al menos 16 años cumplidos para crear una cuenta en Vantia.
         </div>
 
-        <!-- Sección condicional para Jóvenes de 16 y 17 años -->
+        
         <div id="seccionTutor" class="caja-tutor" style="display: none;">
           <div class="aviso-tutor">
             <strong>Detección de joven de 16 a 17 años</strong>
@@ -176,7 +176,7 @@ $roeActual = $form['roe_actual'] ?? $form['roe'] ?? 'uploads/roe/roe_default.png
 
     <div class="auth-footer-links">
       <p>¿Ya tienes una cuenta?</p>
-      <a href="ban.php?pagina=login">Iniciar sesión</a>
+      <a href="index.php?pagina=login">Iniciar sesión</a>
     </div>
   </div>
 </section>
@@ -335,7 +335,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (partes.length !== 3) return null;
     const [y, m, d] = partes.map(Number);
     if (!y || !m || !d) return null;
-    // Usar fecha local para evitar desfases de zona horaria UTC
     const nac = new Date(y, m - 1, d);
     const hoy = new Date();
     let edad = hoy.getFullYear() - nac.getFullYear();
@@ -374,7 +373,6 @@ document.addEventListener('DOMContentLoaded', function() {
       btnCrearCuenta.style.opacity = '0.5';
       btnCrearCuenta.style.cursor = 'not-allowed';
     } else if (edad !== null && edad < 16) {
-      // Bloquear registro a menores de 16 años
       alertaMenor16.innerHTML = '<strong>Edad no permitida:</strong> Debes tener al menos 16 años cumplidos para crear una cuenta en Vantia.';
       alertaMenor16.style.display = 'block';
       seccionTutor.style.display = 'none';
@@ -386,7 +384,6 @@ document.addEventListener('DOMContentLoaded', function() {
       btnCrearCuenta.style.opacity = '0.5';
       btnCrearCuenta.style.cursor = 'not-allowed';
     } else if (edad !== null && edad < 18) {
-      // Permitir de 16 a 17 años con tutor obligatorio
       alertaMenor16.style.display = 'none';
       seccionTutor.style.display = 'block';
       inputTutorNombre.required = true;
@@ -397,7 +394,6 @@ document.addEventListener('DOMContentLoaded', function() {
       btnCrearCuenta.style.opacity = '1';
       btnCrearCuenta.style.cursor = 'pointer';
     } else {
-      // Mayor de 18 años
       alertaMenor16.style.display = 'none';
       seccionTutor.style.display = 'none';
       inputTutorNombre.required = false;

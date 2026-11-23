@@ -20,12 +20,12 @@ class Calificacion
 
         $sql = 'INSERT INTO calificaciones (empresa_id, emprendimiento_id, usuario_may_id, usuario_men_id, candidato_id, candidato_tipo, puntuacion, comentario, creado_en)
                 VALUES (:empresa_id, :emprendimiento_id, :usuario_may_id, :usuario_men_id, :candidato_id, :candidato_tipo, :puntuacion, :comentario, NOW())
-                ON DUPLICATE KEY UPDATE 
+                ON DUPLICATE KEY UPDATE
                     emprendimiento_id = VALUES(emprendimiento_id),
                     usuario_may_id    = VALUES(usuario_may_id),
                     usuario_men_id    = VALUES(usuario_men_id),
-                    puntuacion        = VALUES(puntuacion), 
-                    comentario        = VALUES(comentario), 
+                    puntuacion        = VALUES(puntuacion),
+                    comentario        = VALUES(comentario),
                     creado_en         = NOW()';
         $consulta = $this->conexion->prepare($sql);
         return $consulta->execute([
@@ -45,7 +45,7 @@ class Calificacion
         $sql = 'SELECT c.*, emp.nombre AS empresa_nombre
                 FROM calificaciones c
                 INNER JOIN empresas emp ON emp.id = c.empresa_id
-                WHERE c.candidato_id = :candidato_id 
+                WHERE c.candidato_id = :candidato_id
                   AND c.candidato_tipo = :candidato_tipo';
         $consulta = $this->conexion->prepare($sql);
         $consulta->execute([
@@ -63,7 +63,7 @@ class Calificacion
 
     public function obtenerPorEmpresa($empresaId)
     {
-        $sql = 'SELECT c.*, 
+        $sql = 'SELECT c.*,
                        COALESCE(um.nombre, un.nombre) AS candidato_nombre
                 FROM calificaciones c
                 LEFT JOIN usuarios_may um ON (um.id = c.candidato_id AND c.candidato_tipo = "mayor")

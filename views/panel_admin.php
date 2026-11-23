@@ -7,8 +7,8 @@
     <p>Supervisión de empresas verificadas, tutores legales, menores de edad y mayores de edad en la plataforma.</p>
     
     <div style="margin-top:1rem; display:flex; gap:0.6rem; flex-wrap:wrap; align-items:center;">
-      <a href="ban.php?pagina=trabajos" class="boton boton-sm" style="background:#e2f5e8; color:#1f7a46;">Bolsa pública de empleos</a>
-      <a href="ban.php?pagina=panel_registros" class="boton boton-sm" style="background:#1e40af; color:#ffffff; font-weight:700; box-shadow:0 2px 4px rgba(30,64,175,0.25);">
+      <a href="index.php?pagina=trabajos" class="boton boton-sm" style="background:#e2f5e8; color:#1f7a46;">Bolsa pública de empleos</a>
+      <a href="index.php?pagina=panel_registros" class="boton boton-sm" style="background:#1e40af; color:#ffffff; font-weight:700; box-shadow:0 2px 4px rgba(30,64,175,0.25);">
         Ir a Panel de Registros (Registros, Baneos, Auditoría)
       </a>
     </div>
@@ -19,7 +19,7 @@
   <?php if (!empty($exito)): ?><div class="mensaje-exito" style="margin-bottom:1.5rem;"><?= e($exito) ?></div><?php endif; ?>
   <?php if (!empty($error)): ?><div class="mensaje-error" style="margin-bottom:1.5rem;"><?= e($error) ?></div><?php endif; ?>
 
-  <!-- Tarjetas de Estadísticas Globales -->
+  
   <div class="tarjetas" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:1rem; margin-bottom:2.5rem;">
     <div class="tarjeta">
       <span class="numero">01 · EMPRESAS</span>
@@ -55,7 +55,7 @@
     </div>
   </div>
 
-  <!-- TABLA 1: Empresas Registradas -->
+  
   <div id="seccionEmpresas" class="bloque-panel" style="margin-bottom:3rem;">
     <div class="titulo-seccion">
       <div>
@@ -64,8 +64,6 @@
         <p class="texto-suave">Empresas registradas en la base de datos con verificación laboral.</p>
       </div>
     </div>
-
-
 
     <div class="tabla-contenedor">
       <table class="tabla-panel">
@@ -144,17 +142,15 @@
                 </td>
                 <td>
                   <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                    <form action="ban.php?pagina=toggle_verificar_empresa" method="post" style="display:inline;">
+                    <form action="index.php?pagina=toggle_verificar_empresa" method="post" style="display:inline;">
                       <input type="hidden" name="empresa_id" value="<?= (int) $emp['id'] ?>">
                       <button type="submit" class="boton-sm <?= !empty($emp['verificada']) ? 'boton-outline-oscuro' : 'boton-exito' ?>">
                         <?= !empty($emp['verificada']) ? 'Quitar verificación' : 'Verificar NIT' ?>
                       </button>
                     </form>
 
-
-
                     <?php if (estaBaneado($emp)): ?>
-                      <form action="ban.php?pagina=desbanear_cuenta" method="post" style="display:inline;" onsubmit="return confirm('¿Deseas reactivar y revocar la suspensión de esta empresa?');">
+                      <form action="index.php?pagina=desbanear_cuenta" method="post" style="display:inline;" onsubmit="return confirm('¿Deseas reactivar y revocar la suspensión de esta empresa?');">
                         <input type="hidden" name="id" value="<?= (int) $emp['id'] ?>">
                         <input type="hidden" name="tabla" value="empresas">
                         <button type="submit" class="boton-sm" style="background:#10b981; color:white;">Reactivar</button>
@@ -165,7 +161,7 @@
                       </button>
                     <?php endif; ?>
 
-                    <form action="ban.php?pagina=eliminar_empresa" method="post" style="display:inline;" onsubmit="return confirm('¿Seguro que deseas eliminar esta empresa y todas sus vacantes?');">
+                    <form action="index.php?pagina=eliminar_empresa" method="post" style="display:inline;" onsubmit="return confirm('¿Seguro que deseas eliminar esta empresa y todas sus vacantes?');">
                       <input type="hidden" name="empresa_id" value="<?= (int) $emp['id'] ?>">
                       <button type="submit" class="boton-sm boton-peligro">Eliminar</button>
                     </form>
@@ -179,7 +175,7 @@
     </div>
   </div>
 
-  <!-- TABLA EMPRENDIMIENTOS: Emprendimientos Registrados -->
+  
   <div id="seccionEmprendimientos" class="bloque-panel" style="margin-bottom:3rem;">
     <div class="titulo-seccion">
       <div>
@@ -188,8 +184,6 @@
         <p class="texto-suave">Emprendimientos registrados en la plataforma para impulsar talento joven.</p>
       </div>
     </div>
-
-
 
     <div class="tabla-contenedor">
       <table class="tabla-panel">
@@ -273,17 +267,15 @@
                 </td>
                 <td>
                   <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                    <form action="ban.php?pagina=toggle_verificar_emprendimiento" method="post" style="display:inline;">
+                    <form action="index.php?pagina=toggle_verificar_emprendimiento" method="post" style="display:inline;">
                       <input type="hidden" name="emprendimiento_id" value="<?= (int) $emp['id'] ?>">
                       <button type="submit" class="boton-sm <?= !empty($emp['verificado']) ? 'boton-outline-oscuro' : 'boton-exito' ?>">
                         <?= !empty($emp['verificado']) ? 'Desactivar' : 'Verificar' ?>
                       </button>
                     </form>
 
-
-
                     <?php if (estaBaneado($emp)): ?>
-                      <form action="ban.php?pagina=desbanear_cuenta" method="post" style="display:inline;" onsubmit="return confirm('¿Deseas reactivar y revocar la suspensión de este emprendimiento?');">
+                      <form action="index.php?pagina=desbanear_cuenta" method="post" style="display:inline;" onsubmit="return confirm('¿Deseas reactivar y revocar la suspensión de este emprendimiento?');">
                         <input type="hidden" name="id" value="<?= (int) $emp['id'] ?>">
                         <input type="hidden" name="tabla" value="emprendimientos">
                         <button type="submit" class="boton-sm" style="background:#10b981; color:white;">Reactivar</button>
@@ -294,7 +286,7 @@
                       </button>
                     <?php endif; ?>
 
-                    <form action="ban.php?pagina=eliminar_emprendimiento" method="post" style="display:inline;" onsubmit="return confirm('¿Seguro que deseas eliminar este emprendimiento y todas sus vacantes?');">
+                    <form action="index.php?pagina=eliminar_emprendimiento" method="post" style="display:inline;" onsubmit="return confirm('¿Seguro que deseas eliminar este emprendimiento y todas sus vacantes?');">
                       <input type="hidden" name="emprendimiento_id" value="<?= (int) $emp['id'] ?>">
                       <button type="submit" class="boton-sm boton-peligro">Eliminar</button>
                     </form>
@@ -308,7 +300,7 @@
     </div>
   </div>
 
-  <!-- TABLA 2: Jóvenes Menores de 18 años -->
+  
   <div id="seccionMenores" class="bloque-panel" style="margin-bottom:3rem;">
     <div class="titulo-seccion">
       <div>
@@ -317,8 +309,6 @@
         <p class="texto-suave">Postulantes menores de edad que requieren consentimiento y datos de su tutor legal.</p>
       </div>
     </div>
-
-
 
     <div class="tabla-contenedor">
       <table class="tabla-panel">
@@ -395,7 +385,7 @@
                 <td>
                   <div style="display:flex; gap:6px; flex-wrap:wrap;">
                     <?php if (estaBaneado($umen)): ?>
-                      <form action="ban.php?pagina=desbanear_cuenta" method="post" style="display:inline;" onsubmit="return confirm('¿Deseas reactivar este postulante?');">
+                      <form action="index.php?pagina=desbanear_cuenta" method="post" style="display:inline;" onsubmit="return confirm('¿Deseas reactivar este postulante?');">
                         <input type="hidden" name="id" value="<?= (int) $umen['id'] ?>">
                         <input type="hidden" name="tabla" value="usuarios_men">
                         <button type="submit" class="boton-sm" style="background:#10b981; color:white;">Reactivar</button>
@@ -406,7 +396,7 @@
                       </button>
                     <?php endif; ?>
 
-                    <form action="ban.php?pagina=eliminar_usuario" method="post" style="display:inline;" onsubmit="return confirm('¿Seguro que deseas eliminar este postulante menor de edad?');">
+                    <form action="index.php?pagina=eliminar_usuario" method="post" style="display:inline;" onsubmit="return confirm('¿Seguro que deseas eliminar este postulante menor de edad?');">
                       <input type="hidden" name="usuario_id" value="<?= (int) $umen['id'] ?>">
                       <input type="hidden" name="tabla" value="usuarios_men">
                       <button type="submit" class="boton-sm boton-peligro">Eliminar</button>
@@ -421,7 +411,7 @@
     </div>
   </div>
 
-  <!-- TABLA 3: Tutores Legales y Jóvenes a su Cargo -->
+  
   <div id="seccionTutores" class="bloque-panel" style="margin-bottom:3rem;">
     <div class="titulo-seccion">
       <div>
@@ -430,8 +420,6 @@
         <p class="texto-suave">Padres, madres o tutores legales responsables de los postulantes menores de edad (16 y 17 años).</p>
       </div>
     </div>
-
-
 
     <div class="tabla-contenedor">
       <table class="tabla-panel">
@@ -518,7 +506,7 @@
     </div>
   </div>
 
-  <!-- TABLA 4: Jóvenes Mayores de 18 años y Administradores -->
+  
   <div id="seccionMayores" class="bloque-panel" style="margin-bottom:3rem;">
     <div class="titulo-seccion">
       <div>
@@ -527,8 +515,6 @@
         <p class="texto-suave">Cuentas individuales de postulantes mayores de edad y personal administrativo.</p>
       </div>
     </div>
-
-
 
     <div class="tabla-contenedor">
       <table class="tabla-panel">
@@ -604,7 +590,7 @@
                   <?php if ((int)$umay['id'] !== (int)($_SESSION['usuario_id'] ?? 0)): ?>
                     <div style="display:flex; gap:6px; flex-wrap:wrap;">
                       <?php if (estaBaneado($umay)): ?>
-                        <form action="ban.php?pagina=desbanear_cuenta" method="post" style="display:inline;" onsubmit="return confirm('¿Deseas reactivar este usuario?');">
+                        <form action="index.php?pagina=desbanear_cuenta" method="post" style="display:inline;" onsubmit="return confirm('¿Deseas reactivar este usuario?');">
                           <input type="hidden" name="id" value="<?= (int) $umay['id'] ?>">
                           <input type="hidden" name="tabla" value="usuarios_may">
                           <button type="submit" class="boton-sm" style="background:#10b981; color:white;">Reactivar</button>
@@ -615,7 +601,7 @@
                         </button>
                       <?php endif; ?>
 
-                      <form action="ban.php?pagina=eliminar_usuario" method="post" style="display:inline;" onsubmit="return confirm('¿Seguro que deseas eliminar este usuario?');">
+                      <form action="index.php?pagina=eliminar_usuario" method="post" style="display:inline;" onsubmit="return confirm('¿Seguro que deseas eliminar este usuario?');">
                         <input type="hidden" name="usuario_id" value="<?= (int) $umay['id'] ?>">
                         <input type="hidden" name="tabla" value="usuarios_may">
                         <button type="submit" class="boton-sm boton-peligro">Eliminar</button>
@@ -633,7 +619,7 @@
     </div>
   </div>
 
-  <!-- TABLA 5: Personal Administrativo (usuarios_admin) -->
+  
   <div id="seccionAdmins" class="bloque-panel" style="margin-bottom:3rem;">
     <div class="titulo-seccion">
       <div>
@@ -683,10 +669,10 @@
     </div>
   </div>
 
-  <!-- SECCIÓN INTEGRAL: REGISTROS Y AUDITORÍA DEL SISTEMA -->
+  
   <div id="seccionRegistros" class="bloque-panel" style="margin-top:3.5rem; margin-bottom:3rem; border:2px solid #2563eb; border-radius:14px; padding:28px; background:#ffffff; box-shadow:0 12px 24px -4px rgba(37,99,235,0.08);">
     
-    <!-- Encabezado de la Sección de Registros -->
+    
     <div class="titulo-seccion" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1.2rem; border-bottom:2px solid #f1f5f9; padding-bottom:1.2rem; margin-bottom:1.8rem;">
       <div>
         <span class="etiqueta" style="background:#dbeafe; color:#1e40af; font-weight:800; letter-spacing:0.05em;">AUDITORÍA Y SUPERVISIÓN CENTRAL</span>
@@ -699,7 +685,7 @@
       </div>
 
       <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-        <a href="ban.php?pagina=panel_registros" class="boton boton-sm boton-primario" style="display:inline-flex; align-items:center; gap:6px;">
+        <a href="index.php?pagina=panel_registros" class="boton boton-sm boton-primario" style="display:inline-flex; align-items:center; gap:6px;">
           <svg style="width:14px; height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
           Abrir en Panel de Registros
         </a>
@@ -710,15 +696,13 @@
       </div>
     </div>
 
-
-
-    <!-- Generador Oficial de Reportes en PDF por Día -->
+    
     <div style="margin-bottom:1.8rem; background:#f8fafc; border:1px solid #cbd5e1; border-left:4px solid #1e40af; border-radius:8px; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
       <div>
         <strong style="font-size:14px; color:#0f172a; display:block;">Generar Reporte Diario de Registros en PDF</strong>
         <span class="texto-suave" style="font-size:12.5px;">Exporta un documento formal de auditoría con todos los cambios y registros ocurridos en la fecha seleccionada.</span>
       </div>
-      <form action="ban.php" method="get" target="_blank" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+      <form action="index.php" method="get" target="_blank" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
         <input type="hidden" name="pagina" value="pdf_reporte_diario">
         <label style="font-size:11.5px; font-weight:700; color:#475569;">Fecha:</label>
         <input type="date" name="fecha" value="<?= date('Y-m-d') ?>" max="<?= date('Y-m-d') ?>" required style="height:34px; padding:4px 10px; border:1px solid #cbd5e1; border-radius:4px; font-size:12.5px;">
@@ -734,7 +718,7 @@
       </form>
     </div>
 
-    <!-- Pestañas de Navegación del Centro de Registros -->
+    
     <style>
       .btn-tab-reg {
         padding: 10px 18px;
@@ -837,9 +821,9 @@
       </button>
     </div>
 
-    <!-- ========================================== -->
-    <!-- SUB-APARTADO 1: REPORTES                   -->
-    <!-- ========================================== -->
+    
+    
+    
     <div id="reg-reportes" class="tab-panel-reg activo">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; flex-wrap:wrap; gap:0.5rem;">
         <div>
@@ -849,7 +833,7 @@
         <span style="font-size:12px; color:#64748b;">Generado automáticamente en tiempo real</span>
       </div>
 
-      <!-- Tarjetas de Métricas Ejecutivas -->
+      
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:1rem; margin-bottom:2rem;">
         <div class="tarjeta-kpi-reg" style="border-left:4px solid #2563eb;">
           <span style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">Usuarios Totales</span>
@@ -876,10 +860,10 @@
         </div>
       </div>
 
-      <!-- Cuadrícula de Desglose Operativo -->
+      
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:1.25rem;">
         
-        <!-- Desglose 1: Verificación de Entidades -->
+        
         <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:18px;">
           <h4 style="margin:0 0 12px 0; font-size:14px; color:#1e293b; display:flex; align-items:center; gap:6px;">
             Validación y Verificación Laboral
@@ -898,7 +882,7 @@
           </div>
         </div>
 
-        <!-- Desglose 2: Oferta y Demanda de Empleo -->
+        
         <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:18px;">
           <h4 style="margin:0 0 12px 0; font-size:14px; color:#1e293b; display:flex; align-items:center; gap:6px;">
             Movimiento Laboral y Postulaciones
@@ -919,7 +903,7 @@
 
       </div>
 
-      <!-- Alertas de Seguridad Activas -->
+      
       <div style="margin-top:1.5rem; background:#f0fdf4; border:1px solid #bbf7d0; border-left:4px solid #10b981; border-radius:8px; padding:16px 20px;">
         <h4 style="margin:0 0 6px 0; color:#166534; font-size:14px; display:flex; align-items:center; gap:6px;">
           Diagnóstico Activo del Sistema
@@ -930,11 +914,9 @@
       </div>
     </div>
 
-
-
-    <!-- ========================================== -->
-    <!-- SUB-APARTADO 2: BANEOS                     -->
-    <!-- ========================================== -->
+    
+    
+    
     <div id="reg-baneos" class="tab-panel-reg">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.4rem; flex-wrap:wrap; gap:0.5rem;">
         <div>
@@ -992,10 +974,10 @@
                       </span>
                       <div style="display:flex; align-items:center; gap:8px;">
                         <?php if ($dia !== 'sin_fecha'): ?>
-                          <a href="ban.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
+                          <a href="index.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
                             PDF Acciones del Día
                           </a>
-                          <a href="ban.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-size:11px; padding:3px 9px; font-weight:600; text-decoration:none; border-radius:4px;">
+                          <a href="index.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-size:11px; padding:3px 9px; font-weight:600; text-decoration:none; border-radius:4px;">
                             PDF Completo
                           </a>
                         <?php endif; ?>
@@ -1049,7 +1031,7 @@
                     <?= !empty($cb['fecha']) ? date('H:i:s · d/m/Y', strtotime($cb['fecha'])) : '-' ?>
                   </td>
                   <td>
-                    <form action="ban.php?pagina=desbanear_cuenta" method="post" onsubmit="return confirm('¿Deseas levantar inmediatamente la suspensión para <?= e(addslashes($cb['nombre'])) ?>?');">
+                    <form action="index.php?pagina=desbanear_cuenta" method="post" onsubmit="return confirm('¿Deseas levantar inmediatamente la suspensión para <?= e(addslashes($cb['nombre'])) ?>?');">
                       <input type="hidden" name="id" value="<?= (int) $cb['id'] ?>">
                       <input type="hidden" name="tabla" value="<?= e($cb['tabla']) ?>">
                       <input type="hidden" name="origen" value="panel_admin">
@@ -1066,7 +1048,7 @@
         </table>
       </div>
 
-      <!-- Historial de Auditoría de Baneos -->
+      
       <div style="display:flex; justify-content:space-between; align-items:center; margin:2rem 0 1rem 0; flex-wrap:wrap; gap:0.5rem;">
         <h4 style="margin:0; font-size:15px; color:#0f172a; display:flex; align-items:center; gap:6px;">
           Bitácora de Suspensiones Aplicadas (Separadas por Fecha)
@@ -1109,7 +1091,7 @@
                         <?= formatoFechaGrupo($dia) ?>
                       </span>
                       <?php if ($dia !== 'sin_fecha'): ?>
-                        <a href="ban.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:2px 8px; font-weight:700; text-decoration:none; border-radius:4px;">
+                        <a href="index.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:2px 8px; font-weight:700; text-decoration:none; border-radius:4px;">
                           PDF del Día
                         </a>
                       <?php endif; ?>
@@ -1132,11 +1114,9 @@
       </div>
     </div>
 
-
-
-    <!-- ========================================== -->
-    <!-- SUB-APARTADO 3: DESBANEOS                  -->
-    <!-- ========================================== -->
+    
+    
+    
     <div id="reg-desbaneos" class="tab-panel-reg">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.4rem; flex-wrap:wrap; gap:0.5rem;">
         <div>
@@ -1191,10 +1171,10 @@
                       </span>
                       <div style="display:flex; align-items:center; gap:8px;">
                         <?php if ($dia !== 'sin_fecha'): ?>
-                          <a href="ban.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
+                          <a href="index.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
                             PDF Acciones del Día
                           </a>
-                          <a href="ban.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-size:11px; padding:3px 9px; font-weight:600; text-decoration:none; border-radius:4px;">
+                          <a href="index.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-size:11px; padding:3px 9px; font-weight:600; text-decoration:none; border-radius:4px;">
                             PDF Completo
                           </a>
                         <?php endif; ?>
@@ -1237,11 +1217,9 @@
       </div>
     </div>
 
-
-
-    <!-- ========================================== -->
-    <!-- SUB-APARTADO 4: REGISTRO DE NUEVOS USUARIOS -->
-    <!-- ========================================== -->
+    
+    
+    
     <div id="reg-nuevos" class="tab-panel-reg">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.4rem; flex-wrap:wrap; gap:0.5rem;">
         <div>
@@ -1251,7 +1229,7 @@
           <p class="texto-suave" style="font-size:13.5px; margin:3px 0 0 0;">Bitácora cronológica unificada de altas separadas por fechas: jóvenes menores (16-17), mayores (18+), empresas y emprendimientos.</p>
         </div>
         <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-          <a href="ban.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= date('Y-m-d') ?>" target="_blank" class="boton-sm" style="background:#1e40af; color:#ffffff; font-weight:700; border:1px solid #1e3a8a; padding:6px 12px; text-decoration:none; border-radius:6px; display:inline-flex; align-items:center; gap:5px;">
+          <a href="index.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= date('Y-m-d') ?>" target="_blank" class="boton-sm" style="background:#1e40af; color:#ffffff; font-weight:700; border:1px solid #1e3a8a; padding:6px 12px; text-decoration:none; border-radius:6px; display:inline-flex; align-items:center; gap:5px;">
             <svg style="width:13px; height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             PDF Acciones Admin
           </a>
@@ -1298,10 +1276,10 @@
                       </span>
                       <div style="display:flex; align-items:center; gap:8px;">
                         <?php if ($dia !== 'sin_fecha'): ?>
-                          <a href="ban.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
+                          <a href="index.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
                             PDF Acciones del Día
                           </a>
-                          <a href="ban.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-size:11px; padding:3px 9px; font-weight:600; text-decoration:none; border-radius:4px;">
+                          <a href="index.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-size:11px; padding:3px 9px; font-weight:600; text-decoration:none; border-radius:4px;">
                             PDF Completo
                           </a>
                         <?php endif; ?>
@@ -1355,11 +1333,9 @@
       </div>
     </div>
 
-
-
-    <!-- ========================================== -->
-    <!-- SUB-APARTADO 5: REGISTROS DEL ADMINISTRADOR -->
-    <!-- ========================================== -->
+    
+    
+    
     <div id="reg-adminlogs" class="tab-panel-reg">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.4rem; flex-wrap:wrap; gap:0.5rem;">
         <div>
@@ -1369,7 +1345,7 @@
           <p class="texto-suave" style="font-size:13.5px; margin:3px 0 0 0;">Historial cronológico de auditoría con todas las intervenciones separadas por día.</p>
         </div>
         <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-          <a href="ban.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= date('Y-m-d') ?>" target="_blank" class="boton-sm" style="background:#1e40af; color:#ffffff; font-weight:700; border:1px solid #1e3a8a; padding:6px 12px; text-decoration:none; border-radius:6px; display:inline-flex; align-items:center; gap:5px;">
+          <a href="index.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= date('Y-m-d') ?>" target="_blank" class="boton-sm" style="background:#1e40af; color:#ffffff; font-weight:700; border:1px solid #1e3a8a; padding:6px 12px; text-decoration:none; border-radius:6px; display:inline-flex; align-items:center; gap:5px;">
             <svg style="width:13px; height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             PDF Acciones Admin
           </a>
@@ -1417,10 +1393,10 @@
                       </span>
                       <div style="display:flex; align-items:center; gap:8px;">
                         <?php if ($dia !== 'sin_fecha'): ?>
-                          <a href="ban.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
+                          <a href="index.php?pagina=pdf_reporte_diario&tipo=admin&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
                             PDF Acciones del Día
                           </a>
-                          <a href="ban.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-size:11px; padding:3px 9px; font-weight:600; text-decoration:none; border-radius:4px;">
+                          <a href="index.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-size:11px; padding:3px 9px; font-weight:600; text-decoration:none; border-radius:4px;">
                             PDF Completo
                           </a>
                         <?php endif; ?>
@@ -1475,9 +1451,9 @@
       </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- SUB-APARTADO 6: ATENCIÓN AL CLIENTE        -->
-    <!-- ========================================== -->
+    
+    
+    
     <div id="reg-soporte" class="tab-panel-reg">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.4rem; flex-wrap:wrap; gap:0.5rem;">
         <div>
@@ -1536,7 +1512,7 @@
                       </span>
                       <div style="display:flex; align-items:center; gap:8px;">
                         <?php if ($dia !== 'sin_fecha'): ?>
-                          <a href="ban.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
+                          <a href="index.php?pagina=pdf_reporte_diario&fecha=<?= urlencode($dia) ?>" target="_blank" class="boton-sm" style="background:#ffffff; color:#1e40af; border:1px solid #bfdbfe; font-size:11px; padding:3px 9px; font-weight:700; text-decoration:none; border-radius:4px;">
                             PDF del Día
                           </a>
                         <?php endif; ?>
@@ -1590,7 +1566,7 @@
                         Responder Gmail
                       </a>
                       <?php if (($ms['estado'] ?? 'pendiente') === 'pendiente'): ?>
-                        <form action="ban.php?pagina=cambiar_estado_soporte" method="post" style="display:inline;">
+                        <form action="index.php?pagina=cambiar_estado_soporte" method="post" style="display:inline;">
                           <input type="hidden" name="id" value="<?= (int) $ms['id'] ?>">
                           <input type="hidden" name="estado" value="respondido">
                           <input type="hidden" name="origen" value="panel_admin">
@@ -1599,7 +1575,7 @@
                           </button>
                         </form>
                       <?php else: ?>
-                        <form action="ban.php?pagina=cambiar_estado_soporte" method="post" style="display:inline;">
+                        <form action="index.php?pagina=cambiar_estado_soporte" method="post" style="display:inline;">
                           <input type="hidden" name="id" value="<?= (int) $ms['id'] ?>">
                           <input type="hidden" name="estado" value="pendiente">
                           <input type="hidden" name="origen" value="panel_admin">
@@ -1621,7 +1597,6 @@
   </div>
 </section>
 
-<!-- Modal Reutilizable de Baneo Temporal o Permanente -->
 <div id="modalBaneo" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.6); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
   <div style="background:white; border-radius:8px; width:90%; max-width:440px; padding:24px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2); border:1px solid #e2e8f0;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; border-bottom:1px solid #e2e8f0; padding-bottom:10px;">
@@ -1631,7 +1606,7 @@
       <button type="button" onclick="cerrarModalBaneo()" style="background:none; border:none; font-size:24px; cursor:pointer; color:#64748b; line-height:1;">&times;</button>
     </div>
 
-    <form action="ban.php?pagina=banear_cuenta" method="post" id="formBaneo">
+    <form action="index.php?pagina=banear_cuenta" method="post" id="formBaneo">
       <input type="hidden" name="id" id="baneoId" value="">
       <input type="hidden" name="tabla" id="baneoTabla" value="">
 
@@ -1692,7 +1667,6 @@ function alternarDuracionBaneo(tipo) {
   document.getElementById('grupoDuracion').style.display = (tipo === 'temporal') ? 'block' : 'none';
 }
 
-// Cerrar modal al hacer clic en el fondo oscuro
 window.addEventListener('click', function(e) {
   const modal = document.getElementById('modalBaneo');
   if (e.target === modal) {
@@ -1700,17 +1674,13 @@ window.addEventListener('click', function(e) {
   }
 });
 
-// Control de Pestañas de la Sección de Registros
 function cambiarTabRegistros(tabId, btnElement) {
-  // Ocultar todos los paneles de registros
   const paneles = document.querySelectorAll('.tab-panel-reg');
   paneles.forEach(p => p.classList.remove('activo'));
 
-  // Desactivar todos los botones de pestañas
   const botones = document.querySelectorAll('.btn-tab-reg');
   botones.forEach(b => b.classList.remove('activo'));
 
-  // Activar el panel y el botón correspondiente
   const panelObjetivo = document.getElementById(tabId);
   if (panelObjetivo) {
     panelObjetivo.classList.add('activo');
@@ -1720,7 +1690,6 @@ function cambiarTabRegistros(tabId, btnElement) {
   }
 }
 
-// Filtro rápido de tablas por texto
 function filtrarTablaGenerica(inputId, tableId) {
   const input = document.getElementById(inputId);
   if (!input) return;
@@ -1744,7 +1713,6 @@ function filtrarTablaGenerica(inputId, tableId) {
   }
 }
 
-// Filtro interactivo por fecha específica
 function filtrarPorFecha(fecha, tableId) {
   const tabla = document.getElementById(tableId);
   if (!tabla) return;
@@ -1758,7 +1726,6 @@ function filtrarPorFecha(fecha, tableId) {
   });
 }
 
-// Limpiar filtro de fecha y mostrar todos los grupos
 function limpiarFiltroFecha(tableId, btn) {
   const contenedor = btn.parentElement;
   const input = contenedor.querySelector('input[type="date"]');
@@ -1766,7 +1733,6 @@ function limpiarFiltroFecha(tableId, btn) {
   filtrarPorFecha('', tableId);
 }
 
-// Detección automática de pestaña por hash de URL al cargar la página
 window.addEventListener('DOMContentLoaded', function() {
   const hash = window.location.hash;
   if (hash) {

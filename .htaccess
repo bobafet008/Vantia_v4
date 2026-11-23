@@ -4,8 +4,11 @@ Options -Indexes
     RewriteEngine On
     RewriteBase /vantia_v4/
 
-    RewriteCond %{THE_REQUEST} \s/+vantia_v4/public/ban\.php[?\s] [NC]
-    RewriteRule ^public/ban\.php$ ban.php [R=301,L,QSA]
+    RewriteCond %{THE_REQUEST} \s/+vantia_v4/public/index\.php[?\s] [NC]
+    RewriteRule ^public/index\.php$ index.php [R=301,L,QSA]
+
+    RewriteRule ^ban\.php$ index.php [R=301,L,QSA]
+    RewriteRule ^public/ban\.php$ index.php [R=301,L,QSA]
 
     RewriteCond %{THE_REQUEST} \s/+vantia_v4/public/([^\s?]*) [NC]
     RewriteRule ^public/(.*)$ $1 [R=301,L]
@@ -16,4 +19,4 @@ Options -Indexes
     RewriteRule ^assets/(.*)$ public/assets/$1 [L]
 </IfModule>
 
-DirectoryIndex index.php ban.php
+DirectoryIndex index.php

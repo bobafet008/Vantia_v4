@@ -1,7 +1,7 @@
 <?php require __DIR__ . '/partials/header.php'; ?>
 
 <?php
-// Filtrar empresas donde el empleado ha sido contratado (donde trabaja)
+
 $empresasContratado = [];
 if (!empty($postulaciones)) {
     foreach ($postulaciones as $post) {
@@ -23,10 +23,10 @@ if (!empty($postulaciones)) {
     <p>Revisa el estado de tus solicitudes y califica a las empresas donde trabajas.</p>
     
     <div style="display:flex; gap:10px; margin-top:1rem; flex-wrap:wrap;">
-      <a href="ban.php?pagina=panel_empleado" class="boton boton-sm" style="background:#e0e7ff; color:#3730a3;">Mi Perfil y CV</a>
+      <a href="index.php?pagina=panel_empleado" class="boton boton-sm" style="background:#e0e7ff; color:#3730a3;">Mi Perfil y CV</a>
       <a href="#solicitudes" class="boton boton-sm">Mis Postulaciones (<?= count($postulaciones ?? []) ?>)</a>
       <a href="#calificaciones" class="boton boton-sm boton-oscuro">Calificaciones a Empresas (<?= count($empresasContratado) ?>)</a>
-      <a href="ban.php?pagina=trabajos" class="boton boton-sm" style="background:#e2f5e8; color:#1f7a46;">Explorar más oportunidades</a>
+      <a href="index.php?pagina=trabajos" class="boton boton-sm" style="background:#e2f5e8; color:#1f7a46;">Explorar más oportunidades</a>
     </div>
   </div>
 </section>
@@ -40,7 +40,7 @@ if (!empty($postulaciones)) {
     <div class="mensaje-error" style="margin-bottom:2rem;"><?= e($mensajeError) ?></div>
   <?php endif; ?>
 
-  <!-- SECCIÓN 1: Solicitudes de Empleo -->
+  
   <div id="solicitudes" class="bloque-panel" style="margin-bottom:3.5rem;">
     <div class="titulo-seccion">
       <div>
@@ -53,7 +53,7 @@ if (!empty($postulaciones)) {
       <div class="aviso">
         Aún no te has postulado a ninguna vacante. 
         <br><br>
-        <a href="ban.php?pagina=trabajos" class="boton boton-sm">Explorar oportunidades de empleo</a>
+        <a href="index.php?pagina=trabajos" class="boton boton-sm">Explorar oportunidades de empleo</a>
       </div>
     <?php else: ?>
       <div class="grilla-empleos">
@@ -121,7 +121,7 @@ if (!empty($postulaciones)) {
               <?php endif; ?>
             </div>
 
-            <!-- Si está contratado: enlace directo para calificar a su empresa -->
+            
             <?php if ($post['estado'] === 'contratado' && !empty($post['empresa_id'])): ?>
               <div style="margin-top:14px; padding:10px 12px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:4px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
@@ -142,10 +142,10 @@ if (!empty($postulaciones)) {
               </div>
             <?php endif; ?>
 
-            <!-- Botón de acción: retirar postulación si aún está pendiente -->
+            
             <?php if ($post['estado'] === 'pendiente'): ?>
               <div style="margin-top:14px; padding-top:10px; border-top:1px dashed var(--linea);">
-                <form action="ban.php?pagina=cancelar_postulacion" method="post" onsubmit="return confirm('¿Estás seguro de que deseas retirar esta postulación?');">
+                <form action="index.php?pagina=cancelar_postulacion" method="post" onsubmit="return confirm('¿Estás seguro de que deseas retirar esta postulación?');">
                   <input type="hidden" name="postulacion_id" value="<?= (int) $post['id'] ?>">
                   <button type="submit" class="boton-sm boton-peligro">Retirar postulación</button>
                 </form>
@@ -157,7 +157,7 @@ if (!empty($postulaciones)) {
     <?php endif; ?>
   </div>
 
-  <!-- SECCIÓN 2: Calificaciones a Empresas donde Trabaja -->
+  
   <div id="calificaciones" class="bloque-panel" style="padding-top:2rem; border-top:2px solid var(--linea);">
     <div class="titulo-seccion">
       <div>
@@ -191,14 +191,14 @@ if (!empty($postulaciones)) {
             <h3 style="font: normal 22px Georgia,serif; color: var(--azul); margin: 8px 0 4px;"><?= e($emp['empresa_nombre']) ?></h3>
             <p style="font-size: 13px; color: var(--gris); margin-bottom: 14px;">Puesto contratado: <strong><?= e($emp['empleo_titulo']) ?></strong></p>
 
-            <form action="ban.php?pagina=guardar_calificacion" method="post" style="display:flex; flex-direction:column; gap:10px;">
+            <form action="index.php?pagina=guardar_calificacion" method="post" style="display:flex; flex-direction:column; gap:10px;">
               <input type="hidden" name="empresa_id" value="<?= (int)$emp['empresa_id'] ?>">
 
               <label style="font-size: 12px; font-weight: bold; color: var(--azul); margin-top:2px;">
                 Puntaje asignado a la empresa (del 0 al 5) *:
               </label>
 
-              <!-- Selector interactivo de puntaje 0 a 5 -->
+              
               <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px;">
                 <?php for ($i = 0; $i <= 5; $i++): ?>
                   <label style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 4px; border: 1px solid <?= ($puntuacion === $i) ? '#d5a347' : '#d5d5d0' ?>; background: <?= ($puntuacion === $i) ? '#fbf6ec' : '#fafafa' ?>; border-radius: 4px; cursor: pointer; text-align: center; transition: all 0.2s;">
@@ -227,7 +227,7 @@ if (!empty($postulaciones)) {
   </div>
 
   <div style="margin-top:2.5rem; text-align:center;">
-    <a href="ban.php?pagina=trabajos" class="boton">Ver más oportunidades en Vantia</a>
+    <a href="index.php?pagina=trabajos" class="boton">Ver más oportunidades en Vantia</a>
   </div>
 </section>
 

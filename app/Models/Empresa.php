@@ -17,7 +17,7 @@ class Empresa
                 $this->conexion->exec("ALTER TABLE empresas ADD COLUMN tipo_cuenta VARCHAR(20) NOT NULL DEFAULT 'empresa' AFTER nombre");
             }
         } catch (Exception $e) {
-            // Silencioso
+
         }
     }
 
@@ -59,7 +59,7 @@ class Empresa
                 ) VALUES (
                     :id, :nombre, :tipo_cuenta, :representante, :nit, :roe, :correo, :contrasena, :telefono,
                     :descripcion, :verificada
-                ) ON DUPLICATE KEY UPDATE 
+                ) ON DUPLICATE KEY UPDATE
                     nombre = VALUES(nombre),
                     representante = VALUES(representante),
                     tipo_cuenta = VALUES(tipo_cuenta),
